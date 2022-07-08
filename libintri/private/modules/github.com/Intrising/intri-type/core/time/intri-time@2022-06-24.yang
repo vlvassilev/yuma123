@@ -12,15 +12,12 @@ module intri-time {
 
   import intri-timestamp {
     prefix intri-timestamp;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
   }
   typedef StatusTypeOptions {
     type enumeration {
@@ -172,27 +169,6 @@ module intri-time {
   rpc intri-time-Time-RunListTimeZones {
     output {
       uses ListTimeZones;
-    }
-  }
-  rpc intri-time-Time-GetCorrectionTime {
-    input {
-      uses RequestWithTimestamp;
-    }
-    output {
-      uses Response;
-    }
-  }
-  rpc intri-time-Time-GetCorrectionTimeWithInt64 {
-    input {
-      uses RequestWithInt64;
-    }
-    output {
-      uses Response;
-    }
-  }
-  rpc intri-time-Time-GetUTC {
-    output {
-      uses Response;
     }
   }
 }

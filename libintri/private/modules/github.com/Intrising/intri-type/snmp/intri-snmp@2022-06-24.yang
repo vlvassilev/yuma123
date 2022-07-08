@@ -10,25 +10,14 @@ module intri-snmp {
     description "Build date.";
   }
 
-  import intri-userinterface {
-    prefix intri-userinterface;
-    revision-date "2022-06-24";
-  }
-  import intri-access {
-    prefix intri-access;
-    revision-date "2022-06-24";
-  }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
   }
   import intri-files {
     prefix intri-files;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   grouping EngineInfo {
     leaf Boots {
@@ -36,21 +25,6 @@ module intri-snmp {
     }
     leaf RunTime {
       type int64;
-    }
-  }
-  rpc intri-snmp-SNMP-SetConfig {
-    input {
-      uses intri-userinterface:SNMPConfig;
-    }
-  }
-  rpc intri-snmp-SNMP-SetUsersConfig {
-    input {
-      uses intri-access:UsersConfig;
-    }
-  }
-  rpc intri-snmp-SNMP-SetGroupsConfig {
-    input {
-      uses intri-access:GroupsConfig;
     }
   }
   rpc intri-snmp-SNMP-RunRestartSNMPServer {
@@ -71,11 +45,6 @@ module intri-snmp {
   rpc intri-snmp-SNMP-DeactivateManagerCertificate {
     input {
       uses intri-files:CertificateUserID;
-    }
-  }
-  rpc intri-snmp-SNMP-GetEngineInfo {
-    output {
-      uses EngineInfo;
     }
   }
 }

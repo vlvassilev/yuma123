@@ -12,19 +12,15 @@ module intri-log {
 
   import intri-event {
     prefix intri-event;
-    revision-date "2022-06-24";
   }
   import intri-timestamp {
     prefix intri-timestamp;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
   }
   typedef StorageTypeOptions {
     type enumeration {

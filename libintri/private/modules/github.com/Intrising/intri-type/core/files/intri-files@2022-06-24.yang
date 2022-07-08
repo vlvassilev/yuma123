@@ -12,11 +12,9 @@ module intri-files {
 
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
   }
   typedef CertificateTypeOptions {
     type enumeration {
@@ -175,14 +173,6 @@ module intri-files {
   rpc intri-files-Files-GetCertificateList {
     output {
       uses CertificateIDList;
-    }
-  }
-  rpc intri-files-Files-GetActivateCertificateInfo {
-    input {
-      uses CertificateType;
-    }
-    output {
-      uses CertificateInfo;
     }
   }
 }

@@ -12,19 +12,12 @@ module intri-portauthentication {
 
   import intri-device {
     prefix intri-device;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
-  }
-  import intri-access {
-    prefix intri-access;
-    revision-date "2022-06-24";
   }
   typedef AuthorizationStateTypeOptions {
     type enumeration {
@@ -447,11 +440,6 @@ module intri-portauthentication {
   rpc intri-portauthentication-PortAuthentication-RunPortConfigUnauthorizeMAC {
     input {
       uses UnauthorizeMACEntry;
-    }
-  }
-  rpc intri-portauthentication-PortAuthentication-SetAuthenticationServers {
-    input {
-      uses intri-access:AuthenticationServersConfig;
     }
   }
 }

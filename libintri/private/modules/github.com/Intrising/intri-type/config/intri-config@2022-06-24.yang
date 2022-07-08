@@ -12,143 +12,108 @@ module intri-config {
 
   import intri-acl {
     prefix intri-acl;
-    revision-date "2022-06-24";
   }
   import intri-vlan {
     prefix intri-vlan;
-    revision-date "2022-06-24";
   }
   import intri-gvrp {
     prefix intri-gvrp;
-    revision-date "2022-06-24";
   }
   import intri-access {
     prefix intri-access;
-    revision-date "2022-06-24";
   }
   import intri-userinterface {
     prefix intri-userinterface;
-    revision-date "2022-06-24";
   }
   import intri-system {
     prefix intri-system;
-    revision-date "2022-06-24";
   }
   import intri-network {
     prefix intri-network;
-    revision-date "2022-06-24";
   }
   import intri-time {
     prefix intri-time;
-    revision-date "2022-06-24";
   }
   import intri-port {
     prefix intri-port;
-    revision-date "2022-06-24";
   }
   import intri-sfp {
     prefix intri-sfp;
-    revision-date "2022-06-24";
   }
   import intri-mirroring {
     prefix intri-mirroring;
-    revision-date "2022-06-24";
   }
   import intri-isolation {
     prefix intri-isolation;
-    revision-date "2022-06-24";
   }
   import intri-fdb {
     prefix intri-fdb;
-    revision-date "2022-06-24";
   }
   import intri-portsecurity {
     prefix intri-portsecurity;
-    revision-date "2022-06-24";
   }
   import intri-files {
     prefix intri-files;
-    revision-date "2022-06-24";
   }
   import intri-lacp {
     prefix intri-lacp;
-    revision-date "2022-06-24";
   }
   import intri-multicast {
     prefix intri-multicast;
-    revision-date "2022-06-24";
   }
   import intri-stormcontrol {
     prefix intri-stormcontrol;
-    revision-date "2022-06-24";
   }
   import intri-dhcp {
     prefix intri-dhcp;
-    revision-date "2022-06-24";
   }
   import intri-qos {
     prefix intri-qos;
-    revision-date "2022-06-24";
   }
   import intri-loop {
     prefix intri-loop;
-    revision-date "2022-06-24";
   }
   import intri-lldp {
     prefix intri-lldp;
-    revision-date "2022-06-24";
   }
   import intri-poe {
     prefix intri-poe;
-    revision-date "2022-06-24";
   }
   import intri-cdp {
     prefix intri-cdp;
-    revision-date "2022-06-24";
   }
   import intri-dhcpserver {
     prefix intri-dhcpserver;
-    revision-date "2022-06-24";
   }
   import intri-stp {
     prefix intri-stp;
-    revision-date "2022-06-24";
   }
   import intri-timerange {
     prefix intri-timerange;
-    revision-date "2022-06-24";
   }
   import intri-ptp {
     prefix intri-ptp;
-    revision-date "2022-06-24";
   }
   import intri-monitor {
     prefix intri-monitor;
-    revision-date "2022-06-24";
   }
   import intri-timesync {
     prefix intri-timesync;
-    revision-date "2022-06-24";
   }
   import intri-udld {
     prefix intri-udld;
-    revision-date "2022-06-24";
   }
   import intri-portauthentication {
     prefix intri-portauthentication;
-    revision-date "2022-06-24";
   }
   import intri-log {
     prefix intri-log;
-    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   typedef StorageTypeOptions {
     type enumeration {
@@ -386,556 +351,6 @@ module intri-config {
   rpc intri-config-Config-RunRestoreDefaultConfig {
     input {
       uses RestoreDefaultType;
-    }
-  }
-  rpc intri-config-Config-RunCopyRunningConfig {
-    input {
-      uses intri-common:Path;
-    }
-  }
-  rpc intri-config-Config-RunCopyDefaultConfig {
-    input {
-      uses intri-common:Path;
-    }
-  }
-  rpc intri-config-Config-GetRunningConfig {
-    output {
-      uses AllServicesConfig;
-    }
-  }
-  rpc intri-config-Config-GetDefaultConfig {
-    output {
-      uses AllServicesConfig;
-    }
-  }
-  rpc intri-config-Config-GetSavedConfig {
-    output {
-      uses AllServicesConfig;
-    }
-  }
-  rpc intri-config-Config-GetRunningAclConfig {
-    output {
-      uses intri-acl:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningAclConfig {
-    input {
-      uses intri-acl:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultAclConfig {
-    input {
-      uses intri-acl:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningVlanConfig {
-    output {
-      uses intri-vlan:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningVlanConfig {
-    input {
-      uses intri-vlan:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultVlanConfig {
-    input {
-      uses intri-vlan:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningGvrpConfig {
-    output {
-      uses intri-gvrp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningGvrpConfig {
-    input {
-      uses intri-gvrp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultGvrpConfig {
-    input {
-      uses intri-gvrp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningAccessConfig {
-    output {
-      uses intri-access:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningAccessConfig {
-    input {
-      uses intri-access:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultAccessConfig {
-    input {
-      uses intri-access:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningUserInterfaceConfig {
-    output {
-      uses intri-userinterface:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningUserInterfaceConfig {
-    input {
-      uses intri-userinterface:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultUserInterfaceConfig {
-    input {
-      uses intri-userinterface:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningSystemConfig {
-    output {
-      uses intri-system:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningSystemConfig {
-    input {
-      uses intri-system:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultSystemConfig {
-    input {
-      uses intri-system:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningNetworkConfig {
-    output {
-      uses intri-network:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningNetworkConfig {
-    input {
-      uses intri-network:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultNetworkConfig {
-    input {
-      uses intri-network:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningTimeConfig {
-    output {
-      uses intri-time:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningTimeConfig {
-    input {
-      uses intri-time:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultTimeConfig {
-    input {
-      uses intri-time:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningPortConfig {
-    output {
-      uses intri-port:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningPortConfig {
-    input {
-      uses intri-port:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultPortConfig {
-    input {
-      uses intri-port:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningSFPConfig {
-    output {
-      uses intri-sfp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningSFPConfig {
-    input {
-      uses intri-sfp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultSFPConfig {
-    input {
-      uses intri-sfp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningMirroringConfig {
-    output {
-      uses intri-mirroring:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningMirroringConfig {
-    input {
-      uses intri-mirroring:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultMirroringConfig {
-    input {
-      uses intri-mirroring:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningIsolationConfig {
-    output {
-      uses intri-isolation:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningIsolationConfig {
-    input {
-      uses intri-isolation:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultIsolationConfig {
-    input {
-      uses intri-isolation:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningFDBConfig {
-    output {
-      uses intri-fdb:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningFDBConfig {
-    input {
-      uses intri-fdb:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultFDBConfig {
-    input {
-      uses intri-fdb:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningPortSecurityConfig {
-    output {
-      uses intri-portsecurity:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningPortSecurityConfig {
-    input {
-      uses intri-portsecurity:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultPortSecurityConfig {
-    input {
-      uses intri-portsecurity:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningFilesConfig {
-    output {
-      uses intri-files:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningFilesConfig {
-    input {
-      uses intri-files:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultFilesConfig {
-    input {
-      uses intri-files:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningLACPConfig {
-    output {
-      uses intri-lacp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningLACPConfig {
-    input {
-      uses intri-lacp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultLACPConfig {
-    input {
-      uses intri-lacp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningMulticastConfig {
-    output {
-      uses intri-multicast:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningMulticastConfig {
-    input {
-      uses intri-multicast:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultMulticastConfig {
-    input {
-      uses intri-multicast:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningStormControlConfig {
-    output {
-      uses intri-stormcontrol:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningStormControlConfig {
-    input {
-      uses intri-stormcontrol:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultStormControlConfig {
-    input {
-      uses intri-stormcontrol:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningDHCPConfig {
-    output {
-      uses intri-dhcp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningDHCPConfig {
-    input {
-      uses intri-dhcp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultDHCPConfig {
-    input {
-      uses intri-dhcp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningQoSConfig {
-    output {
-      uses intri-qos:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningQoSConfig {
-    input {
-      uses intri-qos:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultQoSConfig {
-    input {
-      uses intri-qos:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningLoopConfig {
-    output {
-      uses intri-loop:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningLoopConfig {
-    input {
-      uses intri-loop:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultLoopConfig {
-    input {
-      uses intri-loop:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningLLDPConfig {
-    output {
-      uses intri-lldp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningLLDPConfig {
-    input {
-      uses intri-lldp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultLLDPConfig {
-    input {
-      uses intri-lldp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningPoeConfig {
-    output {
-      uses intri-poe:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningPoeConfig {
-    input {
-      uses intri-poe:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultPoeConfig {
-    input {
-      uses intri-poe:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningCDPConfig {
-    output {
-      uses intri-cdp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultCDPConfig {
-    input {
-      uses intri-cdp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningCDPConfig {
-    input {
-      uses intri-cdp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningDHCPServerConfig {
-    output {
-      uses intri-dhcpserver:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningDHCPServerConfig {
-    input {
-      uses intri-dhcpserver:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultDHCPServerConfig {
-    input {
-      uses intri-dhcpserver:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningSTPConfig {
-    output {
-      uses intri-stp:STPConfig;
-    }
-  }
-  rpc intri-config-Config-SetRunningSTPConfig {
-    input {
-      uses intri-stp:STPConfig;
-    }
-  }
-  rpc intri-config-Config-SetDefaultSTPConfig {
-    input {
-      uses intri-stp:STPConfig;
-    }
-  }
-  rpc intri-config-Config-GetRunningMSTPConfig {
-    output {
-      uses intri-stp:MSTPConfig;
-    }
-  }
-  rpc intri-config-Config-SetRunningMSTPConfig {
-    input {
-      uses intri-stp:MSTPConfig;
-    }
-  }
-  rpc intri-config-Config-SetDefaultMSTPConfig {
-    input {
-      uses intri-stp:MSTPConfig;
-    }
-  }
-  rpc intri-config-Config-GetRunningTimeRangeConfig {
-    output {
-      uses intri-timerange:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultTimeRangeConfig {
-    input {
-      uses intri-timerange:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningTimeRangeConfig {
-    input {
-      uses intri-timerange:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningArpInspectionConfig {
-    output {
-      uses intri-dhcp:ARPInspectionConfig;
-    }
-  }
-  rpc intri-config-Config-SetDefaultArpInspectionConfig {
-    input {
-      uses intri-dhcp:ARPInspectionConfig;
-    }
-  }
-  rpc intri-config-Config-SetRunningArpInspectionConfig {
-    input {
-      uses intri-dhcp:ARPInspectionConfig;
-    }
-  }
-  rpc intri-config-Config-GetRunningPTPConfig {
-    output {
-      uses intri-ptp:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultPTPConfig {
-    input {
-      uses intri-ptp:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningPTPConfig {
-    input {
-      uses intri-ptp:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningMonitorConfig {
-    output {
-      uses intri-monitor:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultMonitorConfig {
-    input {
-      uses intri-monitor:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningMonitorConfig {
-    input {
-      uses intri-monitor:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningTimeSyncConfig {
-    output {
-      uses intri-timesync:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningTimeSyncConfig {
-    input {
-      uses intri-timesync:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultTimeSyncConfig {
-    input {
-      uses intri-timesync:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningUdldConfig {
-    output {
-      uses intri-udld:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningUdldConfig {
-    input {
-      uses intri-udld:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultUdldConfig {
-    input {
-      uses intri-udld:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningPortAuthenticationConfig {
-    output {
-      uses intri-portauthentication:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningPortAuthenticationConfig {
-    input {
-      uses intri-portauthentication:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultPortAuthenticationConfig {
-    input {
-      uses intri-portauthentication:Config;
-    }
-  }
-  rpc intri-config-Config-GetRunningLogConfig {
-    output {
-      uses intri-log:Config;
-    }
-  }
-  rpc intri-config-Config-SetDefaultLogConfig {
-    input {
-      uses intri-log:Config;
-    }
-  }
-  rpc intri-config-Config-SetRunningLogConfig {
-    input {
-      uses intri-log:Config;
     }
   }
 }

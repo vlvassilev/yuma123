@@ -10,13 +10,8 @@ module intri-cli {
     description "Build date.";
   }
 
-  import intri-userinterface {
-    prefix intri-userinterface;
-    revision-date "2022-06-24";
-  }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   grouping ScriptAction {
     leaf Token {
@@ -30,11 +25,6 @@ module intri-cli {
     }
     leaf ForceTFTP {
       type boolean;
-    }
-  }
-  rpc intri-cli-CLI-SetConfig {
-    input {
-      uses intri-userinterface:CLIConfig;
     }
   }
   rpc intri-cli-CLI-RunScript {

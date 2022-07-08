@@ -12,11 +12,9 @@ module intri-vlan {
 
   import intri-device {
     prefix intri-device;
-    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
-    revision-date "2022-06-24";
   }
   typedef StatusUsedTypeOptions {
     type enumeration {
@@ -667,26 +665,6 @@ module intri-vlan {
   rpc intri-vlan-VLAN-GetManagementVlanPorts {
     output {
       uses intri-device:PortList;
-    }
-  }
-  rpc intri-vlan-VLAN-SetDefaultPortVlan {
-    input {
-      uses DefaultPortVlanEntry;
-    }
-  }
-  rpc intri-vlan-VLAN-ClearDefaultPortVlan {
-    input {
-      uses DefaultPortVlanEntry;
-    }
-  }
-  rpc intri-vlan-VLAN-UpdateVlanPortVlanStatus {
-    input {
-      uses VlanPortVlanEntry;
-    }
-  }
-  rpc intri-vlan-VLAN-DeleteVlanPortVlanStatus {
-    input {
-      uses VlanPortVlanEntry;
     }
   }
 }

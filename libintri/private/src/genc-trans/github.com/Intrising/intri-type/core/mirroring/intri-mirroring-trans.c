@@ -48,7 +48,7 @@ status_t build_to_xml_mirroring_Config(
       "RSPAN",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -64,7 +64,7 @@ status_t build_to_xml_mirroring_Config(
       "DestinationList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -80,7 +80,7 @@ status_t build_to_xml_mirroring_Config(
       "SourceList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -107,7 +107,7 @@ status_t build_to_xml_mirroring_DestinationSessionEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -118,7 +118,7 @@ status_t build_to_xml_mirroring_DestinationSessionEntry(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -137,7 +137,7 @@ status_t build_to_xml_mirroring_DestinationSessionEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -164,7 +164,7 @@ status_t build_to_xml_mirroring_DestinationSession(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -175,7 +175,7 @@ status_t build_to_xml_mirroring_DestinationSession(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -203,7 +203,7 @@ status_t build_to_xml_mirroring_SourceSessionEntry(
       "DestinationIndex",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -214,7 +214,7 @@ status_t build_to_xml_mirroring_SourceSessionEntry(
       "SourceInterface",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -236,7 +236,7 @@ status_t build_to_xml_mirroring_SourceSessionEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -252,7 +252,7 @@ status_t build_to_xml_mirroring_SourceSessionEntry(
       "DirectionType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -288,7 +288,7 @@ status_t build_to_xml_mirroring_SourceSession(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -299,7 +299,7 @@ status_t build_to_xml_mirroring_SourceSession(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -327,7 +327,7 @@ status_t build_to_xml_mirroring_RSPANConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -338,7 +338,7 @@ status_t build_to_xml_mirroring_RSPANConfig(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

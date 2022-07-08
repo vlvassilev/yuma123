@@ -50,7 +50,7 @@ status_t build_to_xml_hardware_IPv4Static(
       "IPAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -61,7 +61,7 @@ status_t build_to_xml_hardware_IPv4Static(
       "SubnetMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -83,7 +83,7 @@ status_t build_to_xml_hardware_DLDPConfig(
       "System",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -99,7 +99,7 @@ status_t build_to_xml_hardware_DLDPConfig(
       "Port",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -126,7 +126,7 @@ status_t build_to_xml_hardware_DLDPSystemConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -137,7 +137,7 @@ status_t build_to_xml_hardware_DLDPSystemConfig(
       "AdvertisementInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -148,7 +148,7 @@ status_t build_to_xml_hardware_DLDPSystemConfig(
       "ShutDownMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -167,7 +167,7 @@ status_t build_to_xml_hardware_DLDPSystemConfig(
       "AuthMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -189,7 +189,7 @@ status_t build_to_xml_hardware_DLDPSystemConfig(
       "WorkMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -219,7 +219,7 @@ status_t build_to_xml_hardware_DLDPPortConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -230,7 +230,7 @@ status_t build_to_xml_hardware_DLDPPortConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -258,7 +258,7 @@ status_t build_to_xml_hardware_DLDPPortConfigEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -274,7 +274,7 @@ status_t build_to_xml_hardware_DLDPPortConfigEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -296,7 +296,7 @@ status_t build_to_xml_hardware_DLDPPortStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -323,7 +323,7 @@ status_t build_to_xml_hardware_DLDPPortStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -339,7 +339,7 @@ status_t build_to_xml_hardware_DLDPPortStatusEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -350,7 +350,7 @@ status_t build_to_xml_hardware_DLDPPortStatusEntry(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -384,7 +384,7 @@ status_t build_to_xml_hardware_DLDPPortStatusEntry(
       "Link",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -406,7 +406,7 @@ status_t build_to_xml_hardware_DLDPNeighborEntry(
       "NeighborMACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -417,7 +417,7 @@ status_t build_to_xml_hardware_DLDPNeighborEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -428,7 +428,7 @@ status_t build_to_xml_hardware_DLDPNeighborEntry(
       "NeighborAgetime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -439,7 +439,7 @@ status_t build_to_xml_hardware_DLDPNeighborEntry(
       "NeighborState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -469,7 +469,7 @@ status_t build_to_xml_hardware_EnableRequest(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -480,7 +480,7 @@ status_t build_to_xml_hardware_EnableRequest(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -508,7 +508,7 @@ status_t build_to_xml_hardware_EnableRequestEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -524,7 +524,7 @@ status_t build_to_xml_hardware_EnableRequestEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -546,7 +546,7 @@ status_t build_to_xml_hardware_PortLED(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -557,7 +557,7 @@ status_t build_to_xml_hardware_PortLED(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -585,7 +585,7 @@ status_t build_to_xml_hardware_PortLEDEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -601,7 +601,7 @@ status_t build_to_xml_hardware_PortLEDEntry(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -706,7 +706,7 @@ status_t build_to_xml_hardware_BoardLED(
       "Power",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -800,7 +800,7 @@ status_t build_to_xml_hardware_BoardLED(
       "System",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -894,7 +894,7 @@ status_t build_to_xml_hardware_BoardLED(
       "PoEMax",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -988,7 +988,7 @@ status_t build_to_xml_hardware_BoardLED(
       "Fan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1082,7 +1082,7 @@ status_t build_to_xml_hardware_BoardLED(
       "GPS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1187,7 +1187,7 @@ status_t build_to_xml_hardware_LEDStatus(
       "PortLED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1203,7 +1203,7 @@ status_t build_to_xml_hardware_LEDStatus(
       "SystemLED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1230,7 +1230,7 @@ status_t build_to_xml_hardware_Coordinates(
       "Latitude",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1241,7 +1241,7 @@ status_t build_to_xml_hardware_Coordinates(
       "Longitude",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1263,7 +1263,7 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1274,7 +1274,7 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation(
       "NavigationalStatus",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1285,7 +1285,7 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation(
       "Speed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1296,7 +1296,7 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation(
       "Course",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1307,7 +1307,7 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation(
       "MagneticVariation",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1329,7 +1329,7 @@ status_t build_to_xml_hardware_GPSEnable(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1351,7 +1351,7 @@ status_t build_to_xml_hardware_GPSStatus(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1362,7 +1362,7 @@ status_t build_to_xml_hardware_GPSStatus(
       "Status",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1384,7 +1384,7 @@ status_t build_to_xml_hardware_GPSStatus(
       "VerboseInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1400,7 +1400,7 @@ status_t build_to_xml_hardware_GPSStatus(
       "Location",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1416,7 +1416,7 @@ status_t build_to_xml_hardware_GPSStatus(
       "DateTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1443,7 +1443,7 @@ status_t build_to_xml_hardware_GPSCommand(
       "Request",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1454,7 +1454,7 @@ status_t build_to_xml_hardware_GPSCommand(
       "Respond",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1465,7 +1465,7 @@ status_t build_to_xml_hardware_GPSCommand(
         "Respond_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1488,7 +1488,7 @@ status_t build_to_xml_hardware_USBStatus(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1499,7 +1499,7 @@ status_t build_to_xml_hardware_USBStatus(
       "Connected",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1510,7 +1510,7 @@ status_t build_to_xml_hardware_USBStatus(
       "ConnectedDevice",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1532,7 +1532,7 @@ status_t build_to_xml_hardware_USBEthernetConfig(
       "Static",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1559,7 +1559,7 @@ status_t build_to_xml_hardware_FanSpeedConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1570,7 +1570,7 @@ status_t build_to_xml_hardware_FanSpeedConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1598,7 +1598,7 @@ status_t build_to_xml_hardware_FanSpeedConfigEntry(
       "FanNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1609,7 +1609,7 @@ status_t build_to_xml_hardware_FanSpeedConfigEntry(
       "RotatingSpeed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1631,7 +1631,7 @@ status_t build_to_xml_hardware_FanStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1642,7 +1642,7 @@ status_t build_to_xml_hardware_FanStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1670,7 +1670,7 @@ status_t build_to_xml_hardware_FanStatusEntry(
       "FanNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1681,7 +1681,7 @@ status_t build_to_xml_hardware_FanStatusEntry(
       "RotatingSpeedRPM",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1703,7 +1703,7 @@ status_t build_to_xml_hardware_TemperatureStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1714,7 +1714,7 @@ status_t build_to_xml_hardware_TemperatureStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1742,7 +1742,7 @@ status_t build_to_xml_hardware_TemperatureStatusEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1753,7 +1753,7 @@ status_t build_to_xml_hardware_TemperatureStatusEntry(
       "ID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1764,7 +1764,7 @@ status_t build_to_xml_hardware_TemperatureStatusEntry(
       "Temperature",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1786,7 +1786,7 @@ status_t build_to_xml_hardware_PowerRedundantState(
       "RedundantList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1797,7 +1797,7 @@ status_t build_to_xml_hardware_PowerRedundantState(
         "RedundantList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1825,7 +1825,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PwOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1844,7 +1844,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantPlugIn",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1855,7 +1855,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantACOk",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1866,7 +1866,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantOk",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1877,7 +1877,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantVoltage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1888,7 +1888,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantCurrent",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1899,7 +1899,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantPowerConsumption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1910,7 +1910,7 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry(
       "PowerRedundantTemperature",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1932,7 +1932,7 @@ status_t build_to_xml_hardware_PowerGeneralState(
       "Power_12V",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1943,7 +1943,7 @@ status_t build_to_xml_hardware_PowerGeneralState(
       "Power_54V",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1965,7 +1965,7 @@ status_t build_to_xml_hardware_PowerState(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1986,7 +1986,7 @@ status_t build_to_xml_hardware_PowerState(
           "PowerRedundantState",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -2004,7 +2004,7 @@ status_t build_to_xml_hardware_PowerState(
           "PowerGeneralState",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -2033,7 +2033,7 @@ status_t build_to_xml_hardware_TimeControlRegister(
       "RegBase",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2044,7 +2044,7 @@ status_t build_to_xml_hardware_TimeControlRegister(
       "Offset",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2055,7 +2055,7 @@ status_t build_to_xml_hardware_TimeControlRegister(
       "Data",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2077,7 +2077,7 @@ status_t build_to_xml_hardware_Config(
       "LED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2093,7 +2093,7 @@ status_t build_to_xml_hardware_Config(
       "Fan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2109,7 +2109,7 @@ status_t build_to_xml_hardware_Config(
       "GPS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2136,7 +2136,7 @@ status_t build_to_xml_hardware_Ports(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2147,7 +2147,7 @@ status_t build_to_xml_hardware_Ports(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2175,7 +2175,7 @@ status_t build_to_xml_hardware_PortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2191,7 +2191,7 @@ status_t build_to_xml_hardware_PortEntry(
       "HardwarePortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2202,7 +2202,7 @@ status_t build_to_xml_hardware_PortEntry(
       "SwitchPortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2213,7 +2213,7 @@ status_t build_to_xml_hardware_PortEntry(
       "InterfaceType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2232,7 +2232,7 @@ status_t build_to_xml_hardware_PortEntry(
       "Properies",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2243,7 +2243,7 @@ status_t build_to_xml_hardware_PortEntry(
         "Properies_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2302,7 +2302,7 @@ status_t build_to_xml_hardware_PortEntry(
       "SupportPoE",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2313,7 +2313,7 @@ status_t build_to_xml_hardware_PortEntry(
       "SupportSFP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2324,7 +2324,7 @@ status_t build_to_xml_hardware_PortEntry(
       "LinkLED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2418,7 +2418,7 @@ status_t build_to_xml_hardware_PortEntry(
       "PoELED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2512,7 +2512,7 @@ status_t build_to_xml_hardware_PortEntry(
       "SpeedLED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2617,7 +2617,7 @@ status_t build_to_xml_hardware_SystemInfo(
       "Fan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2633,7 +2633,7 @@ status_t build_to_xml_hardware_SystemInfo(
       "Temp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2649,7 +2649,7 @@ status_t build_to_xml_hardware_SystemInfo(
       "BoardLED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2665,7 +2665,7 @@ status_t build_to_xml_hardware_SystemInfo(
       "GPS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2692,7 +2692,7 @@ status_t build_to_xml_hardware_LEDConfig(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2720,7 +2720,7 @@ status_t build_to_xml_hardware_LEDConfig(
       "ResetButton",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2742,7 +2742,7 @@ status_t build_to_xml_hardware_FanPercent(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2753,7 +2753,7 @@ status_t build_to_xml_hardware_FanPercent(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2781,7 +2781,7 @@ status_t build_to_xml_hardware_FanPercentEntry(
       "FanNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2792,7 +2792,7 @@ status_t build_to_xml_hardware_FanPercentEntry(
       "PercentRPM",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2814,7 +2814,7 @@ status_t build_to_xml_hardware_LEDType(
       "LED",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2919,7 +2919,7 @@ status_t build_to_xml_hardware_SignalState(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2930,7 +2930,7 @@ status_t build_to_xml_hardware_SignalState(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2958,7 +2958,7 @@ status_t build_to_xml_hardware_SignalStateEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2974,7 +2974,7 @@ status_t build_to_xml_hardware_SignalStateEntry(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2996,7 +2996,7 @@ status_t build_to_xml_hardware_SFPInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3007,7 +3007,7 @@ status_t build_to_xml_hardware_SFPInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3035,7 +3035,7 @@ status_t build_to_xml_hardware_SFPInfoEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3051,7 +3051,7 @@ status_t build_to_xml_hardware_SFPInfoEntry(
       "Info",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3078,7 +3078,7 @@ status_t build_to_xml_hardware_DeviceI2CAddress(
       "Bus0",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3089,7 +3089,7 @@ status_t build_to_xml_hardware_DeviceI2CAddress(
         "Bus0_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3101,7 +3101,7 @@ status_t build_to_xml_hardware_DeviceI2CAddress(
       "Mux",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3112,7 +3112,7 @@ status_t build_to_xml_hardware_DeviceI2CAddress(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3123,7 +3123,7 @@ status_t build_to_xml_hardware_DeviceI2CAddress(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3151,7 +3151,7 @@ status_t build_to_xml_hardware_DeviceI2CAddressInfo(
       "Ch",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3162,7 +3162,7 @@ status_t build_to_xml_hardware_DeviceI2CAddressInfo(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3173,7 +3173,7 @@ status_t build_to_xml_hardware_DeviceI2CAddressInfo(
         "Address_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3196,7 +3196,7 @@ status_t build_to_xml_hardware_InfoList(
       "Info",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3207,7 +3207,7 @@ status_t build_to_xml_hardware_InfoList(
         "Info_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3230,7 +3230,7 @@ status_t build_to_xml_hardware_Enable(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3252,7 +3252,7 @@ status_t build_to_xml_hardware_Network(
       "IP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3263,7 +3263,7 @@ status_t build_to_xml_hardware_Network(
       "Mask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3285,7 +3285,7 @@ status_t build_to_xml_hardware_MCUInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3296,7 +3296,7 @@ status_t build_to_xml_hardware_MCUInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3324,7 +3324,7 @@ status_t build_to_xml_hardware_MCUVersion(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3335,7 +3335,7 @@ status_t build_to_xml_hardware_MCUVersion(
       "Version",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3357,7 +3357,7 @@ status_t build_to_xml_hardware_PoESetting(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3368,7 +3368,7 @@ status_t build_to_xml_hardware_PoESetting(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3396,7 +3396,7 @@ status_t build_to_xml_hardware_PoESettingEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3412,7 +3412,7 @@ status_t build_to_xml_hardware_PoESettingEntry(
       "Enable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3423,7 +3423,7 @@ status_t build_to_xml_hardware_PoESettingEntry(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3448,7 +3448,7 @@ status_t build_to_xml_hardware_PoESettingEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3484,7 +3484,7 @@ status_t build_to_xml_hardware_PoEPortStatusList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3495,7 +3495,7 @@ status_t build_to_xml_hardware_PoEPortStatusList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3523,7 +3523,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3539,7 +3539,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "IsEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3550,7 +3550,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "IsLinkUp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3561,7 +3561,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "Class",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3610,7 +3610,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "PowerConsumption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3621,7 +3621,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "Current",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3632,7 +3632,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "Voltage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3643,7 +3643,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "Temperature",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3654,7 +3654,7 @@ status_t build_to_xml_hardware_PoEPortStatusEntry(
       "Condition",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3723,7 +3723,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "MinShutDownVoltage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3734,7 +3734,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "MaxShutDownVoltage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3745,7 +3745,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "VMainVoltage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3756,7 +3756,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "IMainCurrent",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3767,7 +3767,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "PowerConsumption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3778,7 +3778,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "Budget",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3789,7 +3789,7 @@ status_t build_to_xml_hardware_PoESystemStatus(
       "Version",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3811,7 +3811,7 @@ status_t build_to_xml_hardware_PoESystemBudgetEntry(
       "Budget",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

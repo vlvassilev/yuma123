@@ -47,7 +47,7 @@ status_t build_to_xml_dhcp_ARPInspectionConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -58,7 +58,7 @@ status_t build_to_xml_dhcp_ARPInspectionConfig(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -69,7 +69,7 @@ status_t build_to_xml_dhcp_ARPInspectionConfig(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -97,7 +97,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -113,7 +113,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -124,7 +124,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "RateLimiting",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -135,7 +135,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "Database",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -160,7 +160,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "ACL",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -176,7 +176,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "SrcMACValid",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -187,7 +187,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "DstMACValid",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -198,7 +198,7 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry(
       "IPRangeValid",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -220,7 +220,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLConfig(
       "ACLRuleUnmatchedAction",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -239,7 +239,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLConfig(
       "Rules",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -250,7 +250,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLConfig(
         "Rules_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -273,7 +273,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
       "VID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -284,7 +284,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
       "SrcMAC",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -295,7 +295,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
       "SrcIP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -306,7 +306,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
       "SrcIPMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -317,7 +317,7 @@ status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -350,7 +350,7 @@ status_t build_to_xml_dhcp_Config(
       "Relay",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -366,7 +366,7 @@ status_t build_to_xml_dhcp_Config(
       "Snooping",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -393,7 +393,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -404,7 +404,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "RelayPorts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -415,7 +415,7 @@ status_t build_to_xml_dhcp_RelayConfig(
         "RelayPorts_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -432,7 +432,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "DHCPServerAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -443,7 +443,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "RemoteIDSource",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -471,7 +471,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "CustomRemoteID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -482,7 +482,7 @@ status_t build_to_xml_dhcp_RelayConfig(
       "CircuitIDSource",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -512,7 +512,7 @@ status_t build_to_xml_dhcp_ConfigRelayPortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -528,7 +528,7 @@ status_t build_to_xml_dhcp_ConfigRelayPortEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -539,7 +539,7 @@ status_t build_to_xml_dhcp_ConfigRelayPortEntry(
       "Option82Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -561,7 +561,7 @@ status_t build_to_xml_dhcp_SnoopingConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -572,7 +572,7 @@ status_t build_to_xml_dhcp_SnoopingConfig(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -583,7 +583,7 @@ status_t build_to_xml_dhcp_SnoopingConfig(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -611,7 +611,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -627,7 +627,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -638,7 +638,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "DHCPFiltering",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -660,7 +660,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "SnoopingTrust",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -679,7 +679,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "AcceptIngressOption82",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -690,7 +690,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "MACAddressVerification",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -701,7 +701,7 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
       "DHCPRateLimiting",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -723,7 +723,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -739,7 +739,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
       "TrustMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -758,7 +758,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
       "Processed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -769,7 +769,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
       "Dropped",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -780,7 +780,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
       "LastDropReason",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -825,7 +825,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -836,7 +836,7 @@ status_t build_to_xml_dhcp_SnoopingStatisticsList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -864,7 +864,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -875,7 +875,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "IP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -886,7 +886,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -902,7 +902,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "VID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -913,7 +913,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "LastUpdated",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -924,7 +924,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "LastUpdatedEpoch",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -935,7 +935,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
       "LeaseTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -957,7 +957,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -968,7 +968,7 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

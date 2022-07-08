@@ -50,7 +50,7 @@ status_t build_to_xml_timerange_Config(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -61,7 +61,7 @@ status_t build_to_xml_timerange_Config(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -89,7 +89,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -100,7 +100,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -111,7 +111,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "Command",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -130,7 +130,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "PeriodicDay",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -146,7 +146,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "StartTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -162,7 +162,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "EndTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -178,7 +178,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "StartDate",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -194,7 +194,7 @@ status_t build_to_xml_timerange_ConfigEntry(
       "EndDate",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -221,7 +221,7 @@ status_t build_to_xml_timerange_DayTime(
       "PeriodicType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -246,7 +246,7 @@ status_t build_to_xml_timerange_DayTime(
       "DayOfWeekLists",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -257,7 +257,7 @@ status_t build_to_xml_timerange_DayTime(
         "DayOfWeekLists_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -306,7 +306,7 @@ status_t build_to_xml_timerange_EntryStatus(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -317,7 +317,7 @@ status_t build_to_xml_timerange_EntryStatus(
       "IsActive",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -339,7 +339,7 @@ status_t build_to_xml_timerange_Status(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -350,7 +350,7 @@ status_t build_to_xml_timerange_Status(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

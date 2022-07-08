@@ -47,7 +47,7 @@ status_t build_to_xml_sfp_Config(
       "LossOfSignalEvent",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -69,7 +69,7 @@ status_t build_to_xml_sfp_Info(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -80,7 +80,7 @@ status_t build_to_xml_sfp_Info(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

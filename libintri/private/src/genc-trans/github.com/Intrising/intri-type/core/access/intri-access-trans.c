@@ -48,7 +48,7 @@ status_t build_to_xml_access_AuthenticationMode(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -93,7 +93,7 @@ status_t build_to_xml_access_AuthenticationConfig(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -127,7 +127,7 @@ status_t build_to_xml_access_AuthenticationConfig(
       "RADIUS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -143,7 +143,7 @@ status_t build_to_xml_access_AuthenticationConfig(
       "TACACS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -170,7 +170,7 @@ status_t build_to_xml_access_AuthenticationTACACS(
       "PrimaryAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -181,7 +181,7 @@ status_t build_to_xml_access_AuthenticationTACACS(
       "FallbackAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -192,7 +192,7 @@ status_t build_to_xml_access_AuthenticationTACACS(
       "UserPrivilegeLevel0",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -203,7 +203,7 @@ status_t build_to_xml_access_AuthenticationTACACS(
       "UserPrivilegeLevel1",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -214,7 +214,7 @@ status_t build_to_xml_access_AuthenticationTACACS(
       "UserPrivilegeLevel15",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -236,7 +236,7 @@ status_t build_to_xml_access_AuthenticationRADIUS(
       "PrimaryAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -247,7 +247,7 @@ status_t build_to_xml_access_AuthenticationRADIUS(
       "FallbackAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -258,7 +258,7 @@ status_t build_to_xml_access_AuthenticationRADIUS(
       "UserPrivilegeLevel6",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -269,7 +269,7 @@ status_t build_to_xml_access_AuthenticationRADIUS(
       "UserPrivilegeLevel7",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -291,7 +291,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -302,7 +302,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "ServerType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -321,7 +321,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "HostAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -332,7 +332,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "PortNumber",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -343,7 +343,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "SharedSecret",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -354,7 +354,7 @@ status_t build_to_xml_access_AuthenticationServerEntry(
       "InterimInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -376,7 +376,7 @@ status_t build_to_xml_access_AuthenticationServersConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -387,7 +387,7 @@ status_t build_to_xml_access_AuthenticationServersConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -415,7 +415,7 @@ status_t build_to_xml_access_LoginRequest(
       "Account",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -426,7 +426,7 @@ status_t build_to_xml_access_LoginRequest(
       "Password",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -448,7 +448,7 @@ status_t build_to_xml_access_RestrictionEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -459,7 +459,7 @@ status_t build_to_xml_access_RestrictionEntry(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -481,7 +481,7 @@ status_t build_to_xml_access_RestrictionEntry(
       "IPAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -503,7 +503,7 @@ status_t build_to_xml_access_RestrictionsConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -514,7 +514,7 @@ status_t build_to_xml_access_RestrictionsConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -542,7 +542,7 @@ status_t build_to_xml_access_UserEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -553,7 +553,7 @@ status_t build_to_xml_access_UserEntry(
       "AssociatedGroups",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -564,7 +564,7 @@ status_t build_to_xml_access_UserEntry(
         "AssociatedGroups_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -576,7 +576,7 @@ status_t build_to_xml_access_UserEntry(
       "GeneralAccessRights",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -607,7 +607,7 @@ status_t build_to_xml_access_UserEntry(
       "TelnetAccessEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -618,7 +618,7 @@ status_t build_to_xml_access_UserEntry(
       "SSHAccessEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -629,7 +629,7 @@ status_t build_to_xml_access_UserEntry(
       "WebAccessEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -640,7 +640,7 @@ status_t build_to_xml_access_UserEntry(
       "SNMPAccessEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -651,7 +651,7 @@ status_t build_to_xml_access_UserEntry(
       "EncryptedAuthPassword",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -662,7 +662,7 @@ status_t build_to_xml_access_UserEntry(
       "SNMPV3SecurityLevel",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -684,7 +684,7 @@ status_t build_to_xml_access_UserEntry(
       "SNMPV3AuthAlgorithm",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -709,7 +709,7 @@ status_t build_to_xml_access_UserEntry(
       "SNMPV3PrivacyAlgorithm",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -737,7 +737,7 @@ status_t build_to_xml_access_UserEntry(
       "EncryptedSNMPAuthPassword",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -748,7 +748,7 @@ status_t build_to_xml_access_UserEntry(
       "EncryptedSNMPPrivacyPassword",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -770,7 +770,7 @@ status_t build_to_xml_access_PatternEntry(
       "Path",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -781,7 +781,7 @@ status_t build_to_xml_access_PatternEntry(
       "AccessRight",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -823,7 +823,7 @@ status_t build_to_xml_access_UsersConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -834,7 +834,7 @@ status_t build_to_xml_access_UsersConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -862,7 +862,7 @@ status_t build_to_xml_access_GroupEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -873,7 +873,7 @@ status_t build_to_xml_access_GroupEntry(
       "Patterns",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -884,7 +884,7 @@ status_t build_to_xml_access_GroupEntry(
         "Patterns_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -912,7 +912,7 @@ status_t build_to_xml_access_GroupsConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -923,7 +923,7 @@ status_t build_to_xml_access_GroupsConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -951,7 +951,7 @@ status_t build_to_xml_access_Config(
       "Authentication",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -967,7 +967,7 @@ status_t build_to_xml_access_Config(
       "Users",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -983,7 +983,7 @@ status_t build_to_xml_access_Config(
       "Groups",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -999,7 +999,7 @@ status_t build_to_xml_access_Config(
       "Restrictions",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1015,7 +1015,7 @@ status_t build_to_xml_access_Config(
       "Servers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1042,7 +1042,7 @@ status_t build_to_xml_access_Password(
       "Password",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1053,7 +1053,7 @@ status_t build_to_xml_access_Password(
       "Irreversable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1075,7 +1075,7 @@ status_t build_to_xml_access_EncryptedPassword(
       "EncryptedPassword",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1097,7 +1097,7 @@ status_t build_to_xml_access_UserPasswordEntry(
       "Username",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1108,7 +1108,7 @@ status_t build_to_xml_access_UserPasswordEntry(
       "Password",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1130,7 +1130,7 @@ status_t build_to_xml_access_UserPassword(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1141,7 +1141,7 @@ status_t build_to_xml_access_UserPassword(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1169,7 +1169,7 @@ status_t build_to_xml_access_NumberOfLogins(
       "NumberOfLogins",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1191,7 +1191,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1202,7 +1202,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "Username",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1213,7 +1213,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "AuthName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1224,7 +1224,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "LoginID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1235,7 +1235,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "LoginTimeStamp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1246,7 +1246,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "LoginEpoch",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1257,7 +1257,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "ConnectTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1268,7 +1268,7 @@ status_t build_to_xml_access_LoginStatusEntry(
       "Service",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1310,7 +1310,7 @@ status_t build_to_xml_access_LoginStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1321,7 +1321,7 @@ status_t build_to_xml_access_LoginStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1349,7 +1349,7 @@ status_t build_to_xml_access_Token(
       "Token",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

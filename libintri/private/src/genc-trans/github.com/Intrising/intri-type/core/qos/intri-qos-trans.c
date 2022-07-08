@@ -47,7 +47,7 @@ status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
       "QueueNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -58,7 +58,7 @@ status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -69,7 +69,7 @@ status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
       "Scheme",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -102,7 +102,7 @@ status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry(
       "CosNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -113,7 +113,7 @@ status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry(
       "QueueNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -135,7 +135,7 @@ status_t build_to_xml_qos_MappingDSCPToQueueEntry(
       "DSCPNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -146,7 +146,7 @@ status_t build_to_xml_qos_MappingDSCPToQueueEntry(
       "QueueNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -168,7 +168,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -184,7 +184,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IsEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -195,7 +195,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "EgressBandwidth",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -206,7 +206,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IngressBandwidth",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -217,7 +217,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IngressUnicastEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -228,7 +228,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IngressMulticastEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -239,7 +239,7 @@ status_t build_to_xml_qos_InterfaceConfigEntry(
       "IngressBroadcastEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -261,7 +261,7 @@ status_t build_to_xml_qos_Config(
       "ModeOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -280,7 +280,7 @@ status_t build_to_xml_qos_Config(
       "TrustModeOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -302,7 +302,7 @@ status_t build_to_xml_qos_Config(
       "QueueList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -313,7 +313,7 @@ status_t build_to_xml_qos_Config(
         "QueueList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -330,7 +330,7 @@ status_t build_to_xml_qos_Config(
       "CoSList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -341,7 +341,7 @@ status_t build_to_xml_qos_Config(
         "CoSList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -358,7 +358,7 @@ status_t build_to_xml_qos_Config(
       "DSCPList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -369,7 +369,7 @@ status_t build_to_xml_qos_Config(
         "DSCPList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -386,7 +386,7 @@ status_t build_to_xml_qos_Config(
       "InterfaceList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -397,7 +397,7 @@ status_t build_to_xml_qos_Config(
         "InterfaceList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -425,7 +425,7 @@ status_t build_to_xml_qos_Mode(
       "Option",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -455,7 +455,7 @@ status_t build_to_xml_qos_TrustMode(
       "Option",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -488,7 +488,7 @@ status_t build_to_xml_qos_PriorityScheme(
       "Option",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -521,7 +521,7 @@ status_t build_to_xml_qos_QueueList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -532,7 +532,7 @@ status_t build_to_xml_qos_QueueList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -560,7 +560,7 @@ status_t build_to_xml_qos_CoSList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -571,7 +571,7 @@ status_t build_to_xml_qos_CoSList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -599,7 +599,7 @@ status_t build_to_xml_qos_DSCPList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -610,7 +610,7 @@ status_t build_to_xml_qos_DSCPList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -638,7 +638,7 @@ status_t build_to_xml_qos_InterfaceList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -649,7 +649,7 @@ status_t build_to_xml_qos_InterfaceList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

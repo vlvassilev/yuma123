@@ -47,7 +47,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -72,7 +72,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -83,7 +83,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "Revision",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -94,7 +94,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "MaxAge",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -105,7 +105,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "HelloTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -116,7 +116,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "ForwardDelay",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -127,7 +127,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "MaxHops",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -138,7 +138,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "TxHoldCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -149,7 +149,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "Cist",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -165,7 +165,7 @@ status_t build_to_xml_stp_MSTPConfig(
       "Mstis",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -176,7 +176,7 @@ status_t build_to_xml_stp_MSTPConfig(
         "Mstis_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -204,7 +204,7 @@ status_t build_to_xml_stp_CISTEntry(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -215,7 +215,7 @@ status_t build_to_xml_stp_CISTEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -226,7 +226,7 @@ status_t build_to_xml_stp_CISTEntry(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -237,7 +237,7 @@ status_t build_to_xml_stp_CISTEntry(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -265,7 +265,7 @@ status_t build_to_xml_stp_MSTIEntry(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -276,7 +276,7 @@ status_t build_to_xml_stp_MSTIEntry(
       "Vlans",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -287,7 +287,7 @@ status_t build_to_xml_stp_MSTIEntry(
         "Vlans_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -299,7 +299,7 @@ status_t build_to_xml_stp_MSTIEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -310,7 +310,7 @@ status_t build_to_xml_stp_MSTIEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -321,7 +321,7 @@ status_t build_to_xml_stp_MSTIEntry(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -332,7 +332,7 @@ status_t build_to_xml_stp_MSTIEntry(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -360,7 +360,7 @@ status_t build_to_xml_stp_MSTIList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -371,7 +371,7 @@ status_t build_to_xml_stp_MSTIList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -399,7 +399,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -410,7 +410,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "PathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -421,7 +421,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -432,7 +432,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "STPEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -443,7 +443,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "P2PMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -465,7 +465,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "EdgeMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -476,7 +476,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "BPDUGuard",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -498,7 +498,7 @@ status_t build_to_xml_stp_MSTPCistPort(
       "RestrictRoot",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -520,7 +520,7 @@ status_t build_to_xml_stp_MSTPMstiPort(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -531,7 +531,7 @@ status_t build_to_xml_stp_MSTPMstiPort(
       "PathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -542,7 +542,7 @@ status_t build_to_xml_stp_MSTPMstiPort(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -564,7 +564,7 @@ status_t build_to_xml_stp_MSTPID(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -575,7 +575,7 @@ status_t build_to_xml_stp_MSTPID(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -597,7 +597,7 @@ status_t build_to_xml_stp_CISTStatus(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -608,7 +608,7 @@ status_t build_to_xml_stp_CISTStatus(
       "BridgeID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -624,7 +624,7 @@ status_t build_to_xml_stp_CISTStatus(
       "RootID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -640,7 +640,7 @@ status_t build_to_xml_stp_CISTStatus(
       "RootPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -651,7 +651,7 @@ status_t build_to_xml_stp_CISTStatus(
       "RootCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -662,7 +662,7 @@ status_t build_to_xml_stp_CISTStatus(
       "RegionalRoot",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -678,7 +678,7 @@ status_t build_to_xml_stp_CISTStatus(
       "InternalRootCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -689,7 +689,7 @@ status_t build_to_xml_stp_CISTStatus(
       "TopologyChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -700,7 +700,7 @@ status_t build_to_xml_stp_CISTStatus(
       "TopologyChangeCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -711,7 +711,7 @@ status_t build_to_xml_stp_CISTStatus(
       "TimeSinceTopologyChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -722,7 +722,7 @@ status_t build_to_xml_stp_CISTStatus(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -733,7 +733,7 @@ status_t build_to_xml_stp_CISTStatus(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -761,7 +761,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -772,7 +772,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "Role",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -783,7 +783,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -794,7 +794,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -805,7 +805,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "PathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -816,7 +816,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "EdgeMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -827,7 +827,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "P2PMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -838,7 +838,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "Uptime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -849,7 +849,7 @@ status_t build_to_xml_stp_CISTPortEntryStatus(
       "BPDUGuard",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -871,7 +871,7 @@ status_t build_to_xml_stp_MSTIStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -882,7 +882,7 @@ status_t build_to_xml_stp_MSTIStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -910,7 +910,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -921,7 +921,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "BridgeID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -937,7 +937,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "RootID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -953,7 +953,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "RootPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -964,7 +964,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "RootCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -975,7 +975,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "TopologyChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -986,7 +986,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "TopologyChangeCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -997,7 +997,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "TimeSinceTopologyChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1008,7 +1008,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1019,7 +1019,7 @@ status_t build_to_xml_stp_MSTIStatusEntry(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1047,7 +1047,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "No",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1058,7 +1058,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "Role",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1069,7 +1069,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1080,7 +1080,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1091,7 +1091,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "PathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1102,7 +1102,7 @@ status_t build_to_xml_stp_MSTIPortStatusEntry(
       "Uptime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1124,7 +1124,7 @@ status_t build_to_xml_stp_MSTPVLANGroupPortEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1135,7 +1135,7 @@ status_t build_to_xml_stp_MSTPVLANGroupPortEntry(
       "Tagged",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1157,7 +1157,7 @@ status_t build_to_xml_stp_MSTPVLANGroupEntry(
       "VLANID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1168,7 +1168,7 @@ status_t build_to_xml_stp_MSTPVLANGroupEntry(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1179,7 +1179,7 @@ status_t build_to_xml_stp_MSTPVLANGroupEntry(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1207,7 +1207,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1232,7 +1232,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1243,7 +1243,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "HelloTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1254,7 +1254,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "MaxAge",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1265,7 +1265,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "ForwardDelay",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1276,7 +1276,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "TxHoldCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1287,7 +1287,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "MSTPRegionName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1298,7 +1298,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "MSTPRevisionLevel",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1309,7 +1309,7 @@ status_t build_to_xml_stp_STPConfigBridge(
       "MSTPMaxHops",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1331,7 +1331,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1342,7 +1342,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1353,7 +1353,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1364,7 +1364,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "AdminP2PPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1386,7 +1386,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "AdminEdgePort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1397,7 +1397,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "AdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1408,7 +1408,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "MSTPDefaultPriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1419,7 +1419,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "MSTPPortPriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1430,7 +1430,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
         "MSTPPortPriority_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1442,7 +1442,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "MSTPDefaultAdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1453,7 +1453,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "MSTPPortAdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1464,7 +1464,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
         "MSTPPortAdminPathCost_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1476,7 +1476,7 @@ status_t build_to_xml_stp_STPConfigPortEntry(
       "BPDUGuard",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1509,7 +1509,7 @@ status_t build_to_xml_stp_STPConfigMSTPGroupEntry(
       "MSTPID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1520,7 +1520,7 @@ status_t build_to_xml_stp_STPConfigMSTPGroupEntry(
       "BridgePriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1531,7 +1531,7 @@ status_t build_to_xml_stp_STPConfigMSTPGroupEntry(
       "VIDs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1542,7 +1542,7 @@ status_t build_to_xml_stp_STPConfigMSTPGroupEntry(
         "VIDs_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1565,7 +1565,7 @@ status_t build_to_xml_stp_STPConfig(
       "Bridge",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1581,7 +1581,7 @@ status_t build_to_xml_stp_STPConfig(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1592,7 +1592,7 @@ status_t build_to_xml_stp_STPConfig(
         "Ports_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1609,7 +1609,7 @@ status_t build_to_xml_stp_STPConfig(
       "MSTPGroups",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1620,7 +1620,7 @@ status_t build_to_xml_stp_STPConfig(
         "MSTPGroups_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1648,7 +1648,7 @@ status_t build_to_xml_stp_BridgeConfigMode(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1684,7 +1684,7 @@ status_t build_to_xml_stp_BridgeConfigPriority(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1706,7 +1706,7 @@ status_t build_to_xml_stp_BridgeConfigHelloTime(
       "HelloTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1728,7 +1728,7 @@ status_t build_to_xml_stp_BridgeConfigMaxAge(
       "MaxAge",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1750,7 +1750,7 @@ status_t build_to_xml_stp_BridgeConfigForwardDelay(
       "ForwardDelay",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1772,7 +1772,7 @@ status_t build_to_xml_stp_BridgeConfigTxHoldCount(
       "TxHoldCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1794,7 +1794,7 @@ status_t build_to_xml_stp_BridgeConfigMSTPRegionName(
       "MSTPRegionName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1816,7 +1816,7 @@ status_t build_to_xml_stp_BridgeConfigMSTPRevisionLevel(
       "MSTPRevisionLevel",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1838,7 +1838,7 @@ status_t build_to_xml_stp_BridgeConfigMSTPMaxHops(
       "MSTPMaxHops",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1860,7 +1860,7 @@ status_t build_to_xml_stp_STPPortConfigEnabledEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1871,7 +1871,7 @@ status_t build_to_xml_stp_STPPortConfigEnabledEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1893,7 +1893,7 @@ status_t build_to_xml_stp_STPPortConfigEnabled(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1904,7 +1904,7 @@ status_t build_to_xml_stp_STPPortConfigEnabled(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1932,7 +1932,7 @@ status_t build_to_xml_stp_STPPortConfigPriorityEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1943,7 +1943,7 @@ status_t build_to_xml_stp_STPPortConfigPriorityEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1965,7 +1965,7 @@ status_t build_to_xml_stp_STPPortConfigPriority(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1976,7 +1976,7 @@ status_t build_to_xml_stp_STPPortConfigPriority(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2004,7 +2004,7 @@ status_t build_to_xml_stp_STPPortConfigAdminP2PPortEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2015,7 +2015,7 @@ status_t build_to_xml_stp_STPPortConfigAdminP2PPortEntry(
       "AdminP2PPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2048,7 +2048,7 @@ status_t build_to_xml_stp_STPPortConfigAdminP2PPort(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2059,7 +2059,7 @@ status_t build_to_xml_stp_STPPortConfigAdminP2PPort(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2087,7 +2087,7 @@ status_t build_to_xml_stp_STPPortConfigAdminEdgePortEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2098,7 +2098,7 @@ status_t build_to_xml_stp_STPPortConfigAdminEdgePortEntry(
       "AdminEdgePort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2120,7 +2120,7 @@ status_t build_to_xml_stp_STPPortConfigAdminEdgePort(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2131,7 +2131,7 @@ status_t build_to_xml_stp_STPPortConfigAdminEdgePort(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2159,7 +2159,7 @@ status_t build_to_xml_stp_STPPortConfigAdminPathCostEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2170,7 +2170,7 @@ status_t build_to_xml_stp_STPPortConfigAdminPathCostEntry(
       "AdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2192,7 +2192,7 @@ status_t build_to_xml_stp_STPPortConfigAdminPathCost(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2203,7 +2203,7 @@ status_t build_to_xml_stp_STPPortConfigAdminPathCost(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2231,7 +2231,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2242,7 +2242,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry(
       "MSTPDefaultPriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2264,7 +2264,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriority(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2275,7 +2275,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriority(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2303,7 +2303,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2314,7 +2314,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
       "MSTPPortPriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2325,7 +2325,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
         "MSTPPortPriority_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2348,7 +2348,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortPriority(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2359,7 +2359,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortPriority(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2387,7 +2387,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2398,7 +2398,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
       "MSTPDefaultAdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2420,7 +2420,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCost(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2431,7 +2431,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCost(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2459,7 +2459,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2470,7 +2470,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
       "MSTPPortAdminPathCost",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2481,7 +2481,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
         "MSTPPortAdminPathCost_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2504,7 +2504,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCost(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2515,7 +2515,7 @@ status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCost(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2543,7 +2543,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUGuardEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2554,7 +2554,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUGuardEntry(
       "BPDUGuard",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2587,7 +2587,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUGuard(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2598,7 +2598,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUGuard(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2626,7 +2626,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2637,7 +2637,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry(
       "BPDUReceiveOnly",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2659,7 +2659,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnly(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2670,7 +2670,7 @@ status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnly(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2698,7 +2698,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictTcnEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2709,7 +2709,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictTcnEntry(
       "RestrictTcn",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2731,7 +2731,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictTcn(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2742,7 +2742,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictTcn(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2770,7 +2770,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictRootEntry(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2781,7 +2781,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictRootEntry(
       "RestrictRoot",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2803,7 +2803,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictRoot(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2814,7 +2814,7 @@ status_t build_to_xml_stp_STPPortConfigRestrictRoot(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2842,7 +2842,7 @@ status_t build_to_xml_stp_MSTPIDList(
       "IDList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2853,7 +2853,7 @@ status_t build_to_xml_stp_MSTPIDList(
         "IDList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2876,7 +2876,7 @@ status_t build_to_xml_stp_STPMSTPGroupEntry(
       "MSTPID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2887,7 +2887,7 @@ status_t build_to_xml_stp_STPMSTPGroupEntry(
       "BridgePriority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2898,7 +2898,7 @@ status_t build_to_xml_stp_STPMSTPGroupEntry(
       "VIDs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2909,7 +2909,7 @@ status_t build_to_xml_stp_STPMSTPGroupEntry(
         "VIDs_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2932,7 +2932,7 @@ status_t build_to_xml_stp_MSTPGroup(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2943,7 +2943,7 @@ status_t build_to_xml_stp_MSTPGroup(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

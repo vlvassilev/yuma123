@@ -47,7 +47,7 @@ status_t build_to_xml_lldp_Config(
       "SystemConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -63,7 +63,7 @@ status_t build_to_xml_lldp_Config(
       "PortConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -90,7 +90,7 @@ status_t build_to_xml_lldp_SystemConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -101,7 +101,7 @@ status_t build_to_xml_lldp_SystemConfig(
       "TimeToLive",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -112,7 +112,7 @@ status_t build_to_xml_lldp_SystemConfig(
       "MsgTxInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -123,7 +123,7 @@ status_t build_to_xml_lldp_SystemConfig(
       "VoiceDisableVlanTLV",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -134,7 +134,7 @@ status_t build_to_xml_lldp_SystemConfig(
       "ForwardToLink",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -156,7 +156,7 @@ status_t build_to_xml_lldp_PortConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -167,7 +167,7 @@ status_t build_to_xml_lldp_PortConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -195,7 +195,7 @@ status_t build_to_xml_lldp_PortConfigEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -211,7 +211,7 @@ status_t build_to_xml_lldp_PortConfigEntry(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -247,7 +247,7 @@ status_t build_to_xml_lldp_LocalInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -258,7 +258,7 @@ status_t build_to_xml_lldp_LocalInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -286,7 +286,7 @@ status_t build_to_xml_lldp_NeighborInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -297,7 +297,7 @@ status_t build_to_xml_lldp_NeighborInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -325,7 +325,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -341,7 +341,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "MACPhy",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -357,7 +357,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "PortMgmt",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -373,7 +373,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "Aggr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -389,7 +389,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "ExtendPoe",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -405,7 +405,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "Power",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -421,7 +421,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "MediaCap",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -437,7 +437,7 @@ status_t build_to_xml_lldp_LocalInfoEntry(
       "SystemInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -464,7 +464,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "RecvIdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -480,7 +480,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "TimeToLive",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -491,7 +491,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "Chassis",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -507,7 +507,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "MgmtAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -518,7 +518,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
         "MgmtAddress_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -535,7 +535,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "Capabilities",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -546,7 +546,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
         "Capabilities_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -584,7 +584,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "CapabilitiesEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -595,7 +595,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
         "CapabilitiesEnabled_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -633,7 +633,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "MedCapabilities",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -644,7 +644,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
         "MedCapabilities_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -676,7 +676,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "PortSubtype",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -692,7 +692,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "VoiceVlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -703,7 +703,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
         "VoiceVlan_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -720,7 +720,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "SystemInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -736,7 +736,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "ExtendPoe",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -752,7 +752,7 @@ status_t build_to_xml_lldp_NeighborInfoEntry(
       "Power",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -779,7 +779,7 @@ status_t build_to_xml_lldp_LinkAggregation(
       "Capabilities",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -790,7 +790,7 @@ status_t build_to_xml_lldp_LinkAggregation(
       "Status",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -801,7 +801,7 @@ status_t build_to_xml_lldp_LinkAggregation(
       "AggregationPortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -823,7 +823,7 @@ status_t build_to_xml_lldp_ExtendedPowerViaMDI(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -848,7 +848,7 @@ status_t build_to_xml_lldp_ExtendedPowerViaMDI(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -873,7 +873,7 @@ status_t build_to_xml_lldp_ExtendedPowerViaMDI(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -898,7 +898,7 @@ status_t build_to_xml_lldp_ExtendedPowerViaMDI(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -920,7 +920,7 @@ status_t build_to_xml_lldp_MACPHYConfig(
       "AutoNegotiationConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -931,7 +931,7 @@ status_t build_to_xml_lldp_MACPHYConfig(
       "AutoNegotiationStatus",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -942,7 +942,7 @@ status_t build_to_xml_lldp_MACPHYConfig(
       "AutoNegoAdvertisedCapability",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -953,7 +953,7 @@ status_t build_to_xml_lldp_MACPHYConfig(
         "AutoNegoAdvertisedCapability_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1015,7 +1015,7 @@ status_t build_to_xml_lldp_MACPHYConfig(
       "OperationalMAUType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1087,7 +1087,7 @@ status_t build_to_xml_lldp_MediaCapability(
       "Capabilities",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1098,7 +1098,7 @@ status_t build_to_xml_lldp_MediaCapability(
         "Capabilities_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1130,7 +1130,7 @@ status_t build_to_xml_lldp_MediaCapability(
       "ClassType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1152,7 +1152,7 @@ status_t build_to_xml_lldp_SystemManagementInfo(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1163,7 +1163,7 @@ status_t build_to_xml_lldp_SystemManagementInfo(
       "Description",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1185,7 +1185,7 @@ status_t build_to_xml_lldp_PortManagementInfo(
       "Ip",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1196,7 +1196,7 @@ status_t build_to_xml_lldp_PortManagementInfo(
         "Ip_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1208,7 +1208,7 @@ status_t build_to_xml_lldp_PortManagementInfo(
       "MACAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1219,7 +1219,7 @@ status_t build_to_xml_lldp_PortManagementInfo(
       "Description",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1241,7 +1241,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1260,7 +1260,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PoePowerSupported",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1271,7 +1271,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PoePowerEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1282,7 +1282,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PairControl",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1293,7 +1293,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PowerPairs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1312,7 +1312,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PowerClass",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1355,7 +1355,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "DeviceType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1380,7 +1380,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1405,7 +1405,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1430,7 +1430,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PdRequestedPower",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1441,7 +1441,7 @@ status_t build_to_xml_lldp_PowerViaMDI(
       "PseAllocatedPower",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1463,7 +1463,7 @@ status_t build_to_xml_lldp_PortManagementAddressInfo(
       "Ip",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1474,7 +1474,7 @@ status_t build_to_xml_lldp_PortManagementAddressInfo(
       "Subtype",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1499,7 +1499,7 @@ status_t build_to_xml_lldp_PortManagementAddressInfo(
       "ID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1521,7 +1521,7 @@ status_t build_to_xml_lldp_ManagementAddress(
       "MACAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1532,7 +1532,7 @@ status_t build_to_xml_lldp_ManagementAddress(
       "Ip",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1543,7 +1543,7 @@ status_t build_to_xml_lldp_ManagementAddress(
         "Ip_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1555,7 +1555,7 @@ status_t build_to_xml_lldp_ManagementAddress(
       "PortDsr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1577,7 +1577,7 @@ status_t build_to_xml_lldp_ChassisInfo(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1614,7 +1614,7 @@ status_t build_to_xml_lldp_ChassisInfo(
       "ID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1636,7 +1636,7 @@ status_t build_to_xml_lldp_PortID(
       "Subtype",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1673,7 +1673,7 @@ status_t build_to_xml_lldp_PortID(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1684,7 +1684,7 @@ status_t build_to_xml_lldp_PortID(
       "ID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1706,7 +1706,7 @@ status_t build_to_xml_lldp_Statistic(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1717,7 +1717,7 @@ status_t build_to_xml_lldp_Statistic(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1745,7 +1745,7 @@ status_t build_to_xml_lldp_StatisticEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1761,7 +1761,7 @@ status_t build_to_xml_lldp_StatisticEntry(
       "FramesOut",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1772,7 +1772,7 @@ status_t build_to_xml_lldp_StatisticEntry(
       "FramesIn",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1783,7 +1783,7 @@ status_t build_to_xml_lldp_StatisticEntry(
       "FramesInErrors",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1805,7 +1805,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "ApplicationType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1845,7 +1845,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "PolicyDefined",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1856,7 +1856,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "TaggedVlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1867,7 +1867,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1878,7 +1878,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "Layer_2Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1918,7 +1918,7 @@ status_t build_to_xml_lldp_VoiceVlanEntry(
       "DSCP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

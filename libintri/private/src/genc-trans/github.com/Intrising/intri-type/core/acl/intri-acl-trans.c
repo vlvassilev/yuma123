@@ -48,7 +48,7 @@ status_t build_to_xml_acl_Config(
       "Interfaces",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -64,7 +64,7 @@ status_t build_to_xml_acl_Config(
       "AclList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -80,7 +80,7 @@ status_t build_to_xml_acl_Config(
       "AceList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -96,7 +96,7 @@ status_t build_to_xml_acl_Config(
       "Binding",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -112,7 +112,7 @@ status_t build_to_xml_acl_Config(
       "Flow",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -139,7 +139,7 @@ status_t build_to_xml_acl_InterfaceList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -150,7 +150,7 @@ status_t build_to_xml_acl_InterfaceList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -178,7 +178,7 @@ status_t build_to_xml_acl_InterfaceEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -194,7 +194,7 @@ status_t build_to_xml_acl_InterfaceEntry(
       "IngressAclName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -205,7 +205,7 @@ status_t build_to_xml_acl_InterfaceEntry(
       "EgressAclName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -227,7 +227,7 @@ status_t build_to_xml_acl_ACLList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -238,7 +238,7 @@ status_t build_to_xml_acl_ACLList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -266,7 +266,7 @@ status_t build_to_xml_acl_ACLEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -277,7 +277,7 @@ status_t build_to_xml_acl_ACLEntry(
       "RuleList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -288,7 +288,7 @@ status_t build_to_xml_acl_ACLEntry(
         "RuleList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -311,7 +311,7 @@ status_t build_to_xml_acl_ACEList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -322,7 +322,7 @@ status_t build_to_xml_acl_ACEList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -350,7 +350,7 @@ status_t build_to_xml_acl_ACEEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -361,7 +361,7 @@ status_t build_to_xml_acl_ACEEntry(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -386,7 +386,7 @@ status_t build_to_xml_acl_ACEEntry(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -397,7 +397,7 @@ status_t build_to_xml_acl_ACEEntry(
       "TimeRangeName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -408,7 +408,7 @@ status_t build_to_xml_acl_ACEEntry(
       "ParamType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -432,7 +432,7 @@ status_t build_to_xml_acl_ACEEntry(
           "Mac",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -450,7 +450,7 @@ status_t build_to_xml_acl_ACEEntry(
           "IPv4",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -468,7 +468,7 @@ status_t build_to_xml_acl_ACEEntry(
           "IPv6",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -486,7 +486,7 @@ status_t build_to_xml_acl_ACEEntry(
           "MacIPv4",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -504,7 +504,7 @@ status_t build_to_xml_acl_ACEEntry(
           "MacIPv6",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -533,7 +533,7 @@ status_t build_to_xml_acl_RuleVlan(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -544,7 +544,7 @@ status_t build_to_xml_acl_RuleVlan(
       "VlanIDMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -566,7 +566,7 @@ status_t build_to_xml_acl_RuleMACIPv4(
       "Mac",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -582,7 +582,7 @@ status_t build_to_xml_acl_RuleMACIPv4(
       "IPv4",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -609,7 +609,7 @@ status_t build_to_xml_acl_RuleMACIPv6(
       "Mac",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -625,7 +625,7 @@ status_t build_to_xml_acl_RuleMACIPv6(
       "IPv6",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -652,7 +652,7 @@ status_t build_to_xml_acl_RuleMAC(
       "EtherType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -668,7 +668,7 @@ status_t build_to_xml_acl_RuleMAC(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -684,7 +684,7 @@ status_t build_to_xml_acl_RuleMAC(
       "Destination",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -700,7 +700,7 @@ status_t build_to_xml_acl_RuleMAC(
       "VlanId",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -722,7 +722,7 @@ status_t build_to_xml_acl_MACConfig(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -733,7 +733,7 @@ status_t build_to_xml_acl_MACConfig(
       "AddressMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -755,7 +755,7 @@ status_t build_to_xml_acl_EtherTypeConfig(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -766,7 +766,7 @@ status_t build_to_xml_acl_EtherTypeConfig(
       "EtherTypeMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -788,7 +788,7 @@ status_t build_to_xml_acl_IPProtocolConfig(
       "Protocol",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -799,7 +799,7 @@ status_t build_to_xml_acl_IPProtocolConfig(
       "ProtocolMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -821,7 +821,7 @@ status_t build_to_xml_acl_RuleIPv4(
       "Protocol",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -837,7 +837,7 @@ status_t build_to_xml_acl_RuleIPv4(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -853,7 +853,7 @@ status_t build_to_xml_acl_RuleIPv4(
       "Destination",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -869,7 +869,7 @@ status_t build_to_xml_acl_RuleIPv4(
       "Layer4Port",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -896,7 +896,7 @@ status_t build_to_xml_acl_IPv4Config(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -907,7 +907,7 @@ status_t build_to_xml_acl_IPv4Config(
       "AddressMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -929,7 +929,7 @@ status_t build_to_xml_acl_RuleIPv6(
       "NextHeader",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -945,7 +945,7 @@ status_t build_to_xml_acl_RuleIPv6(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -961,7 +961,7 @@ status_t build_to_xml_acl_RuleIPv6(
       "Destination",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -977,7 +977,7 @@ status_t build_to_xml_acl_RuleIPv6(
       "Layer4Port",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1004,7 +1004,7 @@ status_t build_to_xml_acl_IPv6Config(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1015,7 +1015,7 @@ status_t build_to_xml_acl_IPv6Config(
       "AddressMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1037,7 +1037,7 @@ status_t build_to_xml_acl_RuleLayer4Port(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1053,7 +1053,7 @@ status_t build_to_xml_acl_RuleLayer4Port(
       "Destination",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1080,7 +1080,7 @@ status_t build_to_xml_acl_IPWithLayer4PortConfig(
       "PortNumber",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1091,7 +1091,7 @@ status_t build_to_xml_acl_IPWithLayer4PortConfig(
       "PortNumberMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1113,7 +1113,7 @@ status_t build_to_xml_acl_BindingList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1124,7 +1124,7 @@ status_t build_to_xml_acl_BindingList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1152,7 +1152,7 @@ status_t build_to_xml_acl_BindingEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1163,7 +1163,7 @@ status_t build_to_xml_acl_BindingEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1179,7 +1179,7 @@ status_t build_to_xml_acl_BindingEntry(
       "Mac",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1190,7 +1190,7 @@ status_t build_to_xml_acl_BindingEntry(
       "ParamType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1214,7 +1214,7 @@ status_t build_to_xml_acl_BindingEntry(
           "IPv4",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -1227,7 +1227,7 @@ status_t build_to_xml_acl_BindingEntry(
           "IPv6",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -1251,7 +1251,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1262,7 +1262,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
       "ACLNameList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1273,7 +1273,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
         "ACLNameList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1285,7 +1285,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
       "SourceList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1296,7 +1296,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
         "SourceList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1313,7 +1313,7 @@ status_t build_to_xml_acl_FlowMirroringEntry(
       "Destination",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1340,7 +1340,7 @@ status_t build_to_xml_acl_FlowMirroringList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1351,7 +1351,7 @@ status_t build_to_xml_acl_FlowMirroringList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

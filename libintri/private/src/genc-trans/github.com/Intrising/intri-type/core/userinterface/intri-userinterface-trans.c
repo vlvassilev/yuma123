@@ -47,7 +47,7 @@ status_t build_to_xml_userinterface_CLIConfig(
       "TelnetEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -58,7 +58,7 @@ status_t build_to_xml_userinterface_CLIConfig(
       "SSHEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -69,7 +69,7 @@ status_t build_to_xml_userinterface_CLIConfig(
       "WelcomeMessage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -80,7 +80,7 @@ status_t build_to_xml_userinterface_CLIConfig(
       "InactivityTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -102,7 +102,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SNMPV1Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -113,7 +113,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SNMPV2CEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -124,7 +124,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "GetCommunity",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -135,7 +135,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SetCommunity",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -146,7 +146,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SNMPV1V2Username",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -157,7 +157,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "PermitV1V2SetCommands",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -168,7 +168,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SNMPV3Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -179,7 +179,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SecurityModel",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -201,7 +201,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "SNMPEngineID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -212,7 +212,7 @@ status_t build_to_xml_userinterface_SNMPConfig(
       "TrapEngineID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -234,7 +234,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "Protocol",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -259,7 +259,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "WebTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -270,7 +270,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "HTTPPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -281,7 +281,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "HTTPSPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -292,7 +292,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "EncryptedCertPassphrase",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -303,7 +303,7 @@ status_t build_to_xml_userinterface_WebConfig(
       "LoginMessage",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -325,7 +325,7 @@ status_t build_to_xml_userinterface_Config(
       "Cli",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -341,7 +341,7 @@ status_t build_to_xml_userinterface_Config(
       "Snmp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -357,7 +357,7 @@ status_t build_to_xml_userinterface_Config(
       "Web",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

@@ -47,7 +47,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -63,7 +63,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InGoodOctets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -74,7 +74,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InBadOctets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -85,7 +85,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InTotalPackets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -96,7 +96,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InUnicasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -107,7 +107,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InNonUnicasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -118,7 +118,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InBroadcasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -129,7 +129,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InMulticasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -140,7 +140,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InPause",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -151,7 +151,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InTotalReceiveErrors",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -162,7 +162,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InUndersize",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -173,7 +173,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InOversize",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -184,7 +184,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InFragments",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -195,7 +195,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InJabber",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -206,7 +206,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InFcsErrors",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -217,7 +217,7 @@ status_t build_to_xml_rmon_IngressEntry(
       "InDiscarded",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -239,7 +239,7 @@ status_t build_to_xml_rmon_Ingress(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -250,7 +250,7 @@ status_t build_to_xml_rmon_Ingress(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -278,7 +278,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -294,7 +294,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutGoodOctets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -305,7 +305,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutUnicasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -316,7 +316,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutNonUnicasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -327,7 +327,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutBroadcasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -338,7 +338,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutMulticasts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -349,7 +349,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutPause",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -360,7 +360,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutDeferred",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -371,7 +371,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutTotalCollisions",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -382,7 +382,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutTotalPackets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -393,7 +393,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutExcessiveCollisions",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -404,7 +404,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutLateCollisions",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -415,7 +415,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutFcsErrors",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -426,7 +426,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutDroppedPackets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -437,7 +437,7 @@ status_t build_to_xml_rmon_EgressEntry(
       "OutMultipleCollisions",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -459,7 +459,7 @@ status_t build_to_xml_rmon_Egress(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -470,7 +470,7 @@ status_t build_to_xml_rmon_Egress(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -498,7 +498,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -514,7 +514,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_64Octets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -525,7 +525,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_65To_127Octets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -536,7 +536,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_128To_255Octets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -547,7 +547,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_256To_511Octets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -558,7 +558,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_512To_1023Octets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -569,7 +569,7 @@ status_t build_to_xml_rmon_HistogramEntry(
       "In_1024ToMaxOctets",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -591,7 +591,7 @@ status_t build_to_xml_rmon_Histogram(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -602,7 +602,7 @@ status_t build_to_xml_rmon_Histogram(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -630,7 +630,7 @@ status_t build_to_xml_rmon_UtilizationRate(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -652,7 +652,7 @@ status_t build_to_xml_rmon_UtilizationRate(
       "Rate",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -674,7 +674,7 @@ status_t build_to_xml_rmon_UtilizationEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -690,7 +690,7 @@ status_t build_to_xml_rmon_UtilizationEntry(
       "Ingress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -701,7 +701,7 @@ status_t build_to_xml_rmon_UtilizationEntry(
         "Ingress_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -718,7 +718,7 @@ status_t build_to_xml_rmon_UtilizationEntry(
       "Egress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -729,7 +729,7 @@ status_t build_to_xml_rmon_UtilizationEntry(
         "Egress_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -757,7 +757,7 @@ status_t build_to_xml_rmon_Utilization(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -768,7 +768,7 @@ status_t build_to_xml_rmon_Utilization(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

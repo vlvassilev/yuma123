@@ -48,7 +48,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "SuppressionOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -70,7 +70,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "IsEnable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -81,7 +81,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "ActionOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -100,7 +100,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "UnitOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -119,7 +119,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "BpsUpperThreshold",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -130,7 +130,7 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
       "PpsUpperThreshold",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -152,7 +152,7 @@ status_t build_to_xml_stormcontrol_PortConfigEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -168,7 +168,7 @@ status_t build_to_xml_stormcontrol_PortConfigEntry(
       "IsEnable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -179,7 +179,7 @@ status_t build_to_xml_stormcontrol_PortConfigEntry(
       "SuppressionList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -190,7 +190,7 @@ status_t build_to_xml_stormcontrol_PortConfigEntry(
         "SuppressionList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -218,7 +218,7 @@ status_t build_to_xml_stormcontrol_PortConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -229,7 +229,7 @@ status_t build_to_xml_stormcontrol_PortConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -257,7 +257,7 @@ status_t build_to_xml_stormcontrol_Config(
       "IsEnable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -268,7 +268,7 @@ status_t build_to_xml_stormcontrol_Config(
       "PortConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

@@ -80,7 +80,7 @@ status_t build_to_xml_config_ImportAction(
       "FileURL",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -91,7 +91,7 @@ status_t build_to_xml_config_ImportAction(
       "RebootAfterAction",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -113,7 +113,7 @@ status_t build_to_xml_config_ExportAction(
       "FileURL",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -124,7 +124,7 @@ status_t build_to_xml_config_ExportAction(
       "IsFTPS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -135,7 +135,7 @@ status_t build_to_xml_config_ExportAction(
       "ForceTFTP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -157,7 +157,7 @@ status_t build_to_xml_config_SaveModeStatus(
       "SaveStorageOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -173,7 +173,7 @@ status_t build_to_xml_config_SaveModeStatus(
       "SaveModeOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -189,7 +189,7 @@ status_t build_to_xml_config_SaveModeStatus(
       "ConfigStateOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -208,7 +208,7 @@ status_t build_to_xml_config_SaveModeStatus(
       "ConfigLastUpdated",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -230,7 +230,7 @@ status_t build_to_xml_config_RestoreDefaultType(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -266,7 +266,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Acl",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -282,7 +282,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Vlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -298,7 +298,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Gvrp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -314,7 +314,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Access",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -330,7 +330,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "UserInterface",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -346,7 +346,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "System",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -362,7 +362,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Network",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -378,7 +378,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Time",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -394,7 +394,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Port",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -410,7 +410,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Sfp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -426,7 +426,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Mirroring",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -442,7 +442,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Isolation",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -458,7 +458,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Fdb",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -474,7 +474,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "PortSecurity",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -490,7 +490,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Files",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -506,7 +506,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Lacp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -522,7 +522,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Multicast",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -538,7 +538,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "StormControl",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -554,7 +554,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Dhcp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -570,7 +570,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "QoS",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -586,7 +586,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Loop",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -602,7 +602,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Lldp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -618,7 +618,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Poe",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -634,7 +634,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Cdp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -650,7 +650,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "DhcpServer",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -666,7 +666,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Stp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -682,7 +682,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Mstp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -698,7 +698,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "TimeRange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -714,7 +714,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "ArpInspection",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -730,7 +730,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Ptp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -746,7 +746,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Monitor",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -762,7 +762,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "TimeSync",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -778,7 +778,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Udld",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -794,7 +794,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "PortAuthentication",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -810,7 +810,7 @@ status_t build_to_xml_config_AllServicesConfig(
       "Log",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -837,7 +837,7 @@ status_t build_to_xml_config_ValidateConfigResult(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -848,7 +848,7 @@ status_t build_to_xml_config_ValidateConfigResult(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

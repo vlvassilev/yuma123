@@ -48,7 +48,7 @@ status_t build_to_xml_timecontrol_InputClockManage(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -59,7 +59,7 @@ status_t build_to_xml_timecontrol_InputClockManage(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -87,7 +87,7 @@ status_t build_to_xml_timecontrol_InputClockManageEntry(
       "InputCLK",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -150,7 +150,7 @@ status_t build_to_xml_timecontrol_MonitorStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -161,7 +161,7 @@ status_t build_to_xml_timecontrol_MonitorStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -189,7 +189,7 @@ status_t build_to_xml_timecontrol_MonitorStatusEntry(
       "InputCLK",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -241,7 +241,7 @@ status_t build_to_xml_timecontrol_MonitorStatusEntry(
       "StatusList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -252,7 +252,7 @@ status_t build_to_xml_timecontrol_MonitorStatusEntry(
         "StatusList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -269,7 +269,7 @@ status_t build_to_xml_timecontrol_MonitorStatusEntry(
       "Valid",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -291,7 +291,7 @@ status_t build_to_xml_timecontrol_StatusInputBit(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -316,7 +316,7 @@ status_t build_to_xml_timecontrol_StatusInputBit(
       "Valid",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -338,7 +338,7 @@ status_t build_to_xml_timecontrol_DPLLManage(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -349,7 +349,7 @@ status_t build_to_xml_timecontrol_DPLLManage(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -377,7 +377,7 @@ status_t build_to_xml_timecontrol_DPLLManageEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -425,7 +425,7 @@ status_t build_to_xml_timecontrol_DPLLStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -436,7 +436,7 @@ status_t build_to_xml_timecontrol_DPLLStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -464,7 +464,7 @@ status_t build_to_xml_timecontrol_DPLLStatusEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -501,7 +501,7 @@ status_t build_to_xml_timecontrol_DPLLStatusEntry(
       "StatusType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -535,7 +535,7 @@ status_t build_to_xml_timecontrol_DPLLStatusEntry(
       "InputCLK",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -598,7 +598,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityManage(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -609,7 +609,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityManage(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -637,7 +637,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -674,7 +674,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
       "PriorityList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -685,7 +685,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
         "PriorityList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -767,7 +767,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriority(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -778,7 +778,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriority(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -806,7 +806,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -843,7 +843,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityEntry(
       "PrioritList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -854,7 +854,7 @@ status_t build_to_xml_timecontrol_DPLLRefPriorityEntry(
         "PrioritList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -882,7 +882,7 @@ status_t build_to_xml_timecontrol_PriorityList(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -952,7 +952,7 @@ status_t build_to_xml_timecontrol_PriorityList(
       "InputCLK",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1015,7 +1015,7 @@ status_t build_to_xml_timecontrol_SyncEInputClockSpeed(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1026,7 +1026,7 @@ status_t build_to_xml_timecontrol_SyncEInputClockSpeed(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1054,7 +1054,7 @@ status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
       "InputCLK",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1106,7 +1106,7 @@ status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
       "Speed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1175,7 +1175,7 @@ status_t build_to_xml_timecontrol_ToDSource(
       "Enable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1186,7 +1186,7 @@ status_t build_to_xml_timecontrol_ToDSource(
       "Source",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1222,7 +1222,7 @@ status_t build_to_xml_timecontrol_DPLLToDManage(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1233,7 +1233,7 @@ status_t build_to_xml_timecontrol_DPLLToDManage(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1261,7 +1261,7 @@ status_t build_to_xml_timecontrol_DPLLToDManageEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1297,7 +1297,7 @@ status_t build_to_xml_timecontrol_ToDTime(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1308,7 +1308,7 @@ status_t build_to_xml_timecontrol_ToDTime(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1336,7 +1336,7 @@ status_t build_to_xml_timecontrol_ToDTimeEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1361,7 +1361,7 @@ status_t build_to_xml_timecontrol_ToDTimeEntry(
       "DateTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1388,7 +1388,7 @@ status_t build_to_xml_timecontrol_DPLLFrequencyControl(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1399,7 +1399,7 @@ status_t build_to_xml_timecontrol_DPLLFrequencyControl(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1427,7 +1427,7 @@ status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1464,7 +1464,7 @@ status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry(
       "FreqOffset",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1486,7 +1486,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControl(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1497,7 +1497,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControl(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1525,7 +1525,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1562,7 +1562,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlEntry(
       "PhOffset",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1584,7 +1584,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1595,7 +1595,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1623,7 +1623,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1660,7 +1660,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
       "Limit",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1682,7 +1682,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlTimer(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1693,7 +1693,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlTimer(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1721,7 +1721,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1758,7 +1758,7 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
       "Timeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

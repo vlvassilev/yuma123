@@ -48,7 +48,7 @@ status_t build_to_xml_multicast_Config(
       "IGMPSnoopingGlobalEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -59,7 +59,7 @@ status_t build_to_xml_multicast_Config(
       "MLDSnoopingGlobalEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -70,7 +70,7 @@ status_t build_to_xml_multicast_Config(
       "IGMPConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -86,7 +86,7 @@ status_t build_to_xml_multicast_Config(
       "MLDConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -102,7 +102,7 @@ status_t build_to_xml_multicast_Config(
       "RouterConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -118,7 +118,7 @@ status_t build_to_xml_multicast_Config(
       "UnregisterConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -134,7 +134,7 @@ status_t build_to_xml_multicast_Config(
       "StaticGroups",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -161,7 +161,7 @@ status_t build_to_xml_multicast_Snooping(
       "VlanList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -172,7 +172,7 @@ status_t build_to_xml_multicast_Snooping(
         "VlanList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -200,7 +200,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -211,7 +211,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "SnoopingEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -222,7 +222,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "QuerierVersion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -253,7 +253,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "MulticastRouterDetection",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -269,7 +269,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "EnableFastLeave",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -280,7 +280,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "EnableReportSuppression",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -291,7 +291,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "GroupLimit",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -302,7 +302,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "GroupMembershipInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -313,7 +313,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "LastMemberQueryTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -324,7 +324,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "MaxResponseTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -335,7 +335,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "RouterAgingTime",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -346,7 +346,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "StartQueryCount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -357,7 +357,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "StartQueryInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -368,7 +368,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "QueryInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -379,7 +379,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "Robustness",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -390,7 +390,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
       "IdentifyiesConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -401,7 +401,7 @@ status_t build_to_xml_multicast_SnoopingConfigEntry(
         "IdentifyiesConfig_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -429,7 +429,7 @@ status_t build_to_xml_multicast_UnregisterFlood(
       "VlanList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -440,7 +440,7 @@ status_t build_to_xml_multicast_UnregisterFlood(
         "VlanList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -468,7 +468,7 @@ status_t build_to_xml_multicast_UnregisterFloodVlan(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -479,7 +479,7 @@ status_t build_to_xml_multicast_UnregisterFloodVlan(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -501,7 +501,7 @@ status_t build_to_xml_multicast_RouterPort(
       "VlanList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -512,7 +512,7 @@ status_t build_to_xml_multicast_RouterPort(
         "VlanList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -540,7 +540,7 @@ status_t build_to_xml_multicast_RouterPortVlanEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -551,7 +551,7 @@ status_t build_to_xml_multicast_RouterPortVlanEntry(
       "PortList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -562,7 +562,7 @@ status_t build_to_xml_multicast_RouterPortVlanEntry(
         "PortList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -590,7 +590,7 @@ status_t build_to_xml_multicast_PortEnabledEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -606,7 +606,7 @@ status_t build_to_xml_multicast_PortEnabledEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -628,7 +628,7 @@ status_t build_to_xml_multicast_Static(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -639,7 +639,7 @@ status_t build_to_xml_multicast_Static(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -667,7 +667,7 @@ status_t build_to_xml_multicast_StaticGroupsConfigEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -678,7 +678,7 @@ status_t build_to_xml_multicast_StaticGroupsConfigEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -689,7 +689,7 @@ status_t build_to_xml_multicast_StaticGroupsConfigEntry(
       "MulticastAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -700,7 +700,7 @@ status_t build_to_xml_multicast_StaticGroupsConfigEntry(
       "ForwardingPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -727,7 +727,7 @@ status_t build_to_xml_multicast_IGMPStatistics(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -738,7 +738,7 @@ status_t build_to_xml_multicast_IGMPStatistics(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -766,7 +766,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -777,7 +777,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "RxGeneralQueries",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -788,7 +788,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "RxV3Reports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -799,7 +799,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "RxV2Reports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -810,7 +810,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "RxV2Leaves",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -821,7 +821,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "RxV1Reports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -832,7 +832,7 @@ status_t build_to_xml_multicast_IGMPStatisticEntry(
       "Querier",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -854,7 +854,7 @@ status_t build_to_xml_multicast_RouterStatus(
       "VlanList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -865,7 +865,7 @@ status_t build_to_xml_multicast_RouterStatus(
         "VlanList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -893,7 +893,7 @@ status_t build_to_xml_multicast_RouterStatusEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -904,7 +904,7 @@ status_t build_to_xml_multicast_RouterStatusEntry(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -915,7 +915,7 @@ status_t build_to_xml_multicast_RouterStatusEntry(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -943,7 +943,7 @@ status_t build_to_xml_multicast_RouterPortStatusEntry(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -968,7 +968,7 @@ status_t build_to_xml_multicast_RouterPortStatusEntry(
       "Status",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -993,7 +993,7 @@ status_t build_to_xml_multicast_RouterPortStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1020,7 +1020,7 @@ status_t build_to_xml_multicast_DynamicGroups(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1031,7 +1031,7 @@ status_t build_to_xml_multicast_DynamicGroups(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1059,7 +1059,7 @@ status_t build_to_xml_multicast_DynamicGroupEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1070,7 +1070,7 @@ status_t build_to_xml_multicast_DynamicGroupEntry(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1081,7 +1081,7 @@ status_t build_to_xml_multicast_DynamicGroupEntry(
       "TTL",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1092,7 +1092,7 @@ status_t build_to_xml_multicast_DynamicGroupEntry(
       "IdentifyList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1103,7 +1103,7 @@ status_t build_to_xml_multicast_DynamicGroupEntry(
         "IdentifyList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1131,7 +1131,7 @@ status_t build_to_xml_multicast_MLDStatistics(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1142,7 +1142,7 @@ status_t build_to_xml_multicast_MLDStatistics(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1170,7 +1170,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1181,7 +1181,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "RxGeneralQueries",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1192,7 +1192,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "RxV2Reports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1203,7 +1203,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "RxV1Reports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1214,7 +1214,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "RxV1Leaves",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1225,7 +1225,7 @@ status_t build_to_xml_multicast_MLDStatisticEntry(
       "Querier",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1247,7 +1247,7 @@ status_t build_to_xml_multicast_VlanList(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1258,7 +1258,7 @@ status_t build_to_xml_multicast_VlanList(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

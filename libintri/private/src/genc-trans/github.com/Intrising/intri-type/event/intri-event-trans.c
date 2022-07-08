@@ -48,7 +48,7 @@ status_t build_to_xml_event_ACLParameter(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -59,7 +59,7 @@ status_t build_to_xml_event_ACLParameter(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -70,7 +70,7 @@ status_t build_to_xml_event_ACLParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -100,7 +100,7 @@ status_t build_to_xml_event_LgportUsed(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -119,7 +119,7 @@ status_t build_to_xml_event_LgportUsed(
       "OriginalMembers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -130,7 +130,7 @@ status_t build_to_xml_event_LgportUsed(
         "OriginalMembers_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -147,7 +147,7 @@ status_t build_to_xml_event_LgportUsed(
       "NewMembers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -158,7 +158,7 @@ status_t build_to_xml_event_LgportUsed(
         "NewMembers_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -175,7 +175,7 @@ status_t build_to_xml_event_LgportUsed(
       "AddedMembers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -186,7 +186,7 @@ status_t build_to_xml_event_LgportUsed(
         "AddedMembers_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -203,7 +203,7 @@ status_t build_to_xml_event_LgportUsed(
       "DeletedMembers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -214,7 +214,7 @@ status_t build_to_xml_event_LgportUsed(
         "DeletedMembers_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -242,7 +242,7 @@ status_t build_to_xml_event_ProtocolUsed(
       "UpdateMembers",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -253,7 +253,7 @@ status_t build_to_xml_event_ProtocolUsed(
         "UpdateMembers_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -281,7 +281,7 @@ status_t build_to_xml_event_AggrParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -300,7 +300,7 @@ status_t build_to_xml_event_AggrParameter(
       "TrunkID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -313,7 +313,7 @@ status_t build_to_xml_event_AggrParameter(
           "Lgport",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -331,7 +331,7 @@ status_t build_to_xml_event_AggrParameter(
           "Protocol",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -360,7 +360,7 @@ status_t build_to_xml_event_AUParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -382,7 +382,7 @@ status_t build_to_xml_event_AUParameter(
       "Entry",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -409,7 +409,7 @@ status_t build_to_xml_event_FDBEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -425,7 +425,7 @@ status_t build_to_xml_event_FDBEntry(
       "IsStatic",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -436,7 +436,7 @@ status_t build_to_xml_event_FDBEntry(
       "IsForward",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -447,7 +447,7 @@ status_t build_to_xml_event_FDBEntry(
       "Address",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -458,7 +458,7 @@ status_t build_to_xml_event_FDBEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -469,7 +469,7 @@ status_t build_to_xml_event_FDBEntry(
       "IsAgeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -480,7 +480,7 @@ status_t build_to_xml_event_FDBEntry(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -513,7 +513,7 @@ status_t build_to_xml_event_ButtonParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -529,7 +529,7 @@ status_t build_to_xml_event_ButtonParameter(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -548,7 +548,7 @@ status_t build_to_xml_event_ButtonParameter(
       "Trigger",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -578,7 +578,7 @@ status_t build_to_xml_event_CryptoRequest(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -589,7 +589,7 @@ status_t build_to_xml_event_CryptoRequest(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -622,7 +622,7 @@ status_t build_to_xml_event_CryptoResponse(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -644,7 +644,7 @@ status_t build_to_xml_event_CryptoBase64Request(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -666,7 +666,7 @@ status_t build_to_xml_event_CryptoBase64Response(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -688,7 +688,7 @@ status_t build_to_xml_event_DHCPParameter(
       "TFTPServer",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -699,7 +699,7 @@ status_t build_to_xml_event_DHCPParameter(
       "BootFile",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -710,7 +710,7 @@ status_t build_to_xml_event_DHCPParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -740,7 +740,7 @@ status_t build_to_xml_event_FDBParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -759,7 +759,7 @@ status_t build_to_xml_event_FDBParameter(
       "Port",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -786,7 +786,7 @@ status_t build_to_xml_event_ServiceInitialized(
       "ServiceType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -797,7 +797,7 @@ status_t build_to_xml_event_ServiceInitialized(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -827,7 +827,7 @@ status_t build_to_xml_event_EthernetLayer(
       "DstMACAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -838,7 +838,7 @@ status_t build_to_xml_event_EthernetLayer(
       "DstMACAddrEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -849,7 +849,7 @@ status_t build_to_xml_event_EthernetLayer(
       "SrcMACAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -860,7 +860,7 @@ status_t build_to_xml_event_EthernetLayer(
       "SrcMACAddrEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -871,7 +871,7 @@ status_t build_to_xml_event_EthernetLayer(
       "EtherType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -917,7 +917,7 @@ status_t build_to_xml_event_EthernetLayer(
       "EtherTypeEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -939,7 +939,7 @@ status_t build_to_xml_event_LLCLayer(
       "DSAP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -950,7 +950,7 @@ status_t build_to_xml_event_LLCLayer(
       "DSAPEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -961,7 +961,7 @@ status_t build_to_xml_event_LLCLayer(
       "IG",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -972,7 +972,7 @@ status_t build_to_xml_event_LLCLayer(
       "IGEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -983,7 +983,7 @@ status_t build_to_xml_event_LLCLayer(
       "SSAP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -994,7 +994,7 @@ status_t build_to_xml_event_LLCLayer(
       "SSAPEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1005,7 +1005,7 @@ status_t build_to_xml_event_LLCLayer(
       "CR",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1016,7 +1016,7 @@ status_t build_to_xml_event_LLCLayer(
       "CREnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1027,7 +1027,7 @@ status_t build_to_xml_event_LLCLayer(
       "Control",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1038,7 +1038,7 @@ status_t build_to_xml_event_LLCLayer(
       "ControlEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1060,7 +1060,7 @@ status_t build_to_xml_event_IPLayer(
       "IPProtocol",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1091,7 +1091,7 @@ status_t build_to_xml_event_IPLayer(
       "IPProtocolEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1102,7 +1102,7 @@ status_t build_to_xml_event_IPLayer(
       "SrcIPAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1113,7 +1113,7 @@ status_t build_to_xml_event_IPLayer(
       "SrcIPAddrEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1124,7 +1124,7 @@ status_t build_to_xml_event_IPLayer(
       "DstIPAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1135,7 +1135,7 @@ status_t build_to_xml_event_IPLayer(
       "DstIPAddrEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1157,7 +1157,7 @@ status_t build_to_xml_event_Layer4Port(
       "L4SrcPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1168,7 +1168,7 @@ status_t build_to_xml_event_Layer4Port(
       "L4SrcPortEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1179,7 +1179,7 @@ status_t build_to_xml_event_Layer4Port(
       "L4DstPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1190,7 +1190,7 @@ status_t build_to_xml_event_Layer4Port(
       "L4DstPortEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1212,7 +1212,7 @@ status_t build_to_xml_event_LinkParameter(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1228,7 +1228,7 @@ status_t build_to_xml_event_LinkParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1258,7 +1258,7 @@ status_t build_to_xml_event_LoginParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1295,7 +1295,7 @@ status_t build_to_xml_event_LoginParameter(
       "Result",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1323,7 +1323,7 @@ status_t build_to_xml_event_LoginParameter(
       "InterfaceName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1354,7 +1354,7 @@ status_t build_to_xml_event_LoginParameter(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1365,7 +1365,7 @@ status_t build_to_xml_event_LoginParameter(
       "Privilege",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1376,7 +1376,7 @@ status_t build_to_xml_event_LoginParameter(
       "Token",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1387,7 +1387,7 @@ status_t build_to_xml_event_LoginParameter(
       "AccessToken",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1398,7 +1398,7 @@ status_t build_to_xml_event_LoginParameter(
       "ErrCode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1409,7 +1409,7 @@ status_t build_to_xml_event_LoginParameter(
       "IPAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1431,7 +1431,7 @@ status_t build_to_xml_event_MaintenanceParameter(
       "Action",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1470,7 +1470,7 @@ status_t build_to_xml_event_MulticastParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1486,7 +1486,7 @@ status_t build_to_xml_event_MulticastParameter(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1497,7 +1497,7 @@ status_t build_to_xml_event_MulticastParameter(
       "Addr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1519,7 +1519,7 @@ status_t build_to_xml_event_PacketProbe(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1530,7 +1530,7 @@ status_t build_to_xml_event_PacketProbe(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1547,7 +1547,7 @@ status_t build_to_xml_event_PacketProbe(
       "IsPhysicalPort",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1569,7 +1569,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "Ethernet",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1585,7 +1585,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "EthernetEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1596,7 +1596,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "LLC",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1612,7 +1612,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "LLCEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1623,7 +1623,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "IP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1639,7 +1639,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "IPEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1650,7 +1650,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "L4",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1666,7 +1666,7 @@ status_t build_to_xml_event_PacketProbeEntry(
       "L4Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1688,7 +1688,7 @@ status_t build_to_xml_event_PacketInfo(
       "Identify",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1704,7 +1704,7 @@ status_t build_to_xml_event_PacketInfo(
       "Forward",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1715,7 +1715,7 @@ status_t build_to_xml_event_PacketInfo(
       "VlanTagged",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1726,7 +1726,7 @@ status_t build_to_xml_event_PacketInfo(
       "EgressFilter",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1737,7 +1737,7 @@ status_t build_to_xml_event_PacketInfo(
       "ExcludeIdentify",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1764,7 +1764,7 @@ status_t build_to_xml_event_PacketContent(
       "Info",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1780,7 +1780,7 @@ status_t build_to_xml_event_PacketContent(
       "Buf",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1802,7 +1802,7 @@ status_t build_to_xml_event_PoEParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1830,7 +1830,7 @@ status_t build_to_xml_event_PoEParameter(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1852,7 +1852,7 @@ status_t build_to_xml_event_PortParameter(
       "DeviceID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1863,7 +1863,7 @@ status_t build_to_xml_event_PortParameter(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1874,7 +1874,7 @@ status_t build_to_xml_event_PortParameter(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1896,7 +1896,7 @@ status_t build_to_xml_event_PortAuthParameter(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1912,7 +1912,7 @@ status_t build_to_xml_event_PortAuthParameter(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1923,7 +1923,7 @@ status_t build_to_xml_event_PortAuthParameter(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1945,7 +1945,7 @@ status_t build_to_xml_event_SFPInfo(
       "DeviceID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1956,7 +1956,7 @@ status_t build_to_xml_event_SFPInfo(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1967,7 +1967,7 @@ status_t build_to_xml_event_SFPInfo(
       "Location",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1978,7 +1978,7 @@ status_t build_to_xml_event_SFPInfo(
       "Status",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1989,7 +1989,7 @@ status_t build_to_xml_event_SFPInfo(
         "Status_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2018,7 +2018,7 @@ status_t build_to_xml_event_SFPInfo(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2046,7 +2046,7 @@ status_t build_to_xml_event_SFPInfo(
       "Connector",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2077,7 +2077,7 @@ status_t build_to_xml_event_SFPInfo(
       "Wavelength",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2088,7 +2088,7 @@ status_t build_to_xml_event_SFPInfo(
       "TxTechnology",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2099,7 +2099,7 @@ status_t build_to_xml_event_SFPInfo(
       "RxTechnology",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2110,7 +2110,7 @@ status_t build_to_xml_event_SFPInfo(
       "NominalBitrate",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2121,7 +2121,7 @@ status_t build_to_xml_event_SFPInfo(
       "Manufacturer",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2132,7 +2132,7 @@ status_t build_to_xml_event_SFPInfo(
       "PartNumber",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2143,7 +2143,7 @@ status_t build_to_xml_event_SFPInfo(
       "Revision",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2154,7 +2154,7 @@ status_t build_to_xml_event_SFPInfo(
       "SerialNumber",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2165,7 +2165,7 @@ status_t build_to_xml_event_SFPInfo(
       "MfgDateCode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2176,7 +2176,7 @@ status_t build_to_xml_event_SFPInfo(
       "TxPower",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2187,7 +2187,7 @@ status_t build_to_xml_event_SFPInfo(
       "RxPower",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2198,7 +2198,7 @@ status_t build_to_xml_event_SFPInfo(
       "Temperature",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2209,7 +2209,7 @@ status_t build_to_xml_event_SFPInfo(
       "MaxLength_9Um",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2220,7 +2220,7 @@ status_t build_to_xml_event_SFPInfo(
       "MaxLength_50Um",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2231,7 +2231,7 @@ status_t build_to_xml_event_SFPInfo(
       "MaxLength_62Um",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2242,7 +2242,7 @@ status_t build_to_xml_event_SFPInfo(
       "MaxLengthCopper",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2253,7 +2253,7 @@ status_t build_to_xml_event_SFPInfo(
       "TuningRange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2264,7 +2264,7 @@ status_t build_to_xml_event_SFPInfo(
       "PowerConsumption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2275,7 +2275,7 @@ status_t build_to_xml_event_SFPInfo(
       "AdditionalInformation",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2286,7 +2286,7 @@ status_t build_to_xml_event_SFPInfo(
         "AdditionalInformation_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2298,7 +2298,7 @@ status_t build_to_xml_event_SFPInfo(
       "Speed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2355,7 +2355,7 @@ status_t build_to_xml_event_SFPParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2380,7 +2380,7 @@ status_t build_to_xml_event_SFPParameter(
       "DeviceID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2391,7 +2391,7 @@ status_t build_to_xml_event_SFPParameter(
       "PortNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2402,7 +2402,7 @@ status_t build_to_xml_event_SFPParameter(
       "Info",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2429,7 +2429,7 @@ status_t build_to_xml_event_StormcontrolParameter(
       "ActionOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2451,7 +2451,7 @@ status_t build_to_xml_event_StormcontrolParameter(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2478,7 +2478,7 @@ status_t build_to_xml_event_BootParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2503,7 +2503,7 @@ status_t build_to_xml_event_BootParameter(
       "Version",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2525,7 +2525,7 @@ status_t build_to_xml_event_NetworkParameter(
       "Inf",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2541,7 +2541,7 @@ status_t build_to_xml_event_NetworkParameter(
       "IPAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2552,7 +2552,7 @@ status_t build_to_xml_event_NetworkParameter(
       "SubnetMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2563,7 +2563,7 @@ status_t build_to_xml_event_NetworkParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2596,7 +2596,7 @@ status_t build_to_xml_event_TimeRangeParameter(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2607,7 +2607,7 @@ status_t build_to_xml_event_TimeRangeParameter(
       "IsActive",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2629,7 +2629,7 @@ status_t build_to_xml_event_UdldParameter(
       "ActionOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2647,7 +2647,7 @@ status_t build_to_xml_event_UdldParameter(
           "PortShutdown",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -2676,7 +2676,7 @@ status_t build_to_xml_event_UdldActionPortShutdown(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2703,7 +2703,7 @@ status_t build_to_xml_event_VLANParameter(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2725,7 +2725,7 @@ status_t build_to_xml_event_VLANParameter(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2736,7 +2736,7 @@ status_t build_to_xml_event_VLANParameter(
       "DeviceID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2747,7 +2747,7 @@ status_t build_to_xml_event_VLANParameter(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2774,7 +2774,7 @@ status_t build_to_xml_event_ManagmentVLANPriority(
       "Priority",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2796,7 +2796,7 @@ status_t build_to_xml_event_InternalTypeUnion(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2807,7 +2807,7 @@ status_t build_to_xml_event_InternalTypeUnion(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -2943,7 +2943,7 @@ status_t build_to_xml_event_Internal(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3067,7 +3067,7 @@ status_t build_to_xml_event_Internal(
       "Message",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3078,7 +3078,7 @@ status_t build_to_xml_event_Internal(
       "Ts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3094,7 +3094,7 @@ status_t build_to_xml_event_Internal(
       "LoggingType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3307,7 +3307,7 @@ status_t build_to_xml_event_Internal(
           "Init",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3325,7 +3325,7 @@ status_t build_to_xml_event_Internal(
           "Vlan",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3343,7 +3343,7 @@ status_t build_to_xml_event_Internal(
           "DHCP",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3361,7 +3361,7 @@ status_t build_to_xml_event_Internal(
           "Login",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3379,7 +3379,7 @@ status_t build_to_xml_event_Internal(
           "Link",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3397,7 +3397,7 @@ status_t build_to_xml_event_Internal(
           "Aggr",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3415,7 +3415,7 @@ status_t build_to_xml_event_Internal(
           "NTP",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3436,7 +3436,7 @@ status_t build_to_xml_event_Internal(
           "Boot",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3454,7 +3454,7 @@ status_t build_to_xml_event_Internal(
           "Network",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3472,7 +3472,7 @@ status_t build_to_xml_event_Internal(
           "Maintenance",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3490,7 +3490,7 @@ status_t build_to_xml_event_Internal(
           "SFP",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3508,7 +3508,7 @@ status_t build_to_xml_event_Internal(
           "Port",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3526,7 +3526,7 @@ status_t build_to_xml_event_Internal(
           "PortAuth",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3544,7 +3544,7 @@ status_t build_to_xml_event_Internal(
           "FDB",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3562,7 +3562,7 @@ status_t build_to_xml_event_Internal(
           "AU",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3580,7 +3580,7 @@ status_t build_to_xml_event_Internal(
           "PoE",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3598,7 +3598,7 @@ status_t build_to_xml_event_Internal(
           "ACL",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3616,7 +3616,7 @@ status_t build_to_xml_event_Internal(
           "TimeRange",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3634,7 +3634,7 @@ status_t build_to_xml_event_Internal(
           "Button",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3652,7 +3652,7 @@ status_t build_to_xml_event_Internal(
           "Stormcontrol",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3670,7 +3670,7 @@ status_t build_to_xml_event_Internal(
           "Multicast",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3688,7 +3688,7 @@ status_t build_to_xml_event_Internal(
           "Udld",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3717,7 +3717,7 @@ status_t build_to_xml_event_TargetLogTypeUnion(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3728,7 +3728,7 @@ status_t build_to_xml_event_TargetLogTypeUnion(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -3780,7 +3780,7 @@ status_t build_to_xml_event_TargetSNMP(
       "HostAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3791,7 +3791,7 @@ status_t build_to_xml_event_TargetSNMP(
       "SnmpCommunity",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3802,7 +3802,7 @@ status_t build_to_xml_event_TargetSNMP(
       "SnmpV3Username",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3835,7 +3835,7 @@ status_t build_to_xml_event_TargetSysLog(
       "HostAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3857,7 +3857,7 @@ status_t build_to_xml_event_TargetLogOptionalParameter(
       "Option",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3899,7 +3899,7 @@ status_t build_to_xml_event_TargetLogOptionalParameter(
           "Snmp",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3917,7 +3917,7 @@ status_t build_to_xml_event_TargetLogOptionalParameter(
           "Cli",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3935,7 +3935,7 @@ status_t build_to_xml_event_TargetLogOptionalParameter(
           "SysLog",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -3964,7 +3964,7 @@ status_t build_to_xml_event_TargetLog(
       "LogID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3975,7 +3975,7 @@ status_t build_to_xml_event_TargetLog(
       "Ts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3991,7 +3991,7 @@ status_t build_to_xml_event_TargetLog(
       "LoggingType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4202,7 +4202,7 @@ status_t build_to_xml_event_TargetLog(
       "LoggingSeverityType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4242,7 +4242,7 @@ status_t build_to_xml_event_TargetLog(
       "Message",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4253,7 +4253,7 @@ status_t build_to_xml_event_TargetLog(
       "Param",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4269,7 +4269,7 @@ status_t build_to_xml_event_TargetLog(
       "Internal",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

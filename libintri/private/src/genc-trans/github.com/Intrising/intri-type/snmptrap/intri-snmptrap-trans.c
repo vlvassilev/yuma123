@@ -48,7 +48,7 @@ status_t build_to_xml_snmptrap_SNMPTrapCounter(
       "ErrorCounts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -59,7 +59,7 @@ status_t build_to_xml_snmptrap_SNMPTrapCounter(
       "TrapCounts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

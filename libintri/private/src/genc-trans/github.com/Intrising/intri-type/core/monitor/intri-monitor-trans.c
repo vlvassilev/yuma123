@@ -48,7 +48,7 @@ status_t build_to_xml_monitor_Config(
       "DeviceLimitConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -64,7 +64,7 @@ status_t build_to_xml_monitor_Config(
       "SystemLimitConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -91,7 +91,7 @@ status_t build_to_xml_monitor_DeviceLimitConfigEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -143,7 +143,7 @@ status_t build_to_xml_monitor_DeviceLimitConfigEntry(
       "LimitOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -165,7 +165,7 @@ status_t build_to_xml_monitor_DeviceLimitConfigEntry(
       "Boundary",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -181,7 +181,7 @@ status_t build_to_xml_monitor_DeviceLimitConfigEntry(
       "ValueOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -206,7 +206,7 @@ status_t build_to_xml_monitor_DeviceLimitConfigEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -233,7 +233,7 @@ status_t build_to_xml_monitor_DeviceLimitConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -244,7 +244,7 @@ status_t build_to_xml_monitor_DeviceLimitConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -272,7 +272,7 @@ status_t build_to_xml_monitor_SystemLimitConfigEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -291,7 +291,7 @@ status_t build_to_xml_monitor_SystemLimitConfigEntry(
       "LimitOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -313,7 +313,7 @@ status_t build_to_xml_monitor_SystemLimitConfigEntry(
       "Boundary",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -329,7 +329,7 @@ status_t build_to_xml_monitor_SystemLimitConfigEntry(
       "ValueOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -354,7 +354,7 @@ status_t build_to_xml_monitor_SystemLimitConfigEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -381,7 +381,7 @@ status_t build_to_xml_monitor_SystemLimitConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -392,7 +392,7 @@ status_t build_to_xml_monitor_SystemLimitConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -420,7 +420,7 @@ status_t build_to_xml_monitor_RangeValue(
       "IntMin",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -431,7 +431,7 @@ status_t build_to_xml_monitor_RangeValue(
       "IntMax",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -442,7 +442,7 @@ status_t build_to_xml_monitor_RangeValue(
       "FloatMin",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -453,7 +453,7 @@ status_t build_to_xml_monitor_RangeValue(
       "FloatMax",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -464,7 +464,7 @@ status_t build_to_xml_monitor_RangeValue(
       "Int64Min",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -475,7 +475,7 @@ status_t build_to_xml_monitor_RangeValue(
       "Int64Max",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -486,7 +486,7 @@ status_t build_to_xml_monitor_RangeValue(
       "Float64Min",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -497,7 +497,7 @@ status_t build_to_xml_monitor_RangeValue(
       "Float64Max",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -519,7 +519,7 @@ status_t build_to_xml_monitor_DeviceScorllBarValueEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -571,7 +571,7 @@ status_t build_to_xml_monitor_DeviceScorllBarValueEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -598,7 +598,7 @@ status_t build_to_xml_monitor_DeviceScorllBarValue(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -609,7 +609,7 @@ status_t build_to_xml_monitor_DeviceScorllBarValue(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -637,7 +637,7 @@ status_t build_to_xml_monitor_SystemScorllBarValueEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -656,7 +656,7 @@ status_t build_to_xml_monitor_SystemScorllBarValueEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -683,7 +683,7 @@ status_t build_to_xml_monitor_SystemScorllBarValue(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -694,7 +694,7 @@ status_t build_to_xml_monitor_SystemScorllBarValue(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -722,7 +722,7 @@ status_t build_to_xml_monitor_Status(
       "DeviceStatus",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -738,7 +738,7 @@ status_t build_to_xml_monitor_Status(
       "SystemStatus",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -754,7 +754,7 @@ status_t build_to_xml_monitor_Status(
       "LedStatus",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -781,7 +781,7 @@ status_t build_to_xml_monitor_DeviceStatusEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -833,7 +833,7 @@ status_t build_to_xml_monitor_DeviceStatusEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -849,7 +849,7 @@ status_t build_to_xml_monitor_DeviceStatusEntry(
       "LoggingOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1071,7 +1071,7 @@ status_t build_to_xml_monitor_DeviceStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1082,7 +1082,7 @@ status_t build_to_xml_monitor_DeviceStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1110,7 +1110,7 @@ status_t build_to_xml_monitor_SystemStatusEntry(
       "MonitorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1129,7 +1129,7 @@ status_t build_to_xml_monitor_SystemStatusEntry(
       "Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1145,7 +1145,7 @@ status_t build_to_xml_monitor_SystemStatusEntry(
       "LoggingOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1367,7 +1367,7 @@ status_t build_to_xml_monitor_SystemStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1378,7 +1378,7 @@ status_t build_to_xml_monitor_SystemStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1406,7 +1406,7 @@ status_t build_to_xml_monitor_DisplayValue(
       "ValueUnit",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1417,7 +1417,7 @@ status_t build_to_xml_monitor_DisplayValue(
       "IntValue",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1428,7 +1428,7 @@ status_t build_to_xml_monitor_DisplayValue(
       "FloatValue",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1439,7 +1439,7 @@ status_t build_to_xml_monitor_DisplayValue(
       "Int64Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1450,7 +1450,7 @@ status_t build_to_xml_monitor_DisplayValue(
       "Float64Value",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1472,7 +1472,7 @@ status_t build_to_xml_monitor_LEDStatus(
       "SystemList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1483,7 +1483,7 @@ status_t build_to_xml_monitor_LEDStatus(
         "SystemList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1500,7 +1500,7 @@ status_t build_to_xml_monitor_LEDStatus(
       "PortList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1511,7 +1511,7 @@ status_t build_to_xml_monitor_LEDStatus(
         "PortList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1539,7 +1539,7 @@ status_t build_to_xml_monitor_SystemLEDStatusEntry(
       "LedType",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1567,7 +1567,7 @@ status_t build_to_xml_monitor_SystemLEDStatusEntry(
       "LedState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1594,7 +1594,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1610,7 +1610,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "IsSfp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1621,7 +1621,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "LinkLedState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1637,7 +1637,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "IsSupportPoELed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1648,7 +1648,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "PoELedState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1664,7 +1664,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "IsSupportSpeedLed",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1675,7 +1675,7 @@ status_t build_to_xml_monitor_PortLEDStatusEntry(
       "SpeedLedState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1702,7 +1702,7 @@ status_t build_to_xml_monitor_LEDStateEntry(
       "StateOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1724,7 +1724,7 @@ status_t build_to_xml_monitor_LEDStateEntry(
       "ColorOption",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1746,7 +1746,7 @@ status_t build_to_xml_monitor_LEDStateEntry(
       "BlinkingIntervalMs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

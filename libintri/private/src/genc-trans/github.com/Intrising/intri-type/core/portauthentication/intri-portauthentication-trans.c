@@ -49,7 +49,7 @@ status_t build_to_xml_portauthentication_Config(
       "SystemConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -65,7 +65,7 @@ status_t build_to_xml_portauthentication_Config(
       "PortConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -81,7 +81,7 @@ status_t build_to_xml_portauthentication_Config(
       "AuthorizedMACs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -108,7 +108,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -119,7 +119,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -130,7 +130,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
       "PermittedPortList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -141,7 +141,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
         "PermittedPortList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -158,7 +158,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
       "TreatAsVendorMAC",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -180,7 +180,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACs(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -191,7 +191,7 @@ status_t build_to_xml_portauthentication_AuthorizedMACs(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -219,7 +219,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "PortAccessControlEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -230,7 +230,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "ReauthenticationPeriod",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -241,7 +241,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "NASIdentifier",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -252,7 +252,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "MACSeparatorChar",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -263,7 +263,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "MACSpelling",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -282,7 +282,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "MACPasswordSource",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -301,7 +301,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "MACPasswordString",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -312,7 +312,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "PrimaryAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -323,7 +323,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "PrimaryAcctServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -334,7 +334,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "FallbackAuthServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -345,7 +345,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "FallbackAcctServerName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -356,7 +356,7 @@ status_t build_to_xml_portauthentication_SystemConfig(
       "ServerDownTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -378,7 +378,7 @@ status_t build_to_xml_portauthentication_PortConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -389,7 +389,7 @@ status_t build_to_xml_portauthentication_PortConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -417,7 +417,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -433,7 +433,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "AuthorizedMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -470,7 +470,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "UnAuthorizedMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -492,7 +492,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "AuthFailRetryInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -503,7 +503,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "LimitedNumberOfMACs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -514,7 +514,7 @@ status_t build_to_xml_portauthentication_PortConfigEntry(
       "MACTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -544,7 +544,7 @@ status_t build_to_xml_portauthentication_PortStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -555,7 +555,7 @@ status_t build_to_xml_portauthentication_PortStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -583,7 +583,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -599,7 +599,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "AuthorizationState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -630,7 +630,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "AuthorizationMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -667,7 +667,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "LastStateChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -678,7 +678,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "NumberOfMACsToLearn",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -689,7 +689,7 @@ status_t build_to_xml_portauthentication_PortStatusEntry(
       "NumberOfLearnedMACs",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -711,7 +711,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -722,7 +722,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -750,7 +750,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -766,7 +766,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "AuthorizationState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -797,7 +797,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "UserMAC",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -808,7 +808,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "UserName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -819,7 +819,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "IdleTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -830,7 +830,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "SessionTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -841,7 +841,7 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
       "LastStateChange",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -863,7 +863,7 @@ status_t build_to_xml_portauthentication_UserStatus(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -874,7 +874,7 @@ status_t build_to_xml_portauthentication_UserStatus(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -902,7 +902,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "EntryState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -924,7 +924,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "AuthorizationState",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -955,7 +955,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "AuthorizationMode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -992,7 +992,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1008,7 +1008,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "UserMAC",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1019,7 +1019,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "UserName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1030,7 +1030,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1041,7 +1041,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "IdleTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1052,7 +1052,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "SessionTimeout",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1063,7 +1063,7 @@ status_t build_to_xml_portauthentication_UserStatusEntry(
       "LoginTimeStamp",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1085,7 +1085,7 @@ status_t build_to_xml_portauthentication_LearnMACNowEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1101,7 +1101,7 @@ status_t build_to_xml_portauthentication_LearnMACNowEntry(
       "Amount",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1123,7 +1123,7 @@ status_t build_to_xml_portauthentication_UnauthorizeMACEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1139,7 +1139,7 @@ status_t build_to_xml_portauthentication_UnauthorizeMACEntry(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

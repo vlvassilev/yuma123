@@ -47,7 +47,7 @@ status_t build_to_xml_vlan_MACBasedGroupEntry(
       "MACAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -58,7 +58,7 @@ status_t build_to_xml_vlan_MACBasedGroupEntry(
       "MACAddressMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -69,7 +69,7 @@ status_t build_to_xml_vlan_MACBasedGroupEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -91,7 +91,7 @@ status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -102,7 +102,7 @@ status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -113,7 +113,7 @@ status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
       "IdentifyList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -124,7 +124,7 @@ status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
         "IdentifyList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -152,7 +152,7 @@ status_t build_to_xml_vlan_MACBasedConfig(
       "GroupList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -163,7 +163,7 @@ status_t build_to_xml_vlan_MACBasedConfig(
         "GroupList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -180,7 +180,7 @@ status_t build_to_xml_vlan_MACBasedConfig(
       "GroupMemberList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -191,7 +191,7 @@ status_t build_to_xml_vlan_MACBasedConfig(
         "GroupMemberList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -219,7 +219,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -230,7 +230,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupEntry(
       "Encapsulation",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -252,7 +252,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupEntry(
       "Protocol",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -274,7 +274,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -285,7 +285,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -296,7 +296,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
       "IdentifyList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -307,7 +307,7 @@ status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
         "IdentifyList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -335,7 +335,7 @@ status_t build_to_xml_vlan_ProtocolBasedConfig(
       "GroupList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -346,7 +346,7 @@ status_t build_to_xml_vlan_ProtocolBasedConfig(
         "GroupList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -363,7 +363,7 @@ status_t build_to_xml_vlan_ProtocolBasedConfig(
       "GroupMemberList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -374,7 +374,7 @@ status_t build_to_xml_vlan_ProtocolBasedConfig(
         "GroupMemberList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -402,7 +402,7 @@ status_t build_to_xml_vlan_SelectiveQinQConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -413,7 +413,7 @@ status_t build_to_xml_vlan_SelectiveQinQConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -441,7 +441,7 @@ status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry(
       "SourceVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -452,7 +452,7 @@ status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry(
       "TranslatedVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -474,7 +474,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupEntry(
       "IPAddress",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -485,7 +485,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupEntry(
       "IPAddressMask",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -496,7 +496,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupEntry(
       "IPVersion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -515,7 +515,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -537,7 +537,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -548,7 +548,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
       "GroupID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -559,7 +559,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
       "IdentifyList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -570,7 +570,7 @@ status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
         "IdentifyList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -598,7 +598,7 @@ status_t build_to_xml_vlan_SubnetBasedConfig(
       "GroupList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -609,7 +609,7 @@ status_t build_to_xml_vlan_SubnetBasedConfig(
         "GroupList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -626,7 +626,7 @@ status_t build_to_xml_vlan_SubnetBasedConfig(
       "GroupMemberList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -637,7 +637,7 @@ status_t build_to_xml_vlan_SubnetBasedConfig(
         "GroupMemberList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -665,7 +665,7 @@ status_t build_to_xml_vlan_MappingPort(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -676,7 +676,7 @@ status_t build_to_xml_vlan_MappingPort(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -704,7 +704,7 @@ status_t build_to_xml_vlan_MappingPortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -720,7 +720,7 @@ status_t build_to_xml_vlan_MappingPortEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -742,7 +742,7 @@ status_t build_to_xml_vlan_MappingConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -753,7 +753,7 @@ status_t build_to_xml_vlan_MappingConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -770,7 +770,7 @@ status_t build_to_xml_vlan_MappingConfig(
       "PortList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -781,7 +781,7 @@ status_t build_to_xml_vlan_MappingConfig(
         "PortList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -809,7 +809,7 @@ status_t build_to_xml_vlan_MappingEntry(
       "SourceVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -820,7 +820,7 @@ status_t build_to_xml_vlan_MappingEntry(
       "TranslatedVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -842,7 +842,7 @@ status_t build_to_xml_vlan_Config(
       "Management",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -858,7 +858,7 @@ status_t build_to_xml_vlan_Config(
       "Voice",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -874,7 +874,7 @@ status_t build_to_xml_vlan_Config(
       "Ports",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -890,7 +890,7 @@ status_t build_to_xml_vlan_Config(
       "Filters",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -906,7 +906,7 @@ status_t build_to_xml_vlan_Config(
       "MACBased",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -922,7 +922,7 @@ status_t build_to_xml_vlan_Config(
       "SubnetBased",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -938,7 +938,7 @@ status_t build_to_xml_vlan_Config(
       "ProtocolBased",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -954,7 +954,7 @@ status_t build_to_xml_vlan_Config(
       "Translation",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -970,7 +970,7 @@ status_t build_to_xml_vlan_Config(
       "SelectiveQinQ",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -997,7 +997,7 @@ status_t build_to_xml_vlan_ManagementConfig(
       "ManagementVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1019,7 +1019,7 @@ status_t build_to_xml_vlan_VoiceConfig(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1030,7 +1030,7 @@ status_t build_to_xml_vlan_VoiceConfig(
       "Prio",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1041,7 +1041,7 @@ status_t build_to_xml_vlan_VoiceConfig(
       "SignalPrio",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1052,7 +1052,7 @@ status_t build_to_xml_vlan_VoiceConfig(
       "DSCP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1063,7 +1063,7 @@ status_t build_to_xml_vlan_VoiceConfig(
       "SignalDSCP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1085,7 +1085,7 @@ status_t build_to_xml_vlan_PortsConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1096,7 +1096,7 @@ status_t build_to_xml_vlan_PortsConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1124,7 +1124,7 @@ status_t build_to_xml_vlan_PortEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1140,7 +1140,7 @@ status_t build_to_xml_vlan_PortEntry(
       "Mode",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1168,7 +1168,7 @@ status_t build_to_xml_vlan_PortEntry(
       "DefaultVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1179,7 +1179,7 @@ status_t build_to_xml_vlan_PortEntry(
       "UnauthorizedVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1190,7 +1190,7 @@ status_t build_to_xml_vlan_PortEntry(
       "FallBackVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1201,7 +1201,7 @@ status_t build_to_xml_vlan_PortEntry(
       "QinQEthertype",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1223,7 +1223,7 @@ status_t build_to_xml_vlan_PortEntry(
       "AcceptableFrametype",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1245,7 +1245,7 @@ status_t build_to_xml_vlan_PortEntry(
       "TaggedList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1256,7 +1256,7 @@ status_t build_to_xml_vlan_PortEntry(
         "TaggedList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1268,7 +1268,7 @@ status_t build_to_xml_vlan_PortEntry(
       "UntaggedList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1279,7 +1279,7 @@ status_t build_to_xml_vlan_PortEntry(
         "UntaggedList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1302,7 +1302,7 @@ status_t build_to_xml_vlan_FiltersConfig(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1313,7 +1313,7 @@ status_t build_to_xml_vlan_FiltersConfig(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1341,7 +1341,7 @@ status_t build_to_xml_vlan_FilterEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1352,7 +1352,7 @@ status_t build_to_xml_vlan_FilterEntry(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1363,7 +1363,7 @@ status_t build_to_xml_vlan_FilterEntry(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1385,7 +1385,7 @@ status_t build_to_xml_vlan_Used(
       "Used",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1427,7 +1427,7 @@ status_t build_to_xml_vlan_VlanPortVlanEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1443,7 +1443,7 @@ status_t build_to_xml_vlan_VlanPortVlanEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1454,7 +1454,7 @@ status_t build_to_xml_vlan_VlanPortVlanEntry(
       "Used",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1496,7 +1496,7 @@ status_t build_to_xml_vlan_DefaultPortVlanEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1512,7 +1512,7 @@ status_t build_to_xml_vlan_DefaultPortVlanEntry(
       "DefaultVlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1523,7 +1523,7 @@ status_t build_to_xml_vlan_DefaultPortVlanEntry(
       "LastUpdateMethod",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1565,7 +1565,7 @@ status_t build_to_xml_vlan_StatusEntry(
       "VlanID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1576,7 +1576,7 @@ status_t build_to_xml_vlan_StatusEntry(
       "TaggedList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1587,7 +1587,7 @@ status_t build_to_xml_vlan_StatusEntry(
         "TaggedList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1604,7 +1604,7 @@ status_t build_to_xml_vlan_StatusEntry(
       "UntaggedList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1615,7 +1615,7 @@ status_t build_to_xml_vlan_StatusEntry(
         "UntaggedList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1643,7 +1643,7 @@ status_t build_to_xml_vlan_StatusMapping(
       "Mapping",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1655,7 +1655,7 @@ status_t build_to_xml_vlan_StatusMapping(
         "Mapping_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1664,7 +1664,7 @@ status_t build_to_xml_vlan_StatusMapping(
         "Key",
         &res);
     if (kvval != NULL) {
-      val_add_child_sorted(kvval, listval);
+      val_add_child(kvval, listval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1675,7 +1675,7 @@ status_t build_to_xml_vlan_StatusMapping(
         "Value",
         &res);
     if (kvval != NULL) {
-      val_add_child_sorted(kvval, listval);
+      val_add_child(kvval, listval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }

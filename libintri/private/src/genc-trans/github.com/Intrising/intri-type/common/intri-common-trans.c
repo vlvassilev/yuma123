@@ -45,7 +45,7 @@ status_t build_to_xml_common_Path(
       "Path",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -67,7 +67,7 @@ status_t build_to_xml_common_ExportPathRequest(
       "Path",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -78,7 +78,7 @@ status_t build_to_xml_common_ExportPathRequest(
       "FTPSEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -100,7 +100,7 @@ status_t build_to_xml_common_ImportPathRequest(
       "Path",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -111,7 +111,7 @@ status_t build_to_xml_common_ImportPathRequest(
       "FTPSEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -122,7 +122,7 @@ status_t build_to_xml_common_ImportPathRequest(
       "RebootAfterAction",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -144,7 +144,7 @@ status_t build_to_xml_common_Enabled(
       "IsEnabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -166,7 +166,7 @@ status_t build_to_xml_common_MACAddress(
       "MACAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -188,7 +188,7 @@ status_t build_to_xml_common_IPAddress(
       "IPAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -210,7 +210,7 @@ status_t build_to_xml_common_IPv4List(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -221,7 +221,7 @@ status_t build_to_xml_common_IPv4List(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -244,7 +244,7 @@ status_t build_to_xml_common_IPv6Entry(
       "Type",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -269,7 +269,7 @@ status_t build_to_xml_common_IPv6Entry(
       "IPAddr",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -291,7 +291,7 @@ status_t build_to_xml_common_IPv6List(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -302,7 +302,7 @@ status_t build_to_xml_common_IPv6List(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -330,7 +330,7 @@ status_t build_to_xml_common_Name(
       "Name",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -352,7 +352,7 @@ status_t build_to_xml_common_NameList(
       "NameList",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -363,7 +363,7 @@ status_t build_to_xml_common_NameList(
         "NameList_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -386,7 +386,7 @@ status_t build_to_xml_common_Reply(
       "Reply",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -408,7 +408,7 @@ status_t build_to_xml_common_Confirm(
       "Confirm",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -430,7 +430,7 @@ status_t build_to_xml_common_DateTime(
       "Ts",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -452,7 +452,7 @@ status_t build_to_xml_common_AllStatus(
       "Status",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -474,7 +474,7 @@ status_t build_to_xml_common_State(
       "State",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -496,56 +496,12 @@ status_t build_to_xml_common_Index(
       "Index",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Index;
-  return res;
-}
-status_t build_to_xml_common_GRPCErrorDetail(
-    val_value_t *parentval,
-    struct commonpb_GRPCErrorDetail *entry) {
-  status_t res = NO_ERR;
-  val_value_t *childval = NULL;
-  const xmlChar *enum_str = EMPTY_STRING;
-  if (entry == NULL) {
-    return res;
-  }
-  childval = agt_make_object(
-      parentval->obj,
-      "FieldName",
-      &res);
-  if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* string */
-  VAL_STRING(childval) = entry->FieldName;
-  childval = agt_make_object(
-      parentval->obj,
-      "FieldValue",
-      &res);
-  if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* string */
-  VAL_STRING(childval) = entry->FieldValue;
-  childval = agt_make_object(
-      parentval->obj,
-      "Description",
-      &res);
-  if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* string */
-  VAL_STRING(childval) = entry->Description;
   return res;
 }
 
@@ -845,34 +801,6 @@ status_t build_to_priv_common_Index(
   if (childval != NULL && childval->res == NO_ERR) {
     /* int32 */
     entry->Index = VAL_INT(childval);
-  }
-  return res;
-}
-status_t build_to_priv_common_GRPCErrorDetail(
-    val_value_t *parentval,
-    struct commonpb_GRPCErrorDetail *entry) {
-  status_t res = NO_ERR;
-  val_value_t *childval = NULL;
-  childval = val_first_child_name(
-      parentval,
-      "FieldName");
-  if (childval != NULL && childval->res == NO_ERR) {
-    /* string */
-    entry->FieldName = VAL_STRING(childval);
-  }
-  childval = val_first_child_name(
-      parentval,
-      "FieldValue");
-  if (childval != NULL && childval->res == NO_ERR) {
-    /* string */
-    entry->FieldValue = VAL_STRING(childval);
-  }
-  childval = val_first_child_name(
-      parentval,
-      "Description");
-  if (childval != NULL && childval->res == NO_ERR) {
-    /* string */
-    entry->Description = VAL_STRING(childval);
   }
   return res;
 }

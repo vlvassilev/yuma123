@@ -72,9 +72,6 @@ extern status_t build_to_xml_common_State(
 extern status_t build_to_xml_common_Index(
     val_value_t *parentval,
     struct commonpb_Index *entry);
-extern status_t build_to_xml_common_GRPCErrorDetail(
-    val_value_t *parentval,
-    struct commonpb_GRPCErrorDetail *entry);
 
 extern status_t build_to_priv_common_Path(
     val_value_t *parentval,
@@ -127,9 +124,6 @@ extern status_t build_to_priv_common_State(
 extern status_t build_to_priv_common_Index(
     val_value_t *parentval,
     struct commonpb_Index *entry);
-extern status_t build_to_priv_common_GRPCErrorDetail(
-    val_value_t *parentval,
-    struct commonpb_GRPCErrorDetail *entry);
 
 #endif /* _H_intri_common_trans */
 

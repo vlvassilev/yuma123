@@ -47,7 +47,7 @@ status_t build_to_xml_cdp_Config(
       "SystemConfig",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -74,7 +74,7 @@ status_t build_to_xml_cdp_SystemConfig(
       "Enabled",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -85,7 +85,7 @@ status_t build_to_xml_cdp_SystemConfig(
       "TimeToLive",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -96,7 +96,7 @@ status_t build_to_xml_cdp_SystemConfig(
       "MsgTxInterval",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -107,7 +107,7 @@ status_t build_to_xml_cdp_SystemConfig(
       "CDPVersion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -137,7 +137,7 @@ status_t build_to_xml_cdp_LocalInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -148,7 +148,7 @@ status_t build_to_xml_cdp_LocalInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -176,7 +176,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -192,7 +192,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "PowerAvailable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -208,7 +208,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "SystemInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -224,7 +224,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "VoiceVlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -240,7 +240,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "PortInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -256,7 +256,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
       "Capability",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -267,7 +267,7 @@ status_t build_to_xml_cdp_LocalInfoEntry(
         "Capability_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -325,7 +325,7 @@ status_t build_to_xml_cdp_NeighborInfo(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -336,7 +336,7 @@ status_t build_to_xml_cdp_NeighborInfo(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -364,7 +364,7 @@ status_t build_to_xml_cdp_NeighborInfoEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -380,7 +380,7 @@ status_t build_to_xml_cdp_NeighborInfoEntry(
       "SystemInfo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -396,7 +396,7 @@ status_t build_to_xml_cdp_NeighborInfoEntry(
       "PowerAvailable",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -412,7 +412,7 @@ status_t build_to_xml_cdp_NeighborInfoEntry(
       "TTL",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -423,7 +423,7 @@ status_t build_to_xml_cdp_NeighborInfoEntry(
       "VoIPVlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -445,7 +445,7 @@ status_t build_to_xml_cdp_RecvIdentifyInfo(
       "RecvIdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -461,7 +461,7 @@ status_t build_to_xml_cdp_RecvIdentifyInfo(
       "PortThroughInterface",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -472,7 +472,7 @@ status_t build_to_xml_cdp_RecvIdentifyInfo(
       "Capability",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -483,7 +483,7 @@ status_t build_to_xml_cdp_RecvIdentifyInfo(
         "Capability_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -541,7 +541,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "IP",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -552,7 +552,7 @@ status_t build_to_xml_cdp_SystemInfo(
         "IP_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -564,7 +564,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "DeviceID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -575,7 +575,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "Platform",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -586,7 +586,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "SystemName",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -597,7 +597,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "SoftwareVersion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -608,7 +608,7 @@ status_t build_to_xml_cdp_SystemInfo(
       "CDPVersion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -638,7 +638,7 @@ status_t build_to_xml_cdp_VoiceVLAN(
       "Data",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -649,7 +649,7 @@ status_t build_to_xml_cdp_VoiceVLAN(
       "VoiceVlan",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -671,7 +671,7 @@ status_t build_to_xml_cdp_PortInfo(
       "PortThroughInterface",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -693,7 +693,7 @@ status_t build_to_xml_cdp_PowerAvailable(
       "RequestID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -704,7 +704,7 @@ status_t build_to_xml_cdp_PowerAvailable(
       "ManagementID",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -715,7 +715,7 @@ status_t build_to_xml_cdp_PowerAvailable(
       "Allocated",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -726,7 +726,7 @@ status_t build_to_xml_cdp_PowerAvailable(
       "Supported",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -748,7 +748,7 @@ status_t build_to_xml_cdp_NeighborPoe(
       "RequestId",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -759,7 +759,7 @@ status_t build_to_xml_cdp_NeighborPoe(
       "Allocated",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -781,7 +781,7 @@ status_t build_to_xml_cdp_Statistic(
       "List",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -792,7 +792,7 @@ status_t build_to_xml_cdp_Statistic(
         "List_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -820,7 +820,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "IdentifyNo",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -836,7 +836,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "FramesOutV1",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -847,7 +847,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "FramesOutV2",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -858,7 +858,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "FramesInV1",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -869,7 +869,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "FramesInV2",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -880,7 +880,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "IllegalChecksum",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -891,7 +891,7 @@ status_t build_to_xml_cdp_StatisticEntry(
       "OtherErrors",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

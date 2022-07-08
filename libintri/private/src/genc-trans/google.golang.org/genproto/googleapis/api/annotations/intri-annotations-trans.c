@@ -45,7 +45,7 @@ status_t build_to_xml_annotations_Http(
       "Rules",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -56,7 +56,7 @@ status_t build_to_xml_annotations_Http(
         "Rules_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -73,7 +73,7 @@ status_t build_to_xml_annotations_Http(
       "FullyDecodeReservedExpansion",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -95,7 +95,7 @@ status_t build_to_xml_annotations_HttpRule(
       "Selector",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -108,7 +108,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Get",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -121,7 +121,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Put",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -134,7 +134,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Post",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -147,7 +147,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Delete",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -160,7 +160,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Patch",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -173,7 +173,7 @@ status_t build_to_xml_annotations_HttpRule(
           "Custom",
           &res);
       if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
+        val_add_child(childval, parentval);
       } else if (res != NO_ERR) {
         return SET_ERROR(res);
       }
@@ -191,7 +191,7 @@ status_t build_to_xml_annotations_HttpRule(
       "Body",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -202,7 +202,7 @@ status_t build_to_xml_annotations_HttpRule(
       "ResponseBody",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -213,7 +213,7 @@ status_t build_to_xml_annotations_HttpRule(
       "AdditionalBindings",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -224,7 +224,7 @@ status_t build_to_xml_annotations_HttpRule(
         "AdditionalBindings_Entry",
         &res);
     if (listval != NULL) {
-      val_add_child_sorted(listval, childval);
+      val_add_child(listval, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -252,7 +252,7 @@ status_t build_to_xml_annotations_CustomHttpPattern(
       "Kind",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -263,7 +263,7 @@ status_t build_to_xml_annotations_CustomHttpPattern(
       "Path",
       &res);
   if (childval != NULL) {
-    val_add_child_sorted(childval, parentval);
+    val_add_child(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }

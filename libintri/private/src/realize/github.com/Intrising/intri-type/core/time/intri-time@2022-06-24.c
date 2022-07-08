@@ -224,131 +224,6 @@ static status_t intri_time_Time_RunListTimeZones_invoke(
   free(out);
   return res;
 }
-static status_t intri_time_Time_GetCorrectionTime_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct timepb_RequestWithTimestamp *in = malloc(sizeof(*in));
-  struct timepb_Response *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_time_RequestWithTimestamp(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  time_Time_GetCorrectionTime(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_time,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_time_Response(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_time_Time_GetCorrectionTimeWithInt64_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct timepb_RequestWithInt64 *in = malloc(sizeof(*in));
-  struct timepb_Response *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_time_RequestWithInt64(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  time_Time_GetCorrectionTimeWithInt64(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_time,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_time_Response(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_time_Time_GetUTC_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct emptypb_Empty *in = malloc(sizeof(*in));
-  struct timepb_Response *out = malloc(sizeof(*out));
-
-  time_Time_GetUTC(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_time,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_time_Response(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_time_init(
     const xmlChar *modname,
@@ -450,33 +325,6 @@ status_t y_intri_time_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_time,
-      "intri-time-Time-GetCorrectionTime",
-      AGT_RPC_PH_INVOKE,
-      intri_time_Time_GetCorrectionTime_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_time,
-      "intri-time-Time-GetCorrectionTimeWithInt64",
-      AGT_RPC_PH_INVOKE,
-      intri_time_Time_GetCorrectionTimeWithInt64_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_time,
-      "intri-time-Time-GetUTC",
-      AGT_RPC_PH_INVOKE,
-      intri_time_Time_GetUTC_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -504,13 +352,4 @@ void y_intri_time_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_time,
       "intri-time-Time-RunListTimeZones");
-  agt_rpc_unregister_method(
-      y_M_intri_time,
-      "intri-time-Time-GetCorrectionTime");
-  agt_rpc_unregister_method(
-      y_M_intri_time,
-      "intri-time-Time-GetCorrectionTimeWithInt64");
-  agt_rpc_unregister_method(
-      y_M_intri_time,
-      "intri-time-Time-GetUTC");
 }

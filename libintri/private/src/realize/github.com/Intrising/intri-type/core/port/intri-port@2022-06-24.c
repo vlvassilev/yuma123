@@ -280,115 +280,6 @@ static status_t intri_port_Port_GetLgStatus_invoke(
   free(out);
   return res;
 }
-static status_t intri_port_Port_RunEnablePort_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct portpb_OperationEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_port_OperationEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  port_Port_RunEnablePort(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_port_Port_GetPortStatus_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct devicepb_InterfaceIdentify *in = malloc(sizeof(*in));
-  struct portpb_StatusEntry *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_device_InterfaceIdentify(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  port_Port_GetPortStatus(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_port,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_port_StatusEntry(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_port_Port_GetLgPortStatus_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct devicepb_InterfaceIdentify *in = malloc(sizeof(*in));
-  struct portpb_LgPortStatusEntry *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_device_InterfaceIdentify(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  port_Port_GetLgPortStatus(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_port,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_port_LgPortStatusEntry(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_port_init(
     const xmlChar *modname,
@@ -525,33 +416,6 @@ status_t y_intri_port_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_port,
-      "intri-port-Port-RunEnablePort",
-      AGT_RPC_PH_INVOKE,
-      intri_port_Port_RunEnablePort_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_port,
-      "intri-port-Port-GetPortStatus",
-      AGT_RPC_PH_INVOKE,
-      intri_port_Port_GetPortStatus_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_port,
-      "intri-port-Port-GetLgPortStatus",
-      AGT_RPC_PH_INVOKE,
-      intri_port_Port_GetLgPortStatus_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -588,13 +452,4 @@ void y_intri_port_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_port,
       "intri-port-Port-GetLgStatus");
-  agt_rpc_unregister_method(
-      y_M_intri_port,
-      "intri-port-Port-RunEnablePort");
-  agt_rpc_unregister_method(
-      y_M_intri_port,
-      "intri-port-Port-GetPortStatus");
-  agt_rpc_unregister_method(
-      y_M_intri_port,
-      "intri-port-Port-GetLgPortStatus");
 }

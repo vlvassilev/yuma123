@@ -39,27 +39,6 @@
 
 static ncx_module_t *intri_cli_mod;
 
-static status_t intri_cli_CLI_SetConfig_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct userinterfacepb_CLIConfig *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_userinterface_CLIConfig(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  cli_CLI_SetConfig(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
 static status_t intri_cli_CLI_RunScript_invoke(
     ses_cb_t *scb,
     rpc_msg_t *msg,
@@ -122,15 +101,6 @@ status_t y_intri_cli_init(
 
   res = agt_rpc_register_method(
       y_M_intri_cli,
-      "intri-cli-CLI-SetConfig",
-      AGT_RPC_PH_INVOKE,
-      intri_cli_CLI_SetConfig_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_cli,
       "intri-cli-CLI-RunScript",
       AGT_RPC_PH_INVOKE,
       intri_cli_CLI_RunScript_invoke);
@@ -147,9 +117,6 @@ status_t y_intri_cli_init2(void) {
 }
 
 void y_intri_cli_cleanup(void) {
-  agt_rpc_unregister_method(
-      y_M_intri_cli,
-      "intri-cli-CLI-SetConfig");
   agt_rpc_unregister_method(
       y_M_intri_cli,
       "intri-cli-CLI-RunScript");

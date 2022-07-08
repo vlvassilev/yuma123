@@ -507,27 +507,6 @@ static status_t intri_portauthentication_PortAuthentication_RunPortConfigUnautho
   free(out);
   return res;
 }
-static status_t intri_portauthentication_PortAuthentication_SetAuthenticationServers_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct accesspb_AuthenticationServersConfig *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_access_AuthenticationServersConfig(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  portauthentication_PortAuthentication_SetAuthenticationServers(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_portauthentication_init(
     const xmlChar *modname,
@@ -727,15 +706,6 @@ status_t y_intri_portauthentication_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_portauthentication,
-      "intri-portauthentication-PortAuthentication-SetAuthenticationServers",
-      AGT_RPC_PH_INVOKE,
-      intri_portauthentication_PortAuthentication_SetAuthenticationServers_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -793,7 +763,4 @@ void y_intri_portauthentication_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_portauthentication,
       "intri-portauthentication-PortAuthentication-RunPortConfigUnauthorizeMAC");
-  agt_rpc_unregister_method(
-      y_M_intri_portauthentication,
-      "intri-portauthentication-PortAuthentication-SetAuthenticationServers");
 }

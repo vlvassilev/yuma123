@@ -376,50 +376,6 @@ static status_t intri_files_Files_GetCertificateList_invoke(
   free(out);
   return res;
 }
-static status_t intri_files_Files_GetActivateCertificateInfo_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct filespb_CertificateType *in = malloc(sizeof(*in));
-  struct filespb_CertificateInfo *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_files_CertificateType(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  files_Files_GetActivateCertificateInfo(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_files,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_files_CertificateInfo(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_files_init(
     const xmlChar *modname,
@@ -576,15 +532,6 @@ status_t y_intri_files_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_files,
-      "intri-files-Files-GetActivateCertificateInfo",
-      AGT_RPC_PH_INVOKE,
-      intri_files_Files_GetActivateCertificateInfo_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -633,7 +580,4 @@ void y_intri_files_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_files,
       "intri-files-Files-GetCertificateList");
-  agt_rpc_unregister_method(
-      y_M_intri_files,
-      "intri-files-Files-GetActivateCertificateInfo");
 }

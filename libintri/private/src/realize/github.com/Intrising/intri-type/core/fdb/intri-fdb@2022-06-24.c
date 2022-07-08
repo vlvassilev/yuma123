@@ -647,90 +647,6 @@ static status_t intri_fdb_FDB_UpdateEntry_invoke(
   free(out);
   return res;
 }
-static status_t intri_fdb_FDB_UpdatePortOccupied_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct fdbpb_PortOccupied *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_fdb_PortOccupied(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  fdb_FDB_UpdatePortOccupied(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_fdb_FDB_AddMulticastEntry_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct eventpb_FDBEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_event_FDBEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  fdb_FDB_AddMulticastEntry(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_fdb_FDB_DeleteMulticastEntry_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct eventpb_FDBEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_event_FDBEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  fdb_FDB_DeleteMulticastEntry(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_fdb_FDB_UpdateMulticastEntry_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct eventpb_FDBEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_event_FDBEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  fdb_FDB_UpdateMulticastEntry(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_fdb_init(
     const xmlChar *modname,
@@ -976,42 +892,6 @@ status_t y_intri_fdb_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-UpdatePortOccupied",
-      AGT_RPC_PH_INVOKE,
-      intri_fdb_FDB_UpdatePortOccupied_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-AddMulticastEntry",
-      AGT_RPC_PH_INVOKE,
-      intri_fdb_FDB_AddMulticastEntry_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-DeleteMulticastEntry",
-      AGT_RPC_PH_INVOKE,
-      intri_fdb_FDB_DeleteMulticastEntry_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-UpdateMulticastEntry",
-      AGT_RPC_PH_INVOKE,
-      intri_fdb_FDB_UpdateMulticastEntry_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -1087,16 +967,4 @@ void y_intri_fdb_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_fdb,
       "intri-fdb-FDB-UpdateEntry");
-  agt_rpc_unregister_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-UpdatePortOccupied");
-  agt_rpc_unregister_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-AddMulticastEntry");
-  agt_rpc_unregister_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-DeleteMulticastEntry");
-  agt_rpc_unregister_method(
-      y_M_intri_fdb,
-      "intri-fdb-FDB-UpdateMulticastEntry");
 }

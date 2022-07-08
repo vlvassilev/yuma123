@@ -41,85 +41,6 @@
 
 static ncx_module_t *intri_snmptrap_mod;
 
-static status_t intri_snmptrap_SNMPTrap_SetUsersConfig_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct accesspb_UsersConfig *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_access_UsersConfig(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmptrap_SNMPTrap_SetUsersConfig(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_snmptrap_SNMPTrap_SetEngineID_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct userinterfacepb_SNMPConfig *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_userinterface_SNMPConfig(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmptrap_SNMPTrap_SetEngineID(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_snmptrap_SNMPTrap_GetTrapCounters_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct emptypb_Empty *in = malloc(sizeof(*in));
-  struct snmptrappb_SNMPTrapCounter *out = malloc(sizeof(*out));
-
-  snmptrap_SNMPTrap_GetTrapCounters(in, out);
-
-  obj_template_t *outobj = obj_find_child(
-      msg->rpc_method,
-      y_M_intri_snmptrap,
-      "output");
-  val_value_t *outval = val_new_value();
-  val_init_from_template(outval, outobj);
-
-  res = build_to_xml_snmptrap_SNMPTrapCounter(outval, out);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-
-  dlq_block_enque(&outval->v.childQ, &msg->rpc_dataQ);
-
-  /* debug: print `val_value_t` in `msg->rpc_dataQ` */
-  // for (val_value_t *val = (val_value_t *)dlq_firstEntry(&msg->rpc_dataQ);
-  //      val != NULL;
-  //      val = (val_value_t *)dlq_nextEntry(val)) {
-  //   val_dump_value(val, 2);
-  // }
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_snmptrap_init(
     const xmlChar *modname,
@@ -167,33 +88,6 @@ status_t y_intri_snmptrap_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-SetUsersConfig",
-      AGT_RPC_PH_INVOKE,
-      intri_snmptrap_SNMPTrap_SetUsersConfig_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-SetEngineID",
-      AGT_RPC_PH_INVOKE,
-      intri_snmptrap_SNMPTrap_SetEngineID_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-GetTrapCounters",
-      AGT_RPC_PH_INVOKE,
-      intri_snmptrap_SNMPTrap_GetTrapCounters_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -203,13 +97,4 @@ status_t y_intri_snmptrap_init2(void) {
 }
 
 void y_intri_snmptrap_cleanup(void) {
-  agt_rpc_unregister_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-SetUsersConfig");
-  agt_rpc_unregister_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-SetEngineID");
-  agt_rpc_unregister_method(
-      y_M_intri_snmptrap,
-      "intri-snmptrap-SNMPTrap-GetTrapCounters");
 }

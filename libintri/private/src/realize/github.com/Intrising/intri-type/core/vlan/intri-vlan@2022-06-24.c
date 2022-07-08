@@ -1120,90 +1120,6 @@ static status_t intri_vlan_VLAN_GetManagementVlanPorts_invoke(
   free(out);
   return res;
 }
-static status_t intri_vlan_VLAN_SetDefaultPortVlan_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct vlanpb_DefaultPortVlanEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_vlan_DefaultPortVlanEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  vlan_VLAN_SetDefaultPortVlan(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_vlan_VLAN_ClearDefaultPortVlan_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct vlanpb_DefaultPortVlanEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_vlan_DefaultPortVlanEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  vlan_VLAN_ClearDefaultPortVlan(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_vlan_VLAN_UpdateVlanPortVlanStatus_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct vlanpb_VlanPortVlanEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: has no Get func */
-  res = build_to_priv_vlan_VlanPortVlanEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  vlan_VLAN_UpdateVlanPortVlanStatus(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_vlan_VLAN_DeleteVlanPortVlanStatus_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct vlanpb_VlanPortVlanEntry *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_vlan_VlanPortVlanEntry(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  vlan_VLAN_DeleteVlanPortVlanStatus(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_vlan_init(
     const xmlChar *modname,
@@ -1621,42 +1537,6 @@ status_t y_intri_vlan_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-SetDefaultPortVlan",
-      AGT_RPC_PH_INVOKE,
-      intri_vlan_VLAN_SetDefaultPortVlan_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-ClearDefaultPortVlan",
-      AGT_RPC_PH_INVOKE,
-      intri_vlan_VLAN_ClearDefaultPortVlan_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-UpdateVlanPortVlanStatus",
-      AGT_RPC_PH_INVOKE,
-      intri_vlan_VLAN_UpdateVlanPortVlanStatus_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-DeleteVlanPortVlanStatus",
-      AGT_RPC_PH_INVOKE,
-      intri_vlan_VLAN_DeleteVlanPortVlanStatus_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -1792,16 +1672,4 @@ void y_intri_vlan_cleanup(void) {
   agt_rpc_unregister_method(
       y_M_intri_vlan,
       "intri-vlan-VLAN-GetManagementVlanPorts");
-  agt_rpc_unregister_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-SetDefaultPortVlan");
-  agt_rpc_unregister_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-ClearDefaultPortVlan");
-  agt_rpc_unregister_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-UpdateVlanPortVlanStatus");
-  agt_rpc_unregister_method(
-      y_M_intri_vlan,
-      "intri-vlan-VLAN-DeleteVlanPortVlanStatus");
 }

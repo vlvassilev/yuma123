@@ -472,8 +472,6 @@ static status_t
     // **/
     // // "2022-07-07 08:57:44" => "2022-07-07T08:57:43Z"
     assert(status_entry->LastLinkChange!=NULL);
-    log_debug("\n b4 last-change, %s", status_entry->LastLinkChange);
-    log_debug("\n b4 last-change, %p", status_entry->LastLinkChange);
     char strT[]="T";
     char strZ[]="Z";
     char final[20];
@@ -482,19 +480,11 @@ static status_t
     if (timebuf != NULL) {
         timebuf+=1;
     }
-    log_debug("\n b4 last-change1 %s", timebuf);
     memset(final, '\0', sizeof(final));
-    log_debug("\n b4 last-change1.1 %s", final);
     memcpy(final, tmp, 10); // memcpy will force final char -> char*
-    log_debug("\n b4 last-change1.2 %s", final);
     strcat(final, strT);
-    log_debug("\n b4 last-change2 %s", final);
-    log_debug("\n b4 last-change2,1 %s", timebuf);
     strcat(final, timebuf);
-    log_debug("\n b4 last-change3 %s", final);
     strcat(final, strZ);
-    log_debug("\n b4 last-change4 %s", final);
-    log_debug("\n in add_interface_state_entry 10");
 
     xmlChar *what = final;
     childval = agt_make_leaf(

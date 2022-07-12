@@ -485,15 +485,21 @@ status_t set_api_string_router(int api_indicator, xmlChar *arg) {
     struct emptypb_Empty *epty;
     struct systempb_Config *sys_config;
     struct networkpb_Config *network_config;
-
+    if (LOGDEBUG) {
+        log_debug("\n in set_api_string_router, args is %s", arg);
+    }
     switch (api_indicator) {
         case private_api_set_network_hostname:
+            epty = malloc(sizeof(*epty));
+            network_config = malloc(sizeof(*network_config));
             network_Network_GetConfig(epty, network_config);
             network_config->Basic->HostName = arg;
             network_Network_SetBasicConfig(network_config->Basic, epty);
             break;
         case private_api_set_system_contact:
         case private_api_set_system_location:
+            epty = malloc(sizeof(*epty));
+            sys_config = malloc(sizeof(*sys_config));
             system_System_GetConfig(epty, sys_config);
             if (api_indicator == private_api_set_system_contact){
                 sys_config->SysContact = arg;
@@ -508,8 +514,11 @@ status_t set_api_string_router(int api_indicator, xmlChar *arg) {
     return res;
 }
 
+
+
 static status_t
-    set_fake_string (
+    ietf_system_callback_router(
+        int api_indicator,
         ses_cb_t *scb,
         rpc_msg_t *msg,
         agt_cbtyp_t cbtyp,
@@ -518,15 +527,21 @@ static status_t
         val_value_t *curval)
 {
     status_t res;
-    val_value_t *errorval;
+    val_value_t *errorval = (curval) ? curval : newval;
     const xmlChar *errorstr;
 
     res = NO_ERR;
     errorval = NULL;
     errorstr = NULL;
 
-    printf("Setting /system/hostname to %s - cbtype=%d\n", VAL_STRING(newval), cbtyp);
-    printf("Setting /system/hostname to %s - editop=%d\n", VAL_STRING(newval), editop);
+    if (LOGDEBUG) {
+        log_debug("\n >>>>> walter: func = api_indicator %d", api_indicator);
+        log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\n newval = %d, curval = %d", newval == NULL, curval == NULL);
+        val_dump_value(newval, 0);
+        val_dump_value(curval, 0);
+    }
+
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
         break;
@@ -537,19 +552,24 @@ static status_t
         /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
+            break;
         case OP_EDITOP_MERGE:
+            break;
         case OP_EDITOP_REPLACE:
-        case OP_EDITOP_CREATE:
             if(newval!=NULL) {
-                printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
-                res = set_api_string_router(private_api_set_network_hostname, VAL_STRING(newval));
+                printf("\nSetting newval %s\n", VAL_STRING(newval));
+                res = set_api_string_router(api_indicator, VAL_STRING(newval));
             }
             break;
+        case OP_EDITOP_CREATE:
+            break;
         case OP_EDITOP_DELETE:
-            return res;
+            break;
         default:
-            assert(0);
+            res = SET_ERROR(ERR_INTERNAL_VAL);
         }
+        break;
+    case AGT_CB_ROLLBACK:
         break;
     default:
         res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -572,7 +592,7 @@ static status_t
 }
 
 static status_t
-    set_hostname (
+    ietf_system_hostname_edit (
         ses_cb_t *scb,
         rpc_msg_t *msg,
         agt_cbtyp_t cbtyp,
@@ -580,59 +600,53 @@ static status_t
         val_value_t *newval,
         val_value_t *curval)
 {
-    status_t res;
-    val_value_t *errorval;
-    const xmlChar *errorstr;
+   return ietf_system_callback_router(
+        private_api_set_network_hostname,
+        scb,
+        msg,
+        cbtyp,
+        editop,
+        newval,
+        curval);
+} /* ietf_system_hostname_edit */
 
-    res = NO_ERR;
-    errorval = NULL;
-    errorstr = NULL;
+static status_t
+    ietf_system_contact_edit (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+   return ietf_system_callback_router(
+        private_api_set_system_contact,
+        scb,
+        msg,
+        cbtyp,
+        editop,
+        newval,
+        curval);
+} /* ietf_system_contact_edit */
 
-    printf("Setting /system/hostname to %s - cbtype=%d\n", VAL_STRING(newval), cbtyp);
-    printf("Setting /system/hostname to %s - editop=%d\n", VAL_STRING(newval), editop);
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-        break;
-    case AGT_CB_APPLY:
-        /* database manipulation done here */
-        break;
-    case AGT_CB_COMMIT:
-        /* device instrumentation done here */
-        switch (editop) {
-        case OP_EDITOP_LOAD:
-        case OP_EDITOP_MERGE:
-        case OP_EDITOP_REPLACE:
-        case OP_EDITOP_CREATE:
-            if(newval!=NULL) {
-                printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
-                res = set_api_string_router(private_api_set_network_hostname, VAL_STRING(newval));
-            }
-            break;
-        case OP_EDITOP_DELETE:
-            return res;
-        default:
-            assert(0);
-        }
-        break;
-    default:
-        res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    /* if error: set the res, errorstr, and errorval parms */
-    if (res != NO_ERR) {
-        agt_record_error(
-            scb,
-            &msg->mhdr,
-            NCX_LAYER_CONTENT,
-            res,
-            NULL,
-            NCX_NT_STRING,
-            errorstr,
-            NCX_NT_VAL,
-            errorval);
-    }
-
-    return res;
-}
+static status_t
+    ietf_system_location_edit (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+   return ietf_system_callback_router(
+        private_api_set_system_location,
+        scb,
+        msg,
+        cbtyp,
+        editop,
+        newval,
+        curval);
+} /* ietf_system_location_edit */
 
 
 /********************************************************************
@@ -1407,13 +1421,13 @@ ietf_system_radius_get (
         log_debug("\nEnter ietf_system_radius_get");
     }
     /* calls the private api */
-    struct emptypb_Empty in;
-    struct accesspb_AuthenticationServersConfig out;
-    access_Access_GetAuthenticatorServerConfig(&in, &out);
+    struct emptypb_Empty *in = malloc(sizeof(*in));
+    struct accesspb_AuthenticationServersConfig *out=malloc(sizeof(*out));
+    access_Access_GetAuthenticatorServerConfig(in, out);
 
-    for (int i = 0; i<(out.List_Len);i++) {
+    for (int i = 0; i<(out->List_Len);i++) {
         /* Only show the tacacs server*/
-        if (out.List[i]->ServerType == accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS) {
+        if (out->List[i]->ServerType == accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS) {
             continue;
         }
         val_value_t *child_val = NULL;
@@ -1428,7 +1442,7 @@ ietf_system_radius_get (
             return SET_ERROR(res);
         }
 
-        res = build_radius_server(child_val, out.List[i]);
+        res = build_radius_server(child_val, out->List[i]);
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
@@ -1662,16 +1676,23 @@ status_t ietf_system_get(
         return SET_ERROR(res);
     }
 
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_radius,
-        dstval,
-        &radiusval);
 
-    res = ietf_system_radius_mro(radiusval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
+    /* calls the private api */
+    struct emptypb_Empty *epty1 = malloc(sizeof(*epty1));
+    struct accesspb_AuthenticationServersConfig *radius_out=malloc(sizeof(*radius_out));
+    access_Access_GetAuthenticatorServerConfig(epty1, radius_out);
+    if (radius_out->List_Len != 0) {
+        res = agt_add_container(
+            ietf_system,
+            ietf_system_radius,
+            dstval,
+            &radiusval);
+        res = ietf_system_radius_mro(radiusval);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
     }
+
     /* Add /system/authentication */
     res = agt_add_container(
         ietf_system,
@@ -1711,61 +1732,6 @@ status_t ietf_system_mro(val_value_t *parentval) {
         parentval,
         ietf_system_get,
         parentval->obj);
-
-    // [FIXME] after done all other system
-    // printf("\n@@@@ add /system/ntp\n");
-    // struct emptypb_Empty *in3 = malloc(sizeof(*(in3)));
-    // struct timepb_Config *time_out = malloc(sizeof(*(time_out)));
-    // time_Time_GetConfig(in3, time_out);
-    // if (time_out->Mode == timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
-    //     /* /system/ntp */
-    //     res = agt_add_container(
-    //         ietf_system,
-    //         ietf_system_ntp,
-    //         parentval,
-    //         &ntp_val);
-    //     if (res != NO_ERR) {
-    //         return SET_ERROR(res);
-    //     }
-
-    //     res = add_child_mro(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
-    //      /* Add /system/ntp/server */
-    //     primary_val = agt_make_list(
-    //         ntp_val->obj,
-    //         ietf_system_ntp_server,
-    //         &res);
-    //     if (primary_val != NULL) {
-    //         val_add_child(primary_val, ntp_val);
-    //     } else if (res != NO_ERR) {
-    //         return SET_ERROR(res);
-    //     }
-    //     res = build_ntp_server(primary_val, "primary", time_out->MainNTPServer);
-    //     if (res != NO_ERR) {
-    //         return SET_ERROR(res);
-    //     }
-
-    //     // support secondary later
-    //     // secondary_val = agt_make_list(
-    //     //     ntp_val->obj,
-    //     //     ietf_system_ntp_server,
-    //     //     &res);
-    //     // if (secondary_val != NULL) {
-    //     //     val_add_child(secondary_val, ntp_val);
-    //     // } else if (res != NO_ERR) {
-    //     //     return SET_ERROR(res);
-    //     // }
-
-    //     // res = build_ntp_server(secondary_val, "secondary", time_out->BackupNTPServer);
-    //     // if (res != NO_ERR) {
-    //     //     return SET_ERROR(res);
-    //     // }
-
-    // }
-
-
-
-
-
     return res;
 }
 
@@ -1840,21 +1806,32 @@ status_t
     if (!ietf_system_obj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
-    printf("start register callback hostname\n");
     res = agt_cb_register_callback(
         "ietf-system",
         (const xmlChar *)"/system/hostname",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
-        set_hostname);
-    printf("register callback hostname end\n");
+        ietf_system_hostname_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    printf("start register callback hostname\n");
     res = agt_cb_register_callback(
         "ietf-system",
-        (const xmlChar *)"/system/clock/timezone-name",
+        (const xmlChar *)"/system/contact",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
-        set_fake_string);
-    printf("register callback hostname end\n");
+        ietf_system_contact_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/location",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_location_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
     yuma_system_obj =
         obj_find_child(ietf_system_state_obj,

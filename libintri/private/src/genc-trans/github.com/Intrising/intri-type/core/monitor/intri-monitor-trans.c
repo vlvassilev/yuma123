@@ -1850,6 +1850,8 @@ status_t build_to_priv_monitor_DeviceLimitConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1933,6 +1935,8 @@ status_t build_to_priv_monitor_SystemLimitConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2052,6 +2056,8 @@ status_t build_to_priv_monitor_DeviceScorllBarValue(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2108,6 +2114,8 @@ status_t build_to_priv_monitor_SystemScorllBarValue(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2217,6 +2225,8 @@ status_t build_to_priv_monitor_DeviceStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2280,6 +2290,8 @@ status_t build_to_priv_monitor_SystemStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2351,6 +2363,8 @@ status_t build_to_priv_monitor_LEDStatus(
   childval = val_first_child_name(
       parentval,
       "SystemList");
+  entry->SystemList_Len = 0;
+  entry->SystemList = malloc(sizeof(*entry->SystemList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SystemList_Len = dlq_count(&childval->v.childQ);
     entry->SystemList = malloc((entry->SystemList_Len + 1) * sizeof(*entry->SystemList));
@@ -2373,6 +2387,8 @@ status_t build_to_priv_monitor_LEDStatus(
   childval = val_first_child_name(
       parentval,
       "PortList");
+  entry->PortList_Len = 0;
+  entry->PortList = malloc(sizeof(*entry->PortList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortList_Len = dlq_count(&childval->v.childQ);
     entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));

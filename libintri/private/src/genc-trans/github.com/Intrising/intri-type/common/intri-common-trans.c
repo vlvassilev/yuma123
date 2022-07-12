@@ -618,6 +618,8 @@ status_t build_to_priv_common_IPv4List(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -662,6 +664,8 @@ status_t build_to_priv_common_IPv6List(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -705,6 +709,8 @@ status_t build_to_priv_common_NameList(
   childval = val_first_child_name(
       parentval,
       "NameList");
+  entry->NameList_Len = 0;
+  entry->NameList = malloc(sizeof(*entry->NameList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->NameList_Len = dlq_count(&childval->v.childQ);
     entry->NameList = malloc((entry->NameList_Len + 1) * sizeof(*entry->NameList));

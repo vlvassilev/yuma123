@@ -359,6 +359,8 @@ status_t build_to_priv_stormcontrol_PortConfigEntry(
   childval = val_first_child_name(
       parentval,
       "SuppressionList");
+  entry->SuppressionList_Len = 0;
+  entry->SuppressionList = malloc(sizeof(*entry->SuppressionList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SuppressionList_Len = dlq_count(&childval->v.childQ);
     entry->SuppressionList = malloc((entry->SuppressionList_Len + 1) * sizeof(*entry->SuppressionList));
@@ -388,6 +390,8 @@ status_t build_to_priv_stormcontrol_PortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

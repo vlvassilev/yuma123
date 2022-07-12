@@ -4326,6 +4326,8 @@ status_t build_to_priv_event_LgportUsed(
   childval = val_first_child_name(
       parentval,
       "OriginalMembers");
+  entry->OriginalMembers_Len = 0;
+  entry->OriginalMembers = malloc(sizeof(*entry->OriginalMembers));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->OriginalMembers_Len = dlq_count(&childval->v.childQ);
     entry->OriginalMembers = malloc((entry->OriginalMembers_Len + 1) * sizeof(*entry->OriginalMembers));
@@ -4348,6 +4350,8 @@ status_t build_to_priv_event_LgportUsed(
   childval = val_first_child_name(
       parentval,
       "NewMembers");
+  entry->NewMembers_Len = 0;
+  entry->NewMembers = malloc(sizeof(*entry->NewMembers));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->NewMembers_Len = dlq_count(&childval->v.childQ);
     entry->NewMembers = malloc((entry->NewMembers_Len + 1) * sizeof(*entry->NewMembers));
@@ -4370,6 +4374,8 @@ status_t build_to_priv_event_LgportUsed(
   childval = val_first_child_name(
       parentval,
       "AddedMembers");
+  entry->AddedMembers_Len = 0;
+  entry->AddedMembers = malloc(sizeof(*entry->AddedMembers));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AddedMembers_Len = dlq_count(&childval->v.childQ);
     entry->AddedMembers = malloc((entry->AddedMembers_Len + 1) * sizeof(*entry->AddedMembers));
@@ -4392,6 +4398,8 @@ status_t build_to_priv_event_LgportUsed(
   childval = val_first_child_name(
       parentval,
       "DeletedMembers");
+  entry->DeletedMembers_Len = 0;
+  entry->DeletedMembers = malloc(sizeof(*entry->DeletedMembers));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeletedMembers_Len = dlq_count(&childval->v.childQ);
     entry->DeletedMembers = malloc((entry->DeletedMembers_Len + 1) * sizeof(*entry->DeletedMembers));
@@ -4421,6 +4429,8 @@ status_t build_to_priv_event_ProtocolUsed(
   childval = val_first_child_name(
       parentval,
       "UpdateMembers");
+  entry->UpdateMembers_Len = 0;
+  entry->UpdateMembers = malloc(sizeof(*entry->UpdateMembers));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->UpdateMembers_Len = dlq_count(&childval->v.childQ);
     entry->UpdateMembers = malloc((entry->UpdateMembers_Len + 1) * sizeof(*entry->UpdateMembers));
@@ -5104,6 +5114,8 @@ status_t build_to_priv_event_PacketProbe(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5412,6 +5424,8 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Status");
+  entry->Status_Len = 0;
+  entry->Status = malloc(sizeof(*entry->Status));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Status_Len = dlq_count(&childval->v.childQ);
     entry->Status = malloc((entry->Status_Len + 1) * sizeof(*entry->Status));
@@ -5568,6 +5582,8 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "AdditionalInformation");
+  entry->AdditionalInformation_Len = 0;
+  entry->AdditionalInformation = malloc(sizeof(*entry->AdditionalInformation));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AdditionalInformation_Len = dlq_count(&childval->v.childQ);
     entry->AdditionalInformation = malloc((entry->AdditionalInformation_Len + 1) * sizeof(*entry->AdditionalInformation));
@@ -5852,6 +5868,8 @@ status_t build_to_priv_event_InternalTypeUnion(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -6218,6 +6236,8 @@ status_t build_to_priv_event_TargetLogTypeUnion(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

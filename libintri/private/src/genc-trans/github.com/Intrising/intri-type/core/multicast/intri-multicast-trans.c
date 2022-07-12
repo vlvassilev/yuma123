@@ -1362,6 +1362,8 @@ status_t build_to_priv_multicast_Snooping(
   childval = val_first_child_name(
       parentval,
       "VlanList");
+  entry->VlanList_Len = 0;
+  entry->VlanList = malloc(sizeof(*entry->VlanList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VlanList_Len = dlq_count(&childval->v.childQ);
     entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
@@ -1496,6 +1498,8 @@ status_t build_to_priv_multicast_SnoopingConfigEntry(
   childval = val_first_child_name(
       parentval,
       "IdentifyiesConfig");
+  entry->IdentifyiesConfig_Len = 0;
+  entry->IdentifyiesConfig = malloc(sizeof(*entry->IdentifyiesConfig));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IdentifyiesConfig_Len = dlq_count(&childval->v.childQ);
     entry->IdentifyiesConfig = malloc((entry->IdentifyiesConfig_Len + 1) * sizeof(*entry->IdentifyiesConfig));
@@ -1525,6 +1529,8 @@ status_t build_to_priv_multicast_UnregisterFlood(
   childval = val_first_child_name(
       parentval,
       "VlanList");
+  entry->VlanList_Len = 0;
+  entry->VlanList = malloc(sizeof(*entry->VlanList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VlanList_Len = dlq_count(&childval->v.childQ);
     entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
@@ -1575,6 +1581,8 @@ status_t build_to_priv_multicast_RouterPort(
   childval = val_first_child_name(
       parentval,
       "VlanList");
+  entry->VlanList_Len = 0;
+  entry->VlanList = malloc(sizeof(*entry->VlanList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VlanList_Len = dlq_count(&childval->v.childQ);
     entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
@@ -1611,6 +1619,8 @@ status_t build_to_priv_multicast_RouterPortVlanEntry(
   childval = val_first_child_name(
       parentval,
       "PortList");
+  entry->PortList_Len = 0;
+  entry->PortList = malloc(sizeof(*entry->PortList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortList_Len = dlq_count(&childval->v.childQ);
     entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
@@ -1667,6 +1677,8 @@ status_t build_to_priv_multicast_Static(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1737,6 +1749,8 @@ status_t build_to_priv_multicast_IGMPStatistics(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1822,6 +1836,8 @@ status_t build_to_priv_multicast_RouterStatus(
   childval = val_first_child_name(
       parentval,
       "VlanList");
+  entry->VlanList_Len = 0;
+  entry->VlanList = malloc(sizeof(*entry->VlanList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VlanList_Len = dlq_count(&childval->v.childQ);
     entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
@@ -1858,6 +1874,8 @@ status_t build_to_priv_multicast_RouterStatusEntry(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1921,6 +1939,8 @@ status_t build_to_priv_multicast_DynamicGroups(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1971,6 +1991,8 @@ status_t build_to_priv_multicast_DynamicGroupEntry(
   childval = val_first_child_name(
       parentval,
       "IdentifyList");
+  entry->IdentifyList_Len = 0;
+  entry->IdentifyList = malloc(sizeof(*entry->IdentifyList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
     entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
@@ -2000,6 +2022,8 @@ status_t build_to_priv_multicast_MLDStatistics(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2078,6 +2102,8 @@ status_t build_to_priv_multicast_VlanList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

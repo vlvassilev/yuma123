@@ -149,6 +149,8 @@ status_t build_to_priv_isolation_ConfigEntry(
   childval = val_first_child_name(
       parentval,
       "AllowOutgoingList");
+  entry->AllowOutgoingList_Len = 0;
+  entry->AllowOutgoingList = malloc(sizeof(*entry->AllowOutgoingList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AllowOutgoingList_Len = dlq_count(&childval->v.childQ);
     entry->AllowOutgoingList = malloc((entry->AllowOutgoingList_Len + 1) * sizeof(*entry->AllowOutgoingList));
@@ -178,6 +180,8 @@ status_t build_to_priv_isolation_Config(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

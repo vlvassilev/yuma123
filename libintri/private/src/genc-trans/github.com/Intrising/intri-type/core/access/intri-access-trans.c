@@ -1546,6 +1546,8 @@ status_t build_to_priv_access_AuthenticationServersConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1624,6 +1626,8 @@ status_t build_to_priv_access_RestrictionsConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1660,6 +1664,8 @@ status_t build_to_priv_access_UserEntry(
   childval = val_first_child_name(
       parentval,
       "AssociatedGroups");
+  entry->AssociatedGroups_Len = 0;
+  entry->AssociatedGroups = malloc(sizeof(*entry->AssociatedGroups));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AssociatedGroups_Len = dlq_count(&childval->v.childQ);
     entry->AssociatedGroups = malloc((entry->AssociatedGroups_Len + 1) * sizeof(*entry->AssociatedGroups));
@@ -1781,6 +1787,8 @@ status_t build_to_priv_access_UsersConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1817,6 +1825,8 @@ status_t build_to_priv_access_GroupEntry(
   childval = val_first_child_name(
       parentval,
       "Patterns");
+  entry->Patterns_Len = 0;
+  entry->Patterns = malloc(sizeof(*entry->Patterns));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Patterns_Len = dlq_count(&childval->v.childQ);
     entry->Patterns = malloc((entry->Patterns_Len + 1) * sizeof(*entry->Patterns));
@@ -1846,6 +1856,8 @@ status_t build_to_priv_access_GroupsConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2003,6 +2015,8 @@ status_t build_to_priv_access_UserPassword(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2109,6 +2123,8 @@ status_t build_to_priv_access_LoginStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

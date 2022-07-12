@@ -998,6 +998,8 @@ status_t build_to_priv_dhcp_ARPInspectionConfig(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -1109,6 +1111,8 @@ status_t build_to_priv_dhcp_ARPInspectionACLConfig(
   childval = val_first_child_name(
       parentval,
       "Rules");
+  entry->Rules_Len = 0;
+  entry->Rules = malloc(sizeof(*entry->Rules));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Rules_Len = dlq_count(&childval->v.childQ);
     entry->Rules = malloc((entry->Rules_Len + 1) * sizeof(*entry->Rules));
@@ -1214,6 +1218,8 @@ status_t build_to_priv_dhcp_RelayConfig(
   childval = val_first_child_name(
       parentval,
       "RelayPorts");
+  entry->RelayPorts_Len = 0;
+  entry->RelayPorts = malloc(sizeof(*entry->RelayPorts));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->RelayPorts_Len = dlq_count(&childval->v.childQ);
     entry->RelayPorts = malloc((entry->RelayPorts_Len + 1) * sizeof(*entry->RelayPorts));
@@ -1312,6 +1318,8 @@ status_t build_to_priv_dhcp_SnoopingConfig(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -1451,6 +1459,8 @@ status_t build_to_priv_dhcp_SnoopingStatisticsList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1542,6 +1552,8 @@ status_t build_to_priv_dhcp_SnoopingBindingDatabaseList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

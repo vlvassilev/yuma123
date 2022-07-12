@@ -280,6 +280,8 @@ status_t build_to_priv_annotations_Http(
   childval = val_first_child_name(
       parentval,
       "Rules");
+  entry->Rules_Len = 0;
+  entry->Rules = malloc(sizeof(*entry->Rules));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Rules_Len = dlq_count(&childval->v.childQ);
     entry->Rules = malloc((entry->Rules_Len + 1) * sizeof(*entry->Rules));
@@ -391,6 +393,8 @@ status_t build_to_priv_annotations_HttpRule(
   childval = val_first_child_name(
       parentval,
       "AdditionalBindings");
+  entry->AdditionalBindings_Len = 0;
+  entry->AdditionalBindings = malloc(sizeof(*entry->AdditionalBindings));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AdditionalBindings_Len = dlq_count(&childval->v.childQ);
     entry->AdditionalBindings = malloc((entry->AdditionalBindings_Len + 1) * sizeof(*entry->AdditionalBindings));

@@ -484,6 +484,8 @@ status_t build_to_priv_portsecurity_Config(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -547,6 +549,8 @@ status_t build_to_priv_portsecurity_PortSecurityConfigEntry(
   childval = val_first_child_name(
       parentval,
       "SecureAddressList");
+  entry->SecureAddressList_Len = 0;
+  entry->SecureAddressList = malloc(sizeof(*entry->SecureAddressList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SecureAddressList_Len = dlq_count(&childval->v.childQ);
     entry->SecureAddressList = malloc((entry->SecureAddressList_Len + 1) * sizeof(*entry->SecureAddressList));
@@ -637,6 +641,8 @@ status_t build_to_priv_portsecurity_Status(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

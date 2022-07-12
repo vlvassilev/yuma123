@@ -627,6 +627,8 @@ status_t build_to_priv_lacp_LAGConfig(
   childval = val_first_child_name(
       parentval,
       "Lists");
+  entry->Lists_Len = 0;
+  entry->Lists = malloc(sizeof(*entry->Lists));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Lists_Len = dlq_count(&childval->v.childQ);
     entry->Lists = malloc((entry->Lists_Len + 1) * sizeof(*entry->Lists));
@@ -690,6 +692,8 @@ status_t build_to_priv_lacp_Status(
   childval = val_first_child_name(
       parentval,
       "PortLists");
+  entry->PortLists_Len = 0;
+  entry->PortLists = malloc(sizeof(*entry->PortLists));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortLists_Len = dlq_count(&childval->v.childQ);
     entry->PortLists = malloc((entry->PortLists_Len + 1) * sizeof(*entry->PortLists));

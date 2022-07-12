@@ -373,6 +373,8 @@ status_t build_to_priv_timerange_Config(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -502,6 +504,8 @@ status_t build_to_priv_timerange_DayTime(
   childval = val_first_child_name(
       parentval,
       "DayOfWeekLists");
+  entry->DayOfWeekLists_Len = 0;
+  entry->DayOfWeekLists = malloc(sizeof(*entry->DayOfWeekLists));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DayOfWeekLists_Len = dlq_count(&childval->v.childQ);
     entry->DayOfWeekLists = malloc((entry->DayOfWeekLists_Len + 1) * sizeof(*entry->DayOfWeekLists));
@@ -546,6 +550,8 @@ status_t build_to_priv_timerange_Status(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

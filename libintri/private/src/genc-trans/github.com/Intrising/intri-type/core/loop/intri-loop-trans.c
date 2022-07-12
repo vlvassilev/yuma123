@@ -263,6 +263,8 @@ status_t build_to_priv_loop_Config(
   childval = val_first_child_name(
       parentval,
       "PortList");
+  entry->PortList_Len = 0;
+  entry->PortList = malloc(sizeof(*entry->PortList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortList_Len = dlq_count(&childval->v.childQ);
     entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
@@ -319,6 +321,8 @@ status_t build_to_priv_loop_PortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -395,6 +399,8 @@ status_t build_to_priv_loop_Status(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

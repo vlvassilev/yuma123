@@ -1216,6 +1216,8 @@ status_t build_to_priv_portauthentication_AuthorizedMACsEntry(
   childval = val_first_child_name(
       parentval,
       "PermittedPortList");
+  entry->PermittedPortList_Len = 0;
+  entry->PermittedPortList = malloc(sizeof(*entry->PermittedPortList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PermittedPortList_Len = dlq_count(&childval->v.childQ);
     entry->PermittedPortList = malloc((entry->PermittedPortList_Len + 1) * sizeof(*entry->PermittedPortList));
@@ -1252,6 +1254,8 @@ status_t build_to_priv_portauthentication_AuthorizedMACs(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1372,6 +1376,8 @@ status_t build_to_priv_portauthentication_PortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1456,6 +1462,8 @@ status_t build_to_priv_portauthentication_PortStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1540,6 +1548,8 @@ status_t build_to_priv_portauthentication_PortAuthorizationStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1631,6 +1641,8 @@ status_t build_to_priv_portauthentication_UserStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

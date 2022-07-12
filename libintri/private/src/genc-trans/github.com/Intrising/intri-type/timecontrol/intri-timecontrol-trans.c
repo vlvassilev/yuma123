@@ -1775,6 +1775,8 @@ status_t build_to_priv_timecontrol_InputClockManage(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1818,6 +1820,8 @@ status_t build_to_priv_timecontrol_MonitorStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1854,6 +1858,8 @@ status_t build_to_priv_timecontrol_MonitorStatusEntry(
   childval = val_first_child_name(
       parentval,
       "StatusList");
+  entry->StatusList_Len = 0;
+  entry->StatusList = malloc(sizeof(*entry->StatusList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->StatusList_Len = dlq_count(&childval->v.childQ);
     entry->StatusList = malloc((entry->StatusList_Len + 1) * sizeof(*entry->StatusList));
@@ -1911,6 +1917,8 @@ status_t build_to_priv_timecontrol_DPLLManage(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1954,6 +1962,8 @@ status_t build_to_priv_timecontrol_DPLLStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2011,6 +2021,8 @@ status_t build_to_priv_timecontrol_DPLLRefPriorityManage(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2047,6 +2059,8 @@ status_t build_to_priv_timecontrol_DPLLRefPriorityManageEntry(
   childval = val_first_child_name(
       parentval,
       "PriorityList");
+  entry->PriorityList_Len = 0;
+  entry->PriorityList = malloc(sizeof(*entry->PriorityList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PriorityList_Len = dlq_count(&childval->v.childQ);
     entry->PriorityList = malloc((entry->PriorityList_Len + 1) * sizeof(*entry->PriorityList));
@@ -2070,6 +2084,8 @@ status_t build_to_priv_timecontrol_DPLLRefPriority(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2106,6 +2122,8 @@ status_t build_to_priv_timecontrol_DPLLRefPriorityEntry(
   childval = val_first_child_name(
       parentval,
       "PrioritList");
+  entry->PrioritList_Len = 0;
+  entry->PrioritList = malloc(sizeof(*entry->PrioritList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PrioritList_Len = dlq_count(&childval->v.childQ);
     entry->PrioritList = malloc((entry->PrioritList_Len + 1) * sizeof(*entry->PrioritList));
@@ -2156,6 +2174,8 @@ status_t build_to_priv_timecontrol_SyncEInputClockSpeed(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2227,6 +2247,8 @@ status_t build_to_priv_timecontrol_DPLLToDManage(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2270,6 +2292,8 @@ status_t build_to_priv_timecontrol_ToDTime(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2326,6 +2350,8 @@ status_t build_to_priv_timecontrol_DPLLFrequencyControl(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2376,6 +2402,8 @@ status_t build_to_priv_timecontrol_DPLLPhaseControl(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2426,6 +2454,8 @@ status_t build_to_priv_timecontrol_DPLLPhaseSlopeLimit(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2476,6 +2506,8 @@ status_t build_to_priv_timecontrol_DPLLPhaseControlTimer(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

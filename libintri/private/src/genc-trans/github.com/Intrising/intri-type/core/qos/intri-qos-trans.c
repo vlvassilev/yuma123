@@ -818,6 +818,8 @@ status_t build_to_priv_qos_Config(
   childval = val_first_child_name(
       parentval,
       "QueueList");
+  entry->QueueList_Len = 0;
+  entry->QueueList = malloc(sizeof(*entry->QueueList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->QueueList_Len = dlq_count(&childval->v.childQ);
     entry->QueueList = malloc((entry->QueueList_Len + 1) * sizeof(*entry->QueueList));
@@ -840,6 +842,8 @@ status_t build_to_priv_qos_Config(
   childval = val_first_child_name(
       parentval,
       "CoSList");
+  entry->CoSList_Len = 0;
+  entry->CoSList = malloc(sizeof(*entry->CoSList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->CoSList_Len = dlq_count(&childval->v.childQ);
     entry->CoSList = malloc((entry->CoSList_Len + 1) * sizeof(*entry->CoSList));
@@ -862,6 +866,8 @@ status_t build_to_priv_qos_Config(
   childval = val_first_child_name(
       parentval,
       "DSCPList");
+  entry->DSCPList_Len = 0;
+  entry->DSCPList = malloc(sizeof(*entry->DSCPList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DSCPList_Len = dlq_count(&childval->v.childQ);
     entry->DSCPList = malloc((entry->DSCPList_Len + 1) * sizeof(*entry->DSCPList));
@@ -884,6 +890,8 @@ status_t build_to_priv_qos_Config(
   childval = val_first_child_name(
       parentval,
       "InterfaceList");
+  entry->InterfaceList_Len = 0;
+  entry->InterfaceList = malloc(sizeof(*entry->InterfaceList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->InterfaceList_Len = dlq_count(&childval->v.childQ);
     entry->InterfaceList = malloc((entry->InterfaceList_Len + 1) * sizeof(*entry->InterfaceList));
@@ -955,6 +963,8 @@ status_t build_to_priv_qos_QueueList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -984,6 +994,8 @@ status_t build_to_priv_qos_CoSList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1013,6 +1025,8 @@ status_t build_to_priv_qos_DSCPList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1042,6 +1056,8 @@ status_t build_to_priv_qos_InterfaceList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

@@ -1446,6 +1446,8 @@ status_t build_to_priv_acl_InterfaceList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1509,6 +1511,8 @@ status_t build_to_priv_acl_ACLList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1545,6 +1549,8 @@ status_t build_to_priv_acl_ACLEntry(
   childval = val_first_child_name(
       parentval,
       "RuleList");
+  entry->RuleList_Len = 0;
+  entry->RuleList = malloc(sizeof(*entry->RuleList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->RuleList_Len = dlq_count(&childval->v.childQ);
     entry->RuleList = malloc((entry->RuleList_Len + 1) * sizeof(*entry->RuleList));
@@ -1568,6 +1574,8 @@ status_t build_to_priv_acl_ACEList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2126,6 +2134,8 @@ status_t build_to_priv_acl_BindingList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2219,6 +2229,8 @@ status_t build_to_priv_acl_FlowMirroringEntry(
   childval = val_first_child_name(
       parentval,
       "ACLNameList");
+  entry->ACLNameList_Len = 0;
+  entry->ACLNameList = malloc(sizeof(*entry->ACLNameList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->ACLNameList_Len = dlq_count(&childval->v.childQ);
     entry->ACLNameList = malloc((entry->ACLNameList_Len + 1) * sizeof(*entry->ACLNameList));
@@ -2235,6 +2247,8 @@ status_t build_to_priv_acl_FlowMirroringEntry(
   childval = val_first_child_name(
       parentval,
       "SourceList");
+  entry->SourceList_Len = 0;
+  entry->SourceList = malloc(sizeof(*entry->SourceList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SourceList_Len = dlq_count(&childval->v.childQ);
     entry->SourceList = malloc((entry->SourceList_Len + 1) * sizeof(*entry->SourceList));
@@ -2277,6 +2291,8 @@ status_t build_to_priv_acl_FlowMirroringList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

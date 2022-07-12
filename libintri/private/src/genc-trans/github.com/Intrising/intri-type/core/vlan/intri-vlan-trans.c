@@ -1740,6 +1740,8 @@ status_t build_to_priv_vlan_MACBasedGroupMemberEntry(
   childval = val_first_child_name(
       parentval,
       "IdentifyList");
+  entry->IdentifyList_Len = 0;
+  entry->IdentifyList = malloc(sizeof(*entry->IdentifyList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
     entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
@@ -1769,6 +1771,8 @@ status_t build_to_priv_vlan_MACBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupList");
+  entry->GroupList_Len = 0;
+  entry->GroupList = malloc(sizeof(*entry->GroupList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupList_Len = dlq_count(&childval->v.childQ);
     entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
@@ -1791,6 +1795,8 @@ status_t build_to_priv_vlan_MACBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupMemberList");
+  entry->GroupMemberList_Len = 0;
+  entry->GroupMemberList = malloc(sizeof(*entry->GroupMemberList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
     entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
@@ -1862,6 +1868,8 @@ status_t build_to_priv_vlan_ProtocolBasedGroupMemberEntry(
   childval = val_first_child_name(
       parentval,
       "IdentifyList");
+  entry->IdentifyList_Len = 0;
+  entry->IdentifyList = malloc(sizeof(*entry->IdentifyList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
     entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
@@ -1891,6 +1899,8 @@ status_t build_to_priv_vlan_ProtocolBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupList");
+  entry->GroupList_Len = 0;
+  entry->GroupList = malloc(sizeof(*entry->GroupList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupList_Len = dlq_count(&childval->v.childQ);
     entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
@@ -1913,6 +1923,8 @@ status_t build_to_priv_vlan_ProtocolBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupMemberList");
+  entry->GroupMemberList_Len = 0;
+  entry->GroupMemberList = malloc(sizeof(*entry->GroupMemberList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
     entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
@@ -1942,6 +1954,8 @@ status_t build_to_priv_vlan_SelectiveQinQConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2041,6 +2055,8 @@ status_t build_to_priv_vlan_SubnetBasedGroupMemberEntry(
   childval = val_first_child_name(
       parentval,
       "IdentifyList");
+  entry->IdentifyList_Len = 0;
+  entry->IdentifyList = malloc(sizeof(*entry->IdentifyList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
     entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
@@ -2070,6 +2086,8 @@ status_t build_to_priv_vlan_SubnetBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupList");
+  entry->GroupList_Len = 0;
+  entry->GroupList = malloc(sizeof(*entry->GroupList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupList_Len = dlq_count(&childval->v.childQ);
     entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
@@ -2092,6 +2110,8 @@ status_t build_to_priv_vlan_SubnetBasedConfig(
   childval = val_first_child_name(
       parentval,
       "GroupMemberList");
+  entry->GroupMemberList_Len = 0;
+  entry->GroupMemberList = malloc(sizeof(*entry->GroupMemberList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
     entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
@@ -2121,6 +2141,8 @@ status_t build_to_priv_vlan_MappingPort(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2177,6 +2199,8 @@ status_t build_to_priv_vlan_MappingConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2199,6 +2223,8 @@ status_t build_to_priv_vlan_MappingConfig(
   childval = val_first_child_name(
       parentval,
       "PortList");
+  entry->PortList_Len = 0;
+  entry->PortList = malloc(sizeof(*entry->PortList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortList_Len = dlq_count(&childval->v.childQ);
     entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
@@ -2429,6 +2455,8 @@ status_t build_to_priv_vlan_PortsConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2513,6 +2541,8 @@ status_t build_to_priv_vlan_PortEntry(
   childval = val_first_child_name(
       parentval,
       "TaggedList");
+  entry->TaggedList_Len = 0;
+  entry->TaggedList = malloc(sizeof(*entry->TaggedList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->TaggedList_Len = dlq_count(&childval->v.childQ);
     entry->TaggedList = malloc((entry->TaggedList_Len + 1) * sizeof(*entry->TaggedList));
@@ -2529,6 +2559,8 @@ status_t build_to_priv_vlan_PortEntry(
   childval = val_first_child_name(
       parentval,
       "UntaggedList");
+  entry->UntaggedList_Len = 0;
+  entry->UntaggedList = malloc(sizeof(*entry->UntaggedList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->UntaggedList_Len = dlq_count(&childval->v.childQ);
     entry->UntaggedList = malloc((entry->UntaggedList_Len + 1) * sizeof(*entry->UntaggedList));
@@ -2552,6 +2584,8 @@ status_t build_to_priv_vlan_FiltersConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2698,6 +2732,8 @@ status_t build_to_priv_vlan_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "TaggedList");
+  entry->TaggedList_Len = 0;
+  entry->TaggedList = malloc(sizeof(*entry->TaggedList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->TaggedList_Len = dlq_count(&childval->v.childQ);
     entry->TaggedList = malloc((entry->TaggedList_Len + 1) * sizeof(*entry->TaggedList));
@@ -2720,6 +2756,8 @@ status_t build_to_priv_vlan_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "UntaggedList");
+  entry->UntaggedList_Len = 0;
+  entry->UntaggedList = malloc(sizeof(*entry->UntaggedList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->UntaggedList_Len = dlq_count(&childval->v.childQ);
     entry->UntaggedList = malloc((entry->UntaggedList_Len + 1) * sizeof(*entry->UntaggedList));

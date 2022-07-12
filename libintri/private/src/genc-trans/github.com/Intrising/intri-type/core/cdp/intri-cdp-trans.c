@@ -963,6 +963,8 @@ status_t build_to_priv_cdp_LocalInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1057,6 +1059,8 @@ status_t build_to_priv_cdp_LocalInfoEntry(
   childval = val_first_child_name(
       parentval,
       "Capability");
+  entry->Capability_Len = 0;
+  entry->Capability = malloc(sizeof(*entry->Capability));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Capability_Len = dlq_count(&childval->v.childQ);
     entry->Capability = malloc((entry->Capability_Len + 1) * sizeof(*entry->Capability));
@@ -1080,6 +1084,8 @@ status_t build_to_priv_cdp_NeighborInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1189,6 +1195,8 @@ status_t build_to_priv_cdp_RecvIdentifyInfo(
   childval = val_first_child_name(
       parentval,
       "Capability");
+  entry->Capability_Len = 0;
+  entry->Capability = malloc(sizeof(*entry->Capability));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Capability_Len = dlq_count(&childval->v.childQ);
     entry->Capability = malloc((entry->Capability_Len + 1) * sizeof(*entry->Capability));
@@ -1212,6 +1220,8 @@ status_t build_to_priv_cdp_SystemInfo(
   childval = val_first_child_name(
       parentval,
       "IP");
+  entry->IP_Len = 0;
+  entry->IP = malloc(sizeof(*entry->IP));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IP_Len = dlq_count(&childval->v.childQ);
     entry->IP = malloc((entry->IP_Len + 1) * sizeof(*entry->IP));
@@ -1361,6 +1371,8 @@ status_t build_to_priv_cdp_Statistic(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

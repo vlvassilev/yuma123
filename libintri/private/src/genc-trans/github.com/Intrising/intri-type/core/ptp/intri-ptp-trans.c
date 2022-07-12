@@ -1246,6 +1246,8 @@ status_t build_to_priv_ptp_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "IPAddressList");
+  entry->IPAddressList_Len = 0;
+  entry->IPAddressList = malloc(sizeof(*entry->IPAddressList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IPAddressList_Len = dlq_count(&childval->v.childQ);
     entry->IPAddressList = malloc((entry->IPAddressList_Len + 1) * sizeof(*entry->IPAddressList));
@@ -1380,6 +1382,8 @@ status_t build_to_priv_ptp_PortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1443,6 +1447,8 @@ status_t build_to_priv_ptp_Status(
   childval = val_first_child_name(
       parentval,
       "PortStatusList");
+  entry->PortStatusList_Len = 0;
+  entry->PortStatusList = malloc(sizeof(*entry->PortStatusList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortStatusList_Len = dlq_count(&childval->v.childQ);
     entry->PortStatusList = malloc((entry->PortStatusList_Len + 1) * sizeof(*entry->PortStatusList));
@@ -1465,6 +1471,8 @@ status_t build_to_priv_ptp_Status(
   childval = val_first_child_name(
       parentval,
       "PortCounterList");
+  entry->PortCounterList_Len = 0;
+  entry->PortCounterList = malloc(sizeof(*entry->PortCounterList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortCounterList_Len = dlq_count(&childval->v.childQ);
     entry->PortCounterList = malloc((entry->PortCounterList_Len + 1) * sizeof(*entry->PortCounterList));
@@ -1494,6 +1502,8 @@ status_t build_to_priv_ptp_ClockStatus(
   childval = val_first_child_name(
       parentval,
       "ParentList");
+  entry->ParentList_Len = 0;
+  entry->ParentList = malloc(sizeof(*entry->ParentList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->ParentList_Len = dlq_count(&childval->v.childQ);
     entry->ParentList = malloc((entry->ParentList_Len + 1) * sizeof(*entry->ParentList));

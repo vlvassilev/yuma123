@@ -5702,6 +5702,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceLed");
+  entry->DeviceLed_Len = 0;
+  entry->DeviceLed = malloc(sizeof(*entry->DeviceLed));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceLed_Len = dlq_count(&childval->v.childQ);
     entry->DeviceLed = malloc((entry->DeviceLed_Len + 1) * sizeof(*entry->DeviceLed));
@@ -5724,6 +5726,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceHWMonitor");
+  entry->DeviceHWMonitor_Len = 0;
+  entry->DeviceHWMonitor = malloc(sizeof(*entry->DeviceHWMonitor));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceHWMonitor_Len = dlq_count(&childval->v.childQ);
     entry->DeviceHWMonitor = malloc((entry->DeviceHWMonitor_Len + 1) * sizeof(*entry->DeviceHWMonitor));
@@ -5746,6 +5750,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DevicePSU");
+  entry->DevicePSU_Len = 0;
+  entry->DevicePSU = malloc(sizeof(*entry->DevicePSU));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DevicePSU_Len = dlq_count(&childval->v.childQ);
     entry->DevicePSU = malloc((entry->DevicePSU_Len + 1) * sizeof(*entry->DevicePSU));
@@ -5768,6 +5774,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceI2C");
+  entry->DeviceI2C_Len = 0;
+  entry->DeviceI2C = malloc(sizeof(*entry->DeviceI2C));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceI2C_Len = dlq_count(&childval->v.childQ);
     entry->DeviceI2C = malloc((entry->DeviceI2C_Len + 1) * sizeof(*entry->DeviceI2C));
@@ -5790,6 +5798,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceHW");
+  entry->DeviceHW_Len = 0;
+  entry->DeviceHW = malloc(sizeof(*entry->DeviceHW));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceHW_Len = dlq_count(&childval->v.childQ);
     entry->DeviceHW = malloc((entry->DeviceHW_Len + 1) * sizeof(*entry->DeviceHW));
@@ -5812,6 +5822,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DevicePTP");
+  entry->DevicePTP_Len = 0;
+  entry->DevicePTP = malloc(sizeof(*entry->DevicePTP));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DevicePTP_Len = dlq_count(&childval->v.childQ);
     entry->DevicePTP = malloc((entry->DevicePTP_Len + 1) * sizeof(*entry->DevicePTP));
@@ -5834,6 +5846,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceGPS");
+  entry->DeviceGPS_Len = 0;
+  entry->DeviceGPS = malloc(sizeof(*entry->DeviceGPS));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceGPS_Len = dlq_count(&childval->v.childQ);
     entry->DeviceGPS = malloc((entry->DeviceGPS_Len + 1) * sizeof(*entry->DeviceGPS));
@@ -5856,6 +5870,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceToD");
+  entry->DeviceToD_Len = 0;
+  entry->DeviceToD = malloc(sizeof(*entry->DeviceToD));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceToD_Len = dlq_count(&childval->v.childQ);
     entry->DeviceToD = malloc((entry->DeviceToD_Len + 1) * sizeof(*entry->DeviceToD));
@@ -5878,6 +5894,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceFan");
+  entry->DeviceFan_Len = 0;
+  entry->DeviceFan = malloc(sizeof(*entry->DeviceFan));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DeviceFan_Len = dlq_count(&childval->v.childQ);
     entry->DeviceFan = malloc((entry->DeviceFan_Len + 1) * sizeof(*entry->DeviceFan));
@@ -5900,6 +5918,8 @@ status_t build_to_priv_device_HardwareInfo(
   childval = val_first_child_name(
       parentval,
       "DevicePoE");
+  entry->DevicePoE_Len = 0;
+  entry->DevicePoE = malloc(sizeof(*entry->DevicePoE));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->DevicePoE_Len = dlq_count(&childval->v.childQ);
     entry->DevicePoE = malloc((entry->DevicePoE_Len + 1) * sizeof(*entry->DevicePoE));
@@ -6117,6 +6137,8 @@ status_t build_to_priv_device_PortInfo(
   childval = val_first_child_name(
       parentval,
       "PoEChannel");
+  entry->PoEChannel_Len = 0;
+  entry->PoEChannel = malloc(sizeof(*entry->PoEChannel));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PoEChannel_Len = dlq_count(&childval->v.childQ);
     entry->PoEChannel = malloc((entry->PoEChannel_Len + 1) * sizeof(*entry->PoEChannel));
@@ -6154,6 +6176,8 @@ status_t build_to_priv_device_PortInfo(
   childval = val_first_child_name(
       parentval,
       "Properties");
+  entry->Properties_Len = 0;
+  entry->Properties = malloc(sizeof(*entry->Properties));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Properties_Len = dlq_count(&childval->v.childQ);
     entry->Properties = malloc((entry->Properties_Len + 1) * sizeof(*entry->Properties));
@@ -6177,6 +6201,8 @@ status_t build_to_priv_device_PortInfo(
   childval = val_first_child_name(
       parentval,
       "SpeedProperties");
+  entry->SpeedProperties_Len = 0;
+  entry->SpeedProperties = malloc(sizeof(*entry->SpeedProperties));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SpeedProperties_Len = dlq_count(&childval->v.childQ);
     entry->SpeedProperties = malloc((entry->SpeedProperties_Len + 1) * sizeof(*entry->SpeedProperties));
@@ -6207,6 +6233,8 @@ status_t build_to_priv_device_BoardInfo(
   childval = val_first_child_name(
       parentval,
       "PortLists");
+  entry->PortLists_Len = 0;
+  entry->PortLists = malloc(sizeof(*entry->PortLists));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortLists_Len = dlq_count(&childval->v.childQ);
     entry->PortLists = malloc((entry->PortLists_Len + 1) * sizeof(*entry->PortLists));
@@ -6229,6 +6257,8 @@ status_t build_to_priv_device_BoardInfo(
   childval = val_first_child_name(
       parentval,
       "HwFeatures");
+  entry->HwFeatures_Len = 0;
+  entry->HwFeatures = malloc(sizeof(*entry->HwFeatures));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->HwFeatures_Len = dlq_count(&childval->v.childQ);
     entry->HwFeatures = malloc((entry->HwFeatures_Len + 1) * sizeof(*entry->HwFeatures));
@@ -6382,6 +6412,8 @@ status_t build_to_priv_device_TimeControlInfo(
   childval = val_first_child_name(
       parentval,
       "PortInfoList");
+  entry->PortInfoList_Len = 0;
+  entry->PortInfoList = malloc(sizeof(*entry->PortInfoList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->PortInfoList_Len = dlq_count(&childval->v.childQ);
     entry->PortInfoList = malloc((entry->PortInfoList_Len + 1) * sizeof(*entry->PortInfoList));
@@ -6404,6 +6436,8 @@ status_t build_to_priv_device_TimeControlInfo(
   childval = val_first_child_name(
       parentval,
       "SpeedFrequencyList");
+  entry->SpeedFrequencyList_Len = 0;
+  entry->SpeedFrequencyList = malloc(sizeof(*entry->SpeedFrequencyList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->SpeedFrequencyList_Len = dlq_count(&childval->v.childQ);
     entry->SpeedFrequencyList = malloc((entry->SpeedFrequencyList_Len + 1) * sizeof(*entry->SpeedFrequencyList));
@@ -8106,6 +8140,8 @@ status_t build_to_priv_device_PortList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

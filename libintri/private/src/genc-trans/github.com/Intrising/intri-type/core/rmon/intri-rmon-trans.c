@@ -916,6 +916,8 @@ status_t build_to_priv_rmon_Ingress(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1063,6 +1065,8 @@ status_t build_to_priv_rmon_Egress(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1154,6 +1158,8 @@ status_t build_to_priv_rmon_Histogram(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -1217,6 +1223,8 @@ status_t build_to_priv_rmon_UtilizationEntry(
   childval = val_first_child_name(
       parentval,
       "Ingress");
+  entry->Ingress_Len = 0;
+  entry->Ingress = malloc(sizeof(*entry->Ingress));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ingress_Len = dlq_count(&childval->v.childQ);
     entry->Ingress = malloc((entry->Ingress_Len + 1) * sizeof(*entry->Ingress));
@@ -1239,6 +1247,8 @@ status_t build_to_priv_rmon_UtilizationEntry(
   childval = val_first_child_name(
       parentval,
       "Egress");
+  entry->Egress_Len = 0;
+  entry->Egress = malloc(sizeof(*entry->Egress));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Egress_Len = dlq_count(&childval->v.childQ);
     entry->Egress = malloc((entry->Egress_Len + 1) * sizeof(*entry->Egress));
@@ -1268,6 +1278,8 @@ status_t build_to_priv_rmon_Utilization(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

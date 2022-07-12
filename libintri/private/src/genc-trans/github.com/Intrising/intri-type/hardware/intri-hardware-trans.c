@@ -3924,6 +3924,8 @@ status_t build_to_priv_hardware_DLDPPortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4076,6 +4078,8 @@ status_t build_to_priv_hardware_EnableRequest(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4132,6 +4136,8 @@ status_t build_to_priv_hardware_PortLED(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4407,6 +4413,8 @@ status_t build_to_priv_hardware_GPSCommand(
   childval = val_first_child_name(
       parentval,
       "Respond");
+  entry->Respond_Len = 0;
+  entry->Respond = malloc(sizeof(*entry->Respond));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Respond_Len = dlq_count(&childval->v.childQ);
     entry->Respond = malloc((entry->Respond_Len + 1) * sizeof(*entry->Respond));
@@ -4478,6 +4486,8 @@ status_t build_to_priv_hardware_FanSpeedConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4528,6 +4538,8 @@ status_t build_to_priv_hardware_FanStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4578,6 +4590,8 @@ status_t build_to_priv_hardware_TemperatureStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4635,6 +4649,8 @@ status_t build_to_priv_hardware_PowerRedundantState(
   childval = val_first_child_name(
       parentval,
       "RedundantList");
+  entry->RedundantList_Len = 0;
+  entry->RedundantList = malloc(sizeof(*entry->RedundantList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->RedundantList_Len = dlq_count(&childval->v.childQ);
     entry->RedundantList = malloc((entry->RedundantList_Len + 1) * sizeof(*entry->RedundantList));
@@ -4864,6 +4880,8 @@ status_t build_to_priv_hardware_Ports(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4927,6 +4945,8 @@ status_t build_to_priv_hardware_PortEntry(
   childval = val_first_child_name(
       parentval,
       "Properies");
+  entry->Properies_Len = 0;
+  entry->Properies = malloc(sizeof(*entry->Properies));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Properies_Len = dlq_count(&childval->v.childQ);
     entry->Properies = malloc((entry->Properies_Len + 1) * sizeof(*entry->Properies));
@@ -5065,6 +5085,8 @@ status_t build_to_priv_hardware_FanPercent(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5129,6 +5151,8 @@ status_t build_to_priv_hardware_SignalState(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5185,6 +5209,8 @@ status_t build_to_priv_hardware_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5247,6 +5273,8 @@ status_t build_to_priv_hardware_DeviceI2CAddress(
   childval = val_first_child_name(
       parentval,
       "Bus0");
+  entry->Bus0_Len = 0;
+  entry->Bus0 = malloc(sizeof(*entry->Bus0));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Bus0_Len = dlq_count(&childval->v.childQ);
     entry->Bus0 = malloc((entry->Bus0_Len + 1) * sizeof(*entry->Bus0));
@@ -5270,6 +5298,8 @@ status_t build_to_priv_hardware_DeviceI2CAddress(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5306,6 +5336,8 @@ status_t build_to_priv_hardware_DeviceI2CAddressInfo(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address_Len = 0;
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Address_Len = dlq_count(&childval->v.childQ);
     entry->Address = malloc((entry->Address_Len + 1) * sizeof(*entry->Address));
@@ -5329,6 +5361,8 @@ status_t build_to_priv_hardware_InfoList(
   childval = val_first_child_name(
       parentval,
       "Info");
+  entry->Info_Len = 0;
+  entry->Info = malloc(sizeof(*entry->Info));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Info_Len = dlq_count(&childval->v.childQ);
     entry->Info = malloc((entry->Info_Len + 1) * sizeof(*entry->Info));
@@ -5387,6 +5421,8 @@ status_t build_to_priv_hardware_MCUInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5437,6 +5473,8 @@ status_t build_to_priv_hardware_PoESetting(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -5507,6 +5545,8 @@ status_t build_to_priv_hardware_PoEPortStatusList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

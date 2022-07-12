@@ -2010,6 +2010,8 @@ status_t build_to_priv_lldp_PortConfig(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2066,6 +2068,8 @@ status_t build_to_priv_lldp_LocalInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2095,6 +2099,8 @@ status_t build_to_priv_lldp_NeighborInfo(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -2268,6 +2274,8 @@ status_t build_to_priv_lldp_NeighborInfoEntry(
   childval = val_first_child_name(
       parentval,
       "MgmtAddress");
+  entry->MgmtAddress_Len = 0;
+  entry->MgmtAddress = malloc(sizeof(*entry->MgmtAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MgmtAddress_Len = dlq_count(&childval->v.childQ);
     entry->MgmtAddress = malloc((entry->MgmtAddress_Len + 1) * sizeof(*entry->MgmtAddress));
@@ -2290,6 +2298,8 @@ status_t build_to_priv_lldp_NeighborInfoEntry(
   childval = val_first_child_name(
       parentval,
       "Capabilities");
+  entry->Capabilities_Len = 0;
+  entry->Capabilities = malloc(sizeof(*entry->Capabilities));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Capabilities_Len = dlq_count(&childval->v.childQ);
     entry->Capabilities = malloc((entry->Capabilities_Len + 1) * sizeof(*entry->Capabilities));
@@ -2306,6 +2316,8 @@ status_t build_to_priv_lldp_NeighborInfoEntry(
   childval = val_first_child_name(
       parentval,
       "CapabilitiesEnabled");
+  entry->CapabilitiesEnabled_Len = 0;
+  entry->CapabilitiesEnabled = malloc(sizeof(*entry->CapabilitiesEnabled));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->CapabilitiesEnabled_Len = dlq_count(&childval->v.childQ);
     entry->CapabilitiesEnabled = malloc((entry->CapabilitiesEnabled_Len + 1) * sizeof(*entry->CapabilitiesEnabled));
@@ -2322,6 +2334,8 @@ status_t build_to_priv_lldp_NeighborInfoEntry(
   childval = val_first_child_name(
       parentval,
       "MedCapabilities");
+  entry->MedCapabilities_Len = 0;
+  entry->MedCapabilities = malloc(sizeof(*entry->MedCapabilities));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MedCapabilities_Len = dlq_count(&childval->v.childQ);
     entry->MedCapabilities = malloc((entry->MedCapabilities_Len + 1) * sizeof(*entry->MedCapabilities));
@@ -2351,6 +2365,8 @@ status_t build_to_priv_lldp_NeighborInfoEntry(
   childval = val_first_child_name(
       parentval,
       "VoiceVlan");
+  entry->VoiceVlan_Len = 0;
+  entry->VoiceVlan = malloc(sizeof(*entry->VoiceVlan));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VoiceVlan_Len = dlq_count(&childval->v.childQ);
     entry->VoiceVlan = malloc((entry->VoiceVlan_Len + 1) * sizeof(*entry->VoiceVlan));
@@ -2496,6 +2512,8 @@ status_t build_to_priv_lldp_MACPHYConfig(
   childval = val_first_child_name(
       parentval,
       "AutoNegoAdvertisedCapability");
+  entry->AutoNegoAdvertisedCapability_Len = 0;
+  entry->AutoNegoAdvertisedCapability = malloc(sizeof(*entry->AutoNegoAdvertisedCapability));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->AutoNegoAdvertisedCapability_Len = dlq_count(&childval->v.childQ);
     entry->AutoNegoAdvertisedCapability = malloc((entry->AutoNegoAdvertisedCapability_Len + 1) * sizeof(*entry->AutoNegoAdvertisedCapability));
@@ -2526,6 +2544,8 @@ status_t build_to_priv_lldp_MediaCapability(
   childval = val_first_child_name(
       parentval,
       "Capabilities");
+  entry->Capabilities_Len = 0;
+  entry->Capabilities = malloc(sizeof(*entry->Capabilities));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Capabilities_Len = dlq_count(&childval->v.childQ);
     entry->Capabilities = malloc((entry->Capabilities_Len + 1) * sizeof(*entry->Capabilities));
@@ -2577,6 +2597,8 @@ status_t build_to_priv_lldp_PortManagementInfo(
   childval = val_first_child_name(
       parentval,
       "Ip");
+  entry->Ip_Len = 0;
+  entry->Ip = malloc(sizeof(*entry->Ip));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ip_Len = dlq_count(&childval->v.childQ);
     entry->Ip = malloc((entry->Ip_Len + 1) * sizeof(*entry->Ip));
@@ -2733,6 +2755,8 @@ status_t build_to_priv_lldp_ManagementAddress(
   childval = val_first_child_name(
       parentval,
       "Ip");
+  entry->Ip_Len = 0;
+  entry->Ip = malloc(sizeof(*entry->Ip));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ip_Len = dlq_count(&childval->v.childQ);
     entry->Ip = malloc((entry->Ip_Len + 1) * sizeof(*entry->Ip));
@@ -2812,6 +2836,8 @@ status_t build_to_priv_lldp_Statistic(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

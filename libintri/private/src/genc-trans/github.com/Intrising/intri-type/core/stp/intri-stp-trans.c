@@ -3035,6 +3035,8 @@ status_t build_to_priv_stp_MSTPConfig(
   childval = val_first_child_name(
       parentval,
       "Mstis");
+  entry->Mstis_Len = 0;
+  entry->Mstis = malloc(sizeof(*entry->Mstis));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Mstis_Len = dlq_count(&childval->v.childQ);
     entry->Mstis = malloc((entry->Mstis_Len + 1) * sizeof(*entry->Mstis));
@@ -3078,6 +3080,8 @@ status_t build_to_priv_stp_CISTEntry(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3114,6 +3118,8 @@ status_t build_to_priv_stp_MSTIEntry(
   childval = val_first_child_name(
       parentval,
       "Vlans");
+  entry->Vlans_Len = 0;
+  entry->Vlans = malloc(sizeof(*entry->Vlans));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Vlans_Len = dlq_count(&childval->v.childQ);
     entry->Vlans = malloc((entry->Vlans_Len + 1) * sizeof(*entry->Vlans));
@@ -3144,6 +3150,8 @@ status_t build_to_priv_stp_MSTIEntry(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3173,6 +3181,8 @@ status_t build_to_priv_stp_MSTIList(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -3402,6 +3412,8 @@ status_t build_to_priv_stp_CISTStatus(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3501,6 +3513,8 @@ status_t build_to_priv_stp_MSTIStatus(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -3598,6 +3612,8 @@ status_t build_to_priv_stp_MSTIStatusEntry(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3704,6 +3720,8 @@ status_t build_to_priv_stp_MSTPVLANGroupEntry(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3852,6 +3870,8 @@ status_t build_to_priv_stp_STPConfigPortEntry(
   childval = val_first_child_name(
       parentval,
       "MSTPPortPriority");
+  entry->MSTPPortPriority_Len = 0;
+  entry->MSTPPortPriority = malloc(sizeof(*entry->MSTPPortPriority));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MSTPPortPriority_Len = dlq_count(&childval->v.childQ);
     entry->MSTPPortPriority = malloc((entry->MSTPPortPriority_Len + 1) * sizeof(*entry->MSTPPortPriority));
@@ -3875,6 +3895,8 @@ status_t build_to_priv_stp_STPConfigPortEntry(
   childval = val_first_child_name(
       parentval,
       "MSTPPortAdminPathCost");
+  entry->MSTPPortAdminPathCost_Len = 0;
+  entry->MSTPPortAdminPathCost = malloc(sizeof(*entry->MSTPPortAdminPathCost));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MSTPPortAdminPathCost_Len = dlq_count(&childval->v.childQ);
     entry->MSTPPortAdminPathCost = malloc((entry->MSTPPortAdminPathCost_Len + 1) * sizeof(*entry->MSTPPortAdminPathCost));
@@ -3919,6 +3941,8 @@ status_t build_to_priv_stp_STPConfigMSTPGroupEntry(
   childval = val_first_child_name(
       parentval,
       "VIDs");
+  entry->VIDs_Len = 0;
+  entry->VIDs = malloc(sizeof(*entry->VIDs));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VIDs_Len = dlq_count(&childval->v.childQ);
     entry->VIDs = malloc((entry->VIDs_Len + 1) * sizeof(*entry->VIDs));
@@ -3955,6 +3979,8 @@ status_t build_to_priv_stp_STPConfig(
   childval = val_first_child_name(
       parentval,
       "Ports");
+  entry->Ports_Len = 0;
+  entry->Ports = malloc(sizeof(*entry->Ports));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->Ports_Len = dlq_count(&childval->v.childQ);
     entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
@@ -3977,6 +4003,8 @@ status_t build_to_priv_stp_STPConfig(
   childval = val_first_child_name(
       parentval,
       "MSTPGroups");
+  entry->MSTPGroups_Len = 0;
+  entry->MSTPGroups = malloc(sizeof(*entry->MSTPGroups));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MSTPGroups_Len = dlq_count(&childval->v.childQ);
     entry->MSTPGroups = malloc((entry->MSTPGroups_Len + 1) * sizeof(*entry->MSTPGroups));
@@ -4153,6 +4181,8 @@ status_t build_to_priv_stp_STPPortConfigEnabled(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4203,6 +4233,8 @@ status_t build_to_priv_stp_STPPortConfigPriority(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4253,6 +4285,8 @@ status_t build_to_priv_stp_STPPortConfigAdminP2PPort(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4303,6 +4337,8 @@ status_t build_to_priv_stp_STPPortConfigAdminEdgePort(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4353,6 +4389,8 @@ status_t build_to_priv_stp_STPPortConfigAdminPathCost(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4403,6 +4441,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPDefaultPriority(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4439,6 +4479,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPPortPriorityEntry(
   childval = val_first_child_name(
       parentval,
       "MSTPPortPriority");
+  entry->MSTPPortPriority_Len = 0;
+  entry->MSTPPortPriority = malloc(sizeof(*entry->MSTPPortPriority));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MSTPPortPriority_Len = dlq_count(&childval->v.childQ);
     entry->MSTPPortPriority = malloc((entry->MSTPPortPriority_Len + 1) * sizeof(*entry->MSTPPortPriority));
@@ -4462,6 +4504,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPPortPriority(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4512,6 +4556,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPDefaultAdminPathCost(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4548,6 +4594,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPPortAdminPathCostEntry(
   childval = val_first_child_name(
       parentval,
       "MSTPPortAdminPathCost");
+  entry->MSTPPortAdminPathCost_Len = 0;
+  entry->MSTPPortAdminPathCost = malloc(sizeof(*entry->MSTPPortAdminPathCost));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->MSTPPortAdminPathCost_Len = dlq_count(&childval->v.childQ);
     entry->MSTPPortAdminPathCost = malloc((entry->MSTPPortAdminPathCost_Len + 1) * sizeof(*entry->MSTPPortAdminPathCost));
@@ -4571,6 +4619,8 @@ status_t build_to_priv_stp_STPPortConfigMSTPPortAdminPathCost(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4621,6 +4671,8 @@ status_t build_to_priv_stp_STPPortConfigBPDUGuard(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4671,6 +4723,8 @@ status_t build_to_priv_stp_STPPortConfigBPDUReceiveOnly(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4721,6 +4775,8 @@ status_t build_to_priv_stp_STPPortConfigRestrictTcn(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4771,6 +4827,8 @@ status_t build_to_priv_stp_STPPortConfigRestrictRoot(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
@@ -4800,6 +4858,8 @@ status_t build_to_priv_stp_MSTPIDList(
   childval = val_first_child_name(
       parentval,
       "IDList");
+  entry->IDList_Len = 0;
+  entry->IDList = malloc(sizeof(*entry->IDList));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->IDList_Len = dlq_count(&childval->v.childQ);
     entry->IDList = malloc((entry->IDList_Len + 1) * sizeof(*entry->IDList));
@@ -4837,6 +4897,8 @@ status_t build_to_priv_stp_STPMSTPGroupEntry(
   childval = val_first_child_name(
       parentval,
       "VIDs");
+  entry->VIDs_Len = 0;
+  entry->VIDs = malloc(sizeof(*entry->VIDs));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->VIDs_Len = dlq_count(&childval->v.childQ);
     entry->VIDs = malloc((entry->VIDs_Len + 1) * sizeof(*entry->VIDs));
@@ -4860,6 +4922,8 @@ status_t build_to_priv_stp_MSTPGroup(
   childval = val_first_child_name(
       parentval,
       "List");
+  entry->List_Len = 0;
+  entry->List = malloc(sizeof(*entry->List));
   if (childval != NULL && childval->res == NO_ERR) {
     entry->List_Len = dlq_count(&childval->v.childQ);
     entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));

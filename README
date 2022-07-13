@@ -28,6 +28,7 @@ Branching from the last BSD licensed branch of the Yuma project the code has evo
 
 ==Option 2: Compilation and installation from source==
  #Build and runtime dependencies resolution for Debian stretch. Replace with appropriate command line if you are not using Debian.
+ sudo apt-get update
  sudo apt-get install git autoconf gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev libssl-dev
  git clone git://git.code.sf.net/p/yuma123/git yuma123-git
  cd yuma123-git

@@ -719,6 +719,7 @@ status_t build_to_priv_timesync_GNSStatus(
   childval = val_first_child_name(
       parentval,
       "Longitude");
+  entry->Longitude = malloc(sizeof(*entry->Longitude));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Longitude = VAL_STRING(childval);
@@ -726,6 +727,7 @@ status_t build_to_priv_timesync_GNSStatus(
   childval = val_first_child_name(
       parentval,
       "Latitude");
+  entry->Latitude = malloc(sizeof(*entry->Latitude));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Latitude = VAL_STRING(childval);
@@ -733,6 +735,7 @@ status_t build_to_priv_timesync_GNSStatus(
   childval = val_first_child_name(
       parentval,
       "DateTime");
+  entry->DateTime = malloc(sizeof(*entry->DateTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DateTime = VAL_STRING(childval);

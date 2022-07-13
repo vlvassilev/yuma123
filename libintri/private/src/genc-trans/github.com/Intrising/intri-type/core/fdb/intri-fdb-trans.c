@@ -841,6 +841,7 @@ status_t build_to_priv_fdb_ForwardConfigEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -906,6 +907,7 @@ status_t build_to_priv_fdb_DropConfigEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -1106,6 +1108,7 @@ status_t build_to_priv_fdb_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -1140,6 +1143,7 @@ status_t build_to_priv_fdb_SpecificMac(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);

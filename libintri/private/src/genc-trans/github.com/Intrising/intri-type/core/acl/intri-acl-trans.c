@@ -1490,6 +1490,7 @@ status_t build_to_priv_acl_InterfaceEntry(
   childval = val_first_child_name(
       parentval,
       "IngressAclName");
+  entry->IngressAclName = malloc(sizeof(*entry->IngressAclName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IngressAclName = VAL_STRING(childval);
@@ -1497,6 +1498,7 @@ status_t build_to_priv_acl_InterfaceEntry(
   childval = val_first_child_name(
       parentval,
       "EgressAclName");
+  entry->EgressAclName = malloc(sizeof(*entry->EgressAclName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EgressAclName = VAL_STRING(childval);
@@ -1542,6 +1544,7 @@ status_t build_to_priv_acl_ACLEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1605,6 +1608,7 @@ status_t build_to_priv_acl_ACEEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1626,6 +1630,7 @@ status_t build_to_priv_acl_ACEEntry(
   childval = val_first_child_name(
       parentval,
       "TimeRangeName");
+  entry->TimeRangeName = malloc(sizeof(*entry->TimeRangeName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TimeRangeName = VAL_STRING(childval);
@@ -1857,6 +1862,7 @@ status_t build_to_priv_acl_MACConfig(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Address = VAL_STRING(childval);
@@ -1864,6 +1870,7 @@ status_t build_to_priv_acl_MACConfig(
   childval = val_first_child_name(
       parentval,
       "AddressMask");
+  entry->AddressMask = malloc(sizeof(*entry->AddressMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AddressMask = VAL_STRING(childval);
@@ -1878,6 +1885,7 @@ status_t build_to_priv_acl_EtherTypeConfig(
   childval = val_first_child_name(
       parentval,
       "Type");
+  entry->Type = malloc(sizeof(*entry->Type));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Type = VAL_STRING(childval);
@@ -1885,6 +1893,7 @@ status_t build_to_priv_acl_EtherTypeConfig(
   childval = val_first_child_name(
       parentval,
       "EtherTypeMask");
+  entry->EtherTypeMask = malloc(sizeof(*entry->EtherTypeMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EtherTypeMask = VAL_STRING(childval);
@@ -1899,6 +1908,7 @@ status_t build_to_priv_acl_IPProtocolConfig(
   childval = val_first_child_name(
       parentval,
       "Protocol");
+  entry->Protocol = malloc(sizeof(*entry->Protocol));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Protocol = VAL_STRING(childval);
@@ -1906,6 +1916,7 @@ status_t build_to_priv_acl_IPProtocolConfig(
   childval = val_first_child_name(
       parentval,
       "ProtocolMask");
+  entry->ProtocolMask = malloc(sizeof(*entry->ProtocolMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ProtocolMask = VAL_STRING(childval);
@@ -1979,6 +1990,7 @@ status_t build_to_priv_acl_IPv4Config(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Address = VAL_STRING(childval);
@@ -1986,6 +1998,7 @@ status_t build_to_priv_acl_IPv4Config(
   childval = val_first_child_name(
       parentval,
       "AddressMask");
+  entry->AddressMask = malloc(sizeof(*entry->AddressMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AddressMask = VAL_STRING(childval);
@@ -2059,6 +2072,7 @@ status_t build_to_priv_acl_IPv6Config(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Address = VAL_STRING(childval);
@@ -2066,6 +2080,7 @@ status_t build_to_priv_acl_IPv6Config(
   childval = val_first_child_name(
       parentval,
       "AddressMask");
+  entry->AddressMask = malloc(sizeof(*entry->AddressMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AddressMask = VAL_STRING(childval);
@@ -2165,6 +2180,7 @@ status_t build_to_priv_acl_BindingEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -2185,6 +2201,7 @@ status_t build_to_priv_acl_BindingEntry(
   childval = val_first_child_name(
       parentval,
       "Mac");
+  entry->Mac = malloc(sizeof(*entry->Mac));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Mac = VAL_STRING(childval);
@@ -2222,6 +2239,7 @@ status_t build_to_priv_acl_FlowMirroringEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);

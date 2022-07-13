@@ -1188,6 +1188,7 @@ status_t build_to_priv_cdp_RecvIdentifyInfo(
   childval = val_first_child_name(
       parentval,
       "PortThroughInterface");
+  entry->PortThroughInterface = malloc(sizeof(*entry->PortThroughInterface));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PortThroughInterface = VAL_STRING(childval);
@@ -1238,6 +1239,7 @@ status_t build_to_priv_cdp_SystemInfo(
   childval = val_first_child_name(
       parentval,
       "DeviceID");
+  entry->DeviceID = malloc(sizeof(*entry->DeviceID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DeviceID = VAL_STRING(childval);
@@ -1245,6 +1247,7 @@ status_t build_to_priv_cdp_SystemInfo(
   childval = val_first_child_name(
       parentval,
       "Platform");
+  entry->Platform = malloc(sizeof(*entry->Platform));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Platform = VAL_STRING(childval);
@@ -1252,6 +1255,7 @@ status_t build_to_priv_cdp_SystemInfo(
   childval = val_first_child_name(
       parentval,
       "SystemName");
+  entry->SystemName = malloc(sizeof(*entry->SystemName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SystemName = VAL_STRING(childval);
@@ -1259,6 +1263,7 @@ status_t build_to_priv_cdp_SystemInfo(
   childval = val_first_child_name(
       parentval,
       "SoftwareVersion");
+  entry->SoftwareVersion = malloc(sizeof(*entry->SoftwareVersion));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SoftwareVersion = VAL_STRING(childval);
@@ -1301,6 +1306,7 @@ status_t build_to_priv_cdp_PortInfo(
   childval = val_first_child_name(
       parentval,
       "PortThroughInterface");
+  entry->PortThroughInterface = malloc(sizeof(*entry->PortThroughInterface));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PortThroughInterface = VAL_STRING(childval);

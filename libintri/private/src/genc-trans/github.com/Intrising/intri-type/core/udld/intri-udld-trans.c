@@ -1096,6 +1096,7 @@ status_t build_to_priv_udld_NeighborStatusEntry(
   childval = val_first_child_name(
       parentval,
       "DeviceID");
+  entry->DeviceID = malloc(sizeof(*entry->DeviceID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DeviceID = VAL_STRING(childval);
@@ -1103,6 +1104,7 @@ status_t build_to_priv_udld_NeighborStatusEntry(
   childval = val_first_child_name(
       parentval,
       "PortID");
+  entry->PortID = malloc(sizeof(*entry->PortID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PortID = VAL_STRING(childval);
@@ -1110,6 +1112,7 @@ status_t build_to_priv_udld_NeighborStatusEntry(
   childval = val_first_child_name(
       parentval,
       "MacAddress");
+  entry->MacAddress = malloc(sizeof(*entry->MacAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MacAddress = VAL_STRING(childval);
@@ -1117,6 +1120,7 @@ status_t build_to_priv_udld_NeighborStatusEntry(
   childval = val_first_child_name(
       parentval,
       "DeviceName");
+  entry->DeviceName = malloc(sizeof(*entry->DeviceName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DeviceName = VAL_STRING(childval);

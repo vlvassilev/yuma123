@@ -393,6 +393,7 @@ status_t build_to_priv_userinterface_CLIConfig(
   childval = val_first_child_name(
       parentval,
       "WelcomeMessage");
+  entry->WelcomeMessage = malloc(sizeof(*entry->WelcomeMessage));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->WelcomeMessage = VAL_STRING(childval);
@@ -428,6 +429,7 @@ status_t build_to_priv_userinterface_SNMPConfig(
   childval = val_first_child_name(
       parentval,
       "GetCommunity");
+  entry->GetCommunity = malloc(sizeof(*entry->GetCommunity));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->GetCommunity = VAL_STRING(childval);
@@ -435,6 +437,7 @@ status_t build_to_priv_userinterface_SNMPConfig(
   childval = val_first_child_name(
       parentval,
       "SetCommunity");
+  entry->SetCommunity = malloc(sizeof(*entry->SetCommunity));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SetCommunity = VAL_STRING(childval);
@@ -442,6 +445,7 @@ status_t build_to_priv_userinterface_SNMPConfig(
   childval = val_first_child_name(
       parentval,
       "SNMPV1V2Username");
+  entry->SNMPV1V2Username = malloc(sizeof(*entry->SNMPV1V2Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SNMPV1V2Username = VAL_STRING(childval);
@@ -470,6 +474,7 @@ status_t build_to_priv_userinterface_SNMPConfig(
   childval = val_first_child_name(
       parentval,
       "SNMPEngineID");
+  entry->SNMPEngineID = malloc(sizeof(*entry->SNMPEngineID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SNMPEngineID = VAL_STRING(childval);
@@ -477,6 +482,7 @@ status_t build_to_priv_userinterface_SNMPConfig(
   childval = val_first_child_name(
       parentval,
       "TrapEngineID");
+  entry->TrapEngineID = malloc(sizeof(*entry->TrapEngineID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TrapEngineID = VAL_STRING(childval);
@@ -519,6 +525,7 @@ status_t build_to_priv_userinterface_WebConfig(
   childval = val_first_child_name(
       parentval,
       "EncryptedCertPassphrase");
+  entry->EncryptedCertPassphrase = malloc(sizeof(*entry->EncryptedCertPassphrase));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EncryptedCertPassphrase = VAL_STRING(childval);
@@ -526,6 +533,7 @@ status_t build_to_priv_userinterface_WebConfig(
   childval = val_first_child_name(
       parentval,
       "LoginMessage");
+  entry->LoginMessage = malloc(sizeof(*entry->LoginMessage));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LoginMessage = VAL_STRING(childval);

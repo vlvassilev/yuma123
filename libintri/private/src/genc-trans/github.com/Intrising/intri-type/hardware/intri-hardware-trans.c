@@ -3828,6 +3828,7 @@ status_t build_to_priv_hardware_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -3835,6 +3836,7 @@ status_t build_to_priv_hardware_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "SubnetMask");
+  entry->SubnetMask = malloc(sizeof(*entry->SubnetMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SubnetMask = VAL_STRING(childval);
@@ -4043,6 +4045,7 @@ status_t build_to_priv_hardware_DLDPNeighborEntry(
   childval = val_first_child_name(
       parentval,
       "NeighborMACAddress");
+  entry->NeighborMACAddress = malloc(sizeof(*entry->NeighborMACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->NeighborMACAddress = VAL_STRING(childval);
@@ -4269,6 +4272,7 @@ status_t build_to_priv_hardware_Coordinates(
   childval = val_first_child_name(
       parentval,
       "Latitude");
+  entry->Latitude = malloc(sizeof(*entry->Latitude));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Latitude = VAL_STRING(childval);
@@ -4276,6 +4280,7 @@ status_t build_to_priv_hardware_Coordinates(
   childval = val_first_child_name(
       parentval,
       "Longitude");
+  entry->Longitude = malloc(sizeof(*entry->Longitude));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Longitude = VAL_STRING(childval);
@@ -4290,6 +4295,7 @@ status_t build_to_priv_hardware_GNSSVerboseInfomation(
   childval = val_first_child_name(
       parentval,
       "Mode");
+  entry->Mode = malloc(sizeof(*entry->Mode));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Mode = VAL_STRING(childval);
@@ -4297,6 +4303,7 @@ status_t build_to_priv_hardware_GNSSVerboseInfomation(
   childval = val_first_child_name(
       parentval,
       "NavigationalStatus");
+  entry->NavigationalStatus = malloc(sizeof(*entry->NavigationalStatus));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->NavigationalStatus = VAL_STRING(childval);
@@ -4406,6 +4413,7 @@ status_t build_to_priv_hardware_GPSCommand(
   childval = val_first_child_name(
       parentval,
       "Request");
+  entry->Request = malloc(sizeof(*entry->Request));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Request = VAL_STRING(childval);
@@ -4452,6 +4460,7 @@ status_t build_to_priv_hardware_USBStatus(
   childval = val_first_child_name(
       parentval,
       "ConnectedDevice");
+  entry->ConnectedDevice = malloc(sizeof(*entry->ConnectedDevice));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ConnectedDevice = VAL_STRING(childval);
@@ -4621,6 +4630,7 @@ status_t build_to_priv_hardware_TemperatureStatusEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5291,6 +5301,7 @@ status_t build_to_priv_hardware_DeviceI2CAddress(
   childval = val_first_child_name(
       parentval,
       "Mux");
+  entry->Mux = malloc(sizeof(*entry->Mux));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Mux = VAL_STRING(childval);
@@ -5400,6 +5411,7 @@ status_t build_to_priv_hardware_Network(
   childval = val_first_child_name(
       parentval,
       "IP");
+  entry->IP = malloc(sizeof(*entry->IP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IP = VAL_STRING(childval);
@@ -5407,6 +5419,7 @@ status_t build_to_priv_hardware_Network(
   childval = val_first_child_name(
       parentval,
       "Mask");
+  entry->Mask = malloc(sizeof(*entry->Mask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Mask = VAL_STRING(childval);
@@ -5452,6 +5465,7 @@ status_t build_to_priv_hardware_MCUVersion(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5459,6 +5473,7 @@ status_t build_to_priv_hardware_MCUVersion(
   childval = val_first_child_name(
       parentval,
       "Version");
+  entry->Version = malloc(sizeof(*entry->Version));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Version = VAL_STRING(childval);
@@ -5694,6 +5709,7 @@ status_t build_to_priv_hardware_PoESystemStatus(
   childval = val_first_child_name(
       parentval,
       "Version");
+  entry->Version = malloc(sizeof(*entry->Version));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Version = VAL_STRING(childval);

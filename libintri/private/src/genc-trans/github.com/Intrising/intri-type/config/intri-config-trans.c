@@ -866,6 +866,7 @@ status_t build_to_priv_config_ImportAction(
   childval = val_first_child_name(
       parentval,
       "FileURL");
+  entry->FileURL = malloc(sizeof(*entry->FileURL));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FileURL = VAL_STRING(childval);
@@ -887,6 +888,7 @@ status_t build_to_priv_config_ExportAction(
   childval = val_first_child_name(
       parentval,
       "FileURL");
+  entry->FileURL = malloc(sizeof(*entry->FileURL));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FileURL = VAL_STRING(childval);
@@ -936,6 +938,7 @@ status_t build_to_priv_config_SaveModeStatus(
   childval = val_first_child_name(
       parentval,
       "ConfigLastUpdated");
+  entry->ConfigLastUpdated = malloc(sizeof(*entry->ConfigLastUpdated));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ConfigLastUpdated = VAL_STRING(childval);

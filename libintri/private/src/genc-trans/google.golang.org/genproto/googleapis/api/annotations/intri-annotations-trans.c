@@ -318,6 +318,7 @@ status_t build_to_priv_annotations_HttpRule(
   childval = val_first_child_name(
       parentval,
       "Selector");
+  entry->Selector = malloc(sizeof(*entry->Selector));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Selector = VAL_STRING(childval);
@@ -379,6 +380,7 @@ status_t build_to_priv_annotations_HttpRule(
   childval = val_first_child_name(
       parentval,
       "Body");
+  entry->Body = malloc(sizeof(*entry->Body));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Body = VAL_STRING(childval);
@@ -386,6 +388,7 @@ status_t build_to_priv_annotations_HttpRule(
   childval = val_first_child_name(
       parentval,
       "ResponseBody");
+  entry->ResponseBody = malloc(sizeof(*entry->ResponseBody));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ResponseBody = VAL_STRING(childval);
@@ -424,6 +427,7 @@ status_t build_to_priv_annotations_CustomHttpPattern(
   childval = val_first_child_name(
       parentval,
       "Kind");
+  entry->Kind = malloc(sizeof(*entry->Kind));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Kind = VAL_STRING(childval);
@@ -431,6 +435,7 @@ status_t build_to_priv_annotations_CustomHttpPattern(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);

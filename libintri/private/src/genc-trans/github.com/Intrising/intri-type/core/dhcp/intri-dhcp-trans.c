@@ -1143,6 +1143,7 @@ status_t build_to_priv_dhcp_ARPInspectionACLRuleEntry(
   childval = val_first_child_name(
       parentval,
       "SrcMAC");
+  entry->SrcMAC = malloc(sizeof(*entry->SrcMAC));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SrcMAC = VAL_STRING(childval);
@@ -1150,6 +1151,7 @@ status_t build_to_priv_dhcp_ARPInspectionACLRuleEntry(
   childval = val_first_child_name(
       parentval,
       "SrcIP");
+  entry->SrcIP = malloc(sizeof(*entry->SrcIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SrcIP = VAL_STRING(childval);
@@ -1157,6 +1159,7 @@ status_t build_to_priv_dhcp_ARPInspectionACLRuleEntry(
   childval = val_first_child_name(
       parentval,
       "SrcIPMask");
+  entry->SrcIPMask = malloc(sizeof(*entry->SrcIPMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SrcIPMask = VAL_STRING(childval);
@@ -1242,6 +1245,7 @@ status_t build_to_priv_dhcp_RelayConfig(
   childval = val_first_child_name(
       parentval,
       "DHCPServerAddress");
+  entry->DHCPServerAddress = malloc(sizeof(*entry->DHCPServerAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DHCPServerAddress = VAL_STRING(childval);
@@ -1256,6 +1260,7 @@ status_t build_to_priv_dhcp_RelayConfig(
   childval = val_first_child_name(
       parentval,
       "CustomRemoteID");
+  entry->CustomRemoteID = malloc(sizeof(*entry->CustomRemoteID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CustomRemoteID = VAL_STRING(childval);
@@ -1490,6 +1495,7 @@ status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -1497,6 +1503,7 @@ status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
   childval = val_first_child_name(
       parentval,
       "IP");
+  entry->IP = malloc(sizeof(*entry->IP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IP = VAL_STRING(childval);
@@ -1524,6 +1531,7 @@ status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
   childval = val_first_child_name(
       parentval,
       "LastUpdated");
+  entry->LastUpdated = malloc(sizeof(*entry->LastUpdated));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastUpdated = VAL_STRING(childval);
@@ -1531,6 +1539,7 @@ status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
   childval = val_first_child_name(
       parentval,
       "LastUpdatedEpoch");
+  entry->LastUpdatedEpoch = malloc(sizeof(*entry->LastUpdatedEpoch));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastUpdatedEpoch = VAL_STRING(childval);

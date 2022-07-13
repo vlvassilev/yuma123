@@ -363,6 +363,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "MainNTPServer");
+  entry->MainNTPServer = malloc(sizeof(*entry->MainNTPServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MainNTPServer = VAL_STRING(childval);
@@ -370,6 +371,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "BackupNTPServer");
+  entry->BackupNTPServer = malloc(sizeof(*entry->BackupNTPServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BackupNTPServer = VAL_STRING(childval);
@@ -391,6 +393,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "TimeZone");
+  entry->TimeZone = malloc(sizeof(*entry->TimeZone));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TimeZone = VAL_STRING(childval);
@@ -398,6 +401,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "TimeFormat");
+  entry->TimeFormat = malloc(sizeof(*entry->TimeFormat));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TimeFormat = VAL_STRING(childval);
@@ -405,6 +409,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "DateFormat");
+  entry->DateFormat = malloc(sizeof(*entry->DateFormat));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DateFormat = VAL_STRING(childval);
@@ -412,6 +417,7 @@ status_t build_to_priv_time_Config(
   childval = val_first_child_name(
       parentval,
       "Manual");
+  entry->Manual = malloc(sizeof(*entry->Manual));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Manual = VAL_STRING(childval);
@@ -458,6 +464,7 @@ status_t build_to_priv_time_Status(
   childval = val_first_child_name(
       parentval,
       "LocalTime");
+  entry->LocalTime = malloc(sizeof(*entry->LocalTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LocalTime = VAL_STRING(childval);
@@ -465,6 +472,7 @@ status_t build_to_priv_time_Status(
   childval = val_first_child_name(
       parentval,
       "LocalDate");
+  entry->LocalDate = malloc(sizeof(*entry->LocalDate));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LocalDate = VAL_STRING(childval);
@@ -472,6 +480,7 @@ status_t build_to_priv_time_Status(
   childval = val_first_child_name(
       parentval,
       "UsedNTPServer");
+  entry->UsedNTPServer = malloc(sizeof(*entry->UsedNTPServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UsedNTPServer = VAL_STRING(childval);
@@ -520,6 +529,7 @@ status_t build_to_priv_time_Response(
   childval = val_first_child_name(
       parentval,
       "Ts");
+  entry->Ts = malloc(sizeof(*entry->Ts));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Ts = VAL_STRING(childval);

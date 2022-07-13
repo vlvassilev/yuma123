@@ -114,6 +114,7 @@ status_t build_to_priv_diagnostic_ARPEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddr");
+  entry->IPAddr = malloc(sizeof(*entry->IPAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddr = VAL_STRING(childval);
@@ -121,6 +122,7 @@ status_t build_to_priv_diagnostic_ARPEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddr");
+  entry->MACAddr = malloc(sizeof(*entry->MACAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddr = VAL_STRING(childval);

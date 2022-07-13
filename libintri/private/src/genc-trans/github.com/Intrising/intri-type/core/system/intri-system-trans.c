@@ -184,6 +184,7 @@ status_t build_to_priv_system_Status(
   childval = val_first_child_name(
       parentval,
       "LastBootTime");
+  entry->LastBootTime = malloc(sizeof(*entry->LastBootTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastBootTime = VAL_STRING(childval);
@@ -205,6 +206,7 @@ status_t build_to_priv_system_Config(
   childval = val_first_child_name(
       parentval,
       "SysName");
+  entry->SysName = malloc(sizeof(*entry->SysName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysName = VAL_STRING(childval);
@@ -212,6 +214,7 @@ status_t build_to_priv_system_Config(
   childval = val_first_child_name(
       parentval,
       "SysLocation");
+  entry->SysLocation = malloc(sizeof(*entry->SysLocation));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysLocation = VAL_STRING(childval);
@@ -219,6 +222,7 @@ status_t build_to_priv_system_Config(
   childval = val_first_child_name(
       parentval,
       "SysGroup");
+  entry->SysGroup = malloc(sizeof(*entry->SysGroup));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysGroup = VAL_STRING(childval);
@@ -226,6 +230,7 @@ status_t build_to_priv_system_Config(
   childval = val_first_child_name(
       parentval,
       "SysContact");
+  entry->SysContact = malloc(sizeof(*entry->SysContact));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysContact = VAL_STRING(childval);
@@ -240,6 +245,7 @@ status_t build_to_priv_system_IdentificationConfig(
   childval = val_first_child_name(
       parentval,
       "SysName");
+  entry->SysName = malloc(sizeof(*entry->SysName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysName = VAL_STRING(childval);
@@ -247,6 +253,7 @@ status_t build_to_priv_system_IdentificationConfig(
   childval = val_first_child_name(
       parentval,
       "SysLocation");
+  entry->SysLocation = malloc(sizeof(*entry->SysLocation));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysLocation = VAL_STRING(childval);
@@ -254,6 +261,7 @@ status_t build_to_priv_system_IdentificationConfig(
   childval = val_first_child_name(
       parentval,
       "SysGroup");
+  entry->SysGroup = malloc(sizeof(*entry->SysGroup));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysGroup = VAL_STRING(childval);
@@ -261,6 +269,7 @@ status_t build_to_priv_system_IdentificationConfig(
   childval = val_first_child_name(
       parentval,
       "SysContact");
+  entry->SysContact = malloc(sizeof(*entry->SysContact));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SysContact = VAL_STRING(childval);

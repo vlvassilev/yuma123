@@ -2576,6 +2576,7 @@ status_t build_to_priv_lldp_SystemManagementInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -2583,6 +2584,7 @@ status_t build_to_priv_lldp_SystemManagementInfo(
   childval = val_first_child_name(
       parentval,
       "Description");
+  entry->Description = malloc(sizeof(*entry->Description));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Description = VAL_STRING(childval);
@@ -2615,6 +2617,7 @@ status_t build_to_priv_lldp_PortManagementInfo(
   childval = val_first_child_name(
       parentval,
       "MACAddr");
+  entry->MACAddr = malloc(sizeof(*entry->MACAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddr = VAL_STRING(childval);
@@ -2622,6 +2625,7 @@ status_t build_to_priv_lldp_PortManagementInfo(
   childval = val_first_child_name(
       parentval,
       "Description");
+  entry->Description = malloc(sizeof(*entry->Description));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Description = VAL_STRING(childval);
@@ -2720,6 +2724,7 @@ status_t build_to_priv_lldp_PortManagementAddressInfo(
   childval = val_first_child_name(
       parentval,
       "Ip");
+  entry->Ip = malloc(sizeof(*entry->Ip));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Ip = VAL_STRING(childval);
@@ -2734,6 +2739,7 @@ status_t build_to_priv_lldp_PortManagementAddressInfo(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -2748,6 +2754,7 @@ status_t build_to_priv_lldp_ManagementAddress(
   childval = val_first_child_name(
       parentval,
       "MACAddr");
+  entry->MACAddr = malloc(sizeof(*entry->MACAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddr = VAL_STRING(childval);
@@ -2773,6 +2780,7 @@ status_t build_to_priv_lldp_ManagementAddress(
   childval = val_first_child_name(
       parentval,
       "PortDsr");
+  entry->PortDsr = malloc(sizeof(*entry->PortDsr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PortDsr = VAL_STRING(childval);
@@ -2794,6 +2802,7 @@ status_t build_to_priv_lldp_ChassisInfo(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -2822,6 +2831,7 @@ status_t build_to_priv_lldp_PortID(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);

@@ -966,6 +966,7 @@ status_t build_to_priv_port_ConfigEntry(
   childval = val_first_child_name(
       parentval,
       "Alias");
+  entry->Alias = malloc(sizeof(*entry->Alias));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Alias = VAL_STRING(childval);
@@ -1052,6 +1053,7 @@ status_t build_to_priv_port_AliasEntry(
   childval = val_first_child_name(
       parentval,
       "Alias");
+  entry->Alias = malloc(sizeof(*entry->Alias));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Alias = VAL_STRING(childval);
@@ -1356,6 +1358,7 @@ status_t build_to_priv_port_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "LastLinkChange");
+  entry->LastLinkChange = malloc(sizeof(*entry->LastLinkChange));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastLinkChange = VAL_STRING(childval);

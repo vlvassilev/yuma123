@@ -1420,6 +1420,7 @@ status_t build_to_priv_access_AuthenticationTACACS(
   childval = val_first_child_name(
       parentval,
       "PrimaryAuthServerName");
+  entry->PrimaryAuthServerName = malloc(sizeof(*entry->PrimaryAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PrimaryAuthServerName = VAL_STRING(childval);
@@ -1427,6 +1428,7 @@ status_t build_to_priv_access_AuthenticationTACACS(
   childval = val_first_child_name(
       parentval,
       "FallbackAuthServerName");
+  entry->FallbackAuthServerName = malloc(sizeof(*entry->FallbackAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FallbackAuthServerName = VAL_STRING(childval);
@@ -1434,6 +1436,7 @@ status_t build_to_priv_access_AuthenticationTACACS(
   childval = val_first_child_name(
       parentval,
       "UserPrivilegeLevel0");
+  entry->UserPrivilegeLevel0 = malloc(sizeof(*entry->UserPrivilegeLevel0));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserPrivilegeLevel0 = VAL_STRING(childval);
@@ -1441,6 +1444,7 @@ status_t build_to_priv_access_AuthenticationTACACS(
   childval = val_first_child_name(
       parentval,
       "UserPrivilegeLevel1");
+  entry->UserPrivilegeLevel1 = malloc(sizeof(*entry->UserPrivilegeLevel1));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserPrivilegeLevel1 = VAL_STRING(childval);
@@ -1448,6 +1452,7 @@ status_t build_to_priv_access_AuthenticationTACACS(
   childval = val_first_child_name(
       parentval,
       "UserPrivilegeLevel15");
+  entry->UserPrivilegeLevel15 = malloc(sizeof(*entry->UserPrivilegeLevel15));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserPrivilegeLevel15 = VAL_STRING(childval);
@@ -1462,6 +1467,7 @@ status_t build_to_priv_access_AuthenticationRADIUS(
   childval = val_first_child_name(
       parentval,
       "PrimaryAuthServerName");
+  entry->PrimaryAuthServerName = malloc(sizeof(*entry->PrimaryAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PrimaryAuthServerName = VAL_STRING(childval);
@@ -1469,6 +1475,7 @@ status_t build_to_priv_access_AuthenticationRADIUS(
   childval = val_first_child_name(
       parentval,
       "FallbackAuthServerName");
+  entry->FallbackAuthServerName = malloc(sizeof(*entry->FallbackAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FallbackAuthServerName = VAL_STRING(childval);
@@ -1476,6 +1483,7 @@ status_t build_to_priv_access_AuthenticationRADIUS(
   childval = val_first_child_name(
       parentval,
       "UserPrivilegeLevel6");
+  entry->UserPrivilegeLevel6 = malloc(sizeof(*entry->UserPrivilegeLevel6));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserPrivilegeLevel6 = VAL_STRING(childval);
@@ -1483,6 +1491,7 @@ status_t build_to_priv_access_AuthenticationRADIUS(
   childval = val_first_child_name(
       parentval,
       "UserPrivilegeLevel7");
+  entry->UserPrivilegeLevel7 = malloc(sizeof(*entry->UserPrivilegeLevel7));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserPrivilegeLevel7 = VAL_STRING(childval);
@@ -1497,6 +1506,7 @@ status_t build_to_priv_access_AuthenticationServerEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1511,6 +1521,7 @@ status_t build_to_priv_access_AuthenticationServerEntry(
   childval = val_first_child_name(
       parentval,
       "HostAddress");
+  entry->HostAddress = malloc(sizeof(*entry->HostAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HostAddress = VAL_STRING(childval);
@@ -1525,6 +1536,7 @@ status_t build_to_priv_access_AuthenticationServerEntry(
   childval = val_first_child_name(
       parentval,
       "SharedSecret");
+  entry->SharedSecret = malloc(sizeof(*entry->SharedSecret));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SharedSecret = VAL_STRING(childval);
@@ -1577,6 +1589,7 @@ status_t build_to_priv_access_LoginRequest(
   childval = val_first_child_name(
       parentval,
       "Account");
+  entry->Account = malloc(sizeof(*entry->Account));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Account = VAL_STRING(childval);
@@ -1584,6 +1597,7 @@ status_t build_to_priv_access_LoginRequest(
   childval = val_first_child_name(
       parentval,
       "Password");
+  entry->Password = malloc(sizeof(*entry->Password));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Password = VAL_STRING(childval);
@@ -1598,6 +1612,7 @@ status_t build_to_priv_access_RestrictionEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1612,6 +1627,7 @@ status_t build_to_priv_access_RestrictionEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -1657,6 +1673,7 @@ status_t build_to_priv_access_UserEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1717,6 +1734,7 @@ status_t build_to_priv_access_UserEntry(
   childval = val_first_child_name(
       parentval,
       "EncryptedAuthPassword");
+  entry->EncryptedAuthPassword = malloc(sizeof(*entry->EncryptedAuthPassword));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EncryptedAuthPassword = VAL_STRING(childval);
@@ -1745,6 +1763,7 @@ status_t build_to_priv_access_UserEntry(
   childval = val_first_child_name(
       parentval,
       "EncryptedSNMPAuthPassword");
+  entry->EncryptedSNMPAuthPassword = malloc(sizeof(*entry->EncryptedSNMPAuthPassword));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EncryptedSNMPAuthPassword = VAL_STRING(childval);
@@ -1752,6 +1771,7 @@ status_t build_to_priv_access_UserEntry(
   childval = val_first_child_name(
       parentval,
       "EncryptedSNMPPrivacyPassword");
+  entry->EncryptedSNMPPrivacyPassword = malloc(sizeof(*entry->EncryptedSNMPPrivacyPassword));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EncryptedSNMPPrivacyPassword = VAL_STRING(childval);
@@ -1766,6 +1786,7 @@ status_t build_to_priv_access_PatternEntry(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -1818,6 +1839,7 @@ status_t build_to_priv_access_GroupEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1959,6 +1981,7 @@ status_t build_to_priv_access_Password(
   childval = val_first_child_name(
       parentval,
       "Password");
+  entry->Password = malloc(sizeof(*entry->Password));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Password = VAL_STRING(childval);
@@ -1980,6 +2003,7 @@ status_t build_to_priv_access_EncryptedPassword(
   childval = val_first_child_name(
       parentval,
       "EncryptedPassword");
+  entry->EncryptedPassword = malloc(sizeof(*entry->EncryptedPassword));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EncryptedPassword = VAL_STRING(childval);
@@ -1994,6 +2018,7 @@ status_t build_to_priv_access_UserPasswordEntry(
   childval = val_first_child_name(
       parentval,
       "Username");
+  entry->Username = malloc(sizeof(*entry->Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Username = VAL_STRING(childval);
@@ -2001,6 +2026,7 @@ status_t build_to_priv_access_UserPasswordEntry(
   childval = val_first_child_name(
       parentval,
       "Password");
+  entry->Password = malloc(sizeof(*entry->Password));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Password = VAL_STRING(childval);
@@ -2060,6 +2086,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "State");
+  entry->State = malloc(sizeof(*entry->State));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->State = VAL_STRING(childval);
@@ -2067,6 +2094,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "Username");
+  entry->Username = malloc(sizeof(*entry->Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Username = VAL_STRING(childval);
@@ -2074,6 +2102,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "AuthName");
+  entry->AuthName = malloc(sizeof(*entry->AuthName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AuthName = VAL_STRING(childval);
@@ -2081,6 +2110,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LoginID");
+  entry->LoginID = malloc(sizeof(*entry->LoginID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LoginID = VAL_STRING(childval);
@@ -2088,6 +2118,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LoginTimeStamp");
+  entry->LoginTimeStamp = malloc(sizeof(*entry->LoginTimeStamp));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LoginTimeStamp = VAL_STRING(childval);
@@ -2095,6 +2126,7 @@ status_t build_to_priv_access_LoginStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LoginEpoch");
+  entry->LoginEpoch = malloc(sizeof(*entry->LoginEpoch));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LoginEpoch = VAL_STRING(childval);
@@ -2154,6 +2186,7 @@ status_t build_to_priv_access_Token(
   childval = val_first_child_name(
       parentval,
       "Token");
+  entry->Token = malloc(sizeof(*entry->Token));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Token = VAL_STRING(childval);

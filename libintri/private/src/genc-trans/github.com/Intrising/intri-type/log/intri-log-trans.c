@@ -1126,6 +1126,7 @@ status_t build_to_priv_log_TargetConfigEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1133,6 +1134,7 @@ status_t build_to_priv_log_TargetConfigEntry(
   childval = val_first_child_name(
       parentval,
       "HostAddress");
+  entry->HostAddress = malloc(sizeof(*entry->HostAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HostAddress = VAL_STRING(childval);
@@ -1168,6 +1170,7 @@ status_t build_to_priv_log_TargetConfigEntry(
   childval = val_first_child_name(
       parentval,
       "SnmpV3Username");
+  entry->SnmpV3Username = malloc(sizeof(*entry->SnmpV3Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SnmpV3Username = VAL_STRING(childval);
@@ -1175,6 +1178,7 @@ status_t build_to_priv_log_TargetConfigEntry(
   childval = val_first_child_name(
       parentval,
       "SnmpTrapCommunity");
+  entry->SnmpTrapCommunity = malloc(sizeof(*entry->SnmpTrapCommunity));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SnmpTrapCommunity = VAL_STRING(childval);
@@ -1317,6 +1321,7 @@ status_t build_to_priv_log_LogFileEntry(
   childval = val_first_child_name(
       parentval,
       "Message");
+  entry->Message = malloc(sizeof(*entry->Message));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Message = VAL_STRING(childval);

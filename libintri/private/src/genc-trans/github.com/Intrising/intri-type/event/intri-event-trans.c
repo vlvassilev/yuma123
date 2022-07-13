@@ -4291,6 +4291,7 @@ status_t build_to_priv_event_ACLParameter(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -4563,6 +4564,7 @@ status_t build_to_priv_event_FDBEntry(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Address = VAL_STRING(childval);
@@ -4626,6 +4628,7 @@ status_t build_to_priv_event_CryptoRequest(
   childval = val_first_child_name(
       parentval,
       "Value");
+  entry->Value = malloc(sizeof(*entry->Value));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Value = VAL_STRING(childval);
@@ -4647,6 +4650,7 @@ status_t build_to_priv_event_CryptoResponse(
   childval = val_first_child_name(
       parentval,
       "Value");
+  entry->Value = malloc(sizeof(*entry->Value));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Value = VAL_STRING(childval);
@@ -4689,6 +4693,7 @@ status_t build_to_priv_event_DHCPParameter(
   childval = val_first_child_name(
       parentval,
       "TFTPServer");
+  entry->TFTPServer = malloc(sizeof(*entry->TFTPServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TFTPServer = VAL_STRING(childval);
@@ -4696,6 +4701,7 @@ status_t build_to_priv_event_DHCPParameter(
   childval = val_first_child_name(
       parentval,
       "BootFile");
+  entry->BootFile = malloc(sizeof(*entry->BootFile));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BootFile = VAL_STRING(childval);
@@ -4744,6 +4750,7 @@ status_t build_to_priv_event_ServiceInitialized(
   childval = val_first_child_name(
       parentval,
       "ServiceType");
+  entry->ServiceType = malloc(sizeof(*entry->ServiceType));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ServiceType = VAL_STRING(childval);
@@ -5023,6 +5030,7 @@ status_t build_to_priv_event_LoginParameter(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5037,6 +5045,7 @@ status_t build_to_priv_event_LoginParameter(
   childval = val_first_child_name(
       parentval,
       "Token");
+  entry->Token = malloc(sizeof(*entry->Token));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Token = VAL_STRING(childval);
@@ -5044,6 +5053,7 @@ status_t build_to_priv_event_LoginParameter(
   childval = val_first_child_name(
       parentval,
       "AccessToken");
+  entry->AccessToken = malloc(sizeof(*entry->AccessToken));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AccessToken = VAL_STRING(childval);
@@ -5051,6 +5061,7 @@ status_t build_to_priv_event_LoginParameter(
   childval = val_first_child_name(
       parentval,
       "ErrCode");
+  entry->ErrCode = malloc(sizeof(*entry->ErrCode));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ErrCode = VAL_STRING(childval);
@@ -5058,6 +5069,7 @@ status_t build_to_priv_event_LoginParameter(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -5100,6 +5112,7 @@ status_t build_to_priv_event_MulticastParameter(
   childval = val_first_child_name(
       parentval,
       "Addr");
+  entry->Addr = malloc(sizeof(*entry->Addr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Addr = VAL_STRING(childval);
@@ -5389,6 +5402,7 @@ status_t build_to_priv_event_PortAuthParameter(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -5417,6 +5431,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Location");
+  entry->Location = malloc(sizeof(*entry->Location));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Location = VAL_STRING(childval);
@@ -5456,6 +5471,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Wavelength");
+  entry->Wavelength = malloc(sizeof(*entry->Wavelength));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Wavelength = VAL_STRING(childval);
@@ -5463,6 +5479,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "TxTechnology");
+  entry->TxTechnology = malloc(sizeof(*entry->TxTechnology));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TxTechnology = VAL_STRING(childval);
@@ -5470,6 +5487,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "RxTechnology");
+  entry->RxTechnology = malloc(sizeof(*entry->RxTechnology));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->RxTechnology = VAL_STRING(childval);
@@ -5477,6 +5495,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "NominalBitrate");
+  entry->NominalBitrate = malloc(sizeof(*entry->NominalBitrate));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->NominalBitrate = VAL_STRING(childval);
@@ -5484,6 +5503,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Manufacturer");
+  entry->Manufacturer = malloc(sizeof(*entry->Manufacturer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Manufacturer = VAL_STRING(childval);
@@ -5491,6 +5511,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "PartNumber");
+  entry->PartNumber = malloc(sizeof(*entry->PartNumber));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PartNumber = VAL_STRING(childval);
@@ -5498,6 +5519,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Revision");
+  entry->Revision = malloc(sizeof(*entry->Revision));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Revision = VAL_STRING(childval);
@@ -5505,6 +5527,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "SerialNumber");
+  entry->SerialNumber = malloc(sizeof(*entry->SerialNumber));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SerialNumber = VAL_STRING(childval);
@@ -5512,6 +5535,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "MfgDateCode");
+  entry->MfgDateCode = malloc(sizeof(*entry->MfgDateCode));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MfgDateCode = VAL_STRING(childval);
@@ -5519,6 +5543,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "TxPower");
+  entry->TxPower = malloc(sizeof(*entry->TxPower));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TxPower = VAL_STRING(childval);
@@ -5526,6 +5551,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "RxPower");
+  entry->RxPower = malloc(sizeof(*entry->RxPower));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->RxPower = VAL_STRING(childval);
@@ -5533,6 +5559,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "Temperature");
+  entry->Temperature = malloc(sizeof(*entry->Temperature));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Temperature = VAL_STRING(childval);
@@ -5540,6 +5567,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "MaxLength_9Um");
+  entry->MaxLength_9Um = malloc(sizeof(*entry->MaxLength_9Um));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MaxLength_9Um = VAL_STRING(childval);
@@ -5547,6 +5575,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "MaxLength_50Um");
+  entry->MaxLength_50Um = malloc(sizeof(*entry->MaxLength_50Um));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MaxLength_50Um = VAL_STRING(childval);
@@ -5554,6 +5583,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "MaxLength_62Um");
+  entry->MaxLength_62Um = malloc(sizeof(*entry->MaxLength_62Um));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MaxLength_62Um = VAL_STRING(childval);
@@ -5561,6 +5591,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "MaxLengthCopper");
+  entry->MaxLengthCopper = malloc(sizeof(*entry->MaxLengthCopper));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MaxLengthCopper = VAL_STRING(childval);
@@ -5568,6 +5599,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "TuningRange");
+  entry->TuningRange = malloc(sizeof(*entry->TuningRange));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TuningRange = VAL_STRING(childval);
@@ -5575,6 +5607,7 @@ status_t build_to_priv_event_SFPInfo(
   childval = val_first_child_name(
       parentval,
       "PowerConsumption");
+  entry->PowerConsumption = malloc(sizeof(*entry->PowerConsumption));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PowerConsumption = VAL_STRING(childval);
@@ -5689,6 +5722,7 @@ status_t build_to_priv_event_BootParameter(
   childval = val_first_child_name(
       parentval,
       "Version");
+  entry->Version = malloc(sizeof(*entry->Version));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Version = VAL_STRING(childval);
@@ -5716,6 +5750,7 @@ status_t build_to_priv_event_NetworkParameter(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -5723,6 +5758,7 @@ status_t build_to_priv_event_NetworkParameter(
   childval = val_first_child_name(
       parentval,
       "SubnetMask");
+  entry->SubnetMask = malloc(sizeof(*entry->SubnetMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SubnetMask = VAL_STRING(childval);
@@ -5744,6 +5780,7 @@ status_t build_to_priv_event_TimeRangeParameter(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5900,6 +5937,7 @@ status_t build_to_priv_event_Internal(
   childval = val_first_child_name(
       parentval,
       "Message");
+  entry->Message = malloc(sizeof(*entry->Message));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Message = VAL_STRING(childval);
@@ -6261,6 +6299,7 @@ status_t build_to_priv_event_TargetSNMP(
   childval = val_first_child_name(
       parentval,
       "HostAddress");
+  entry->HostAddress = malloc(sizeof(*entry->HostAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HostAddress = VAL_STRING(childval);
@@ -6268,6 +6307,7 @@ status_t build_to_priv_event_TargetSNMP(
   childval = val_first_child_name(
       parentval,
       "SnmpCommunity");
+  entry->SnmpCommunity = malloc(sizeof(*entry->SnmpCommunity));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SnmpCommunity = VAL_STRING(childval);
@@ -6275,6 +6315,7 @@ status_t build_to_priv_event_TargetSNMP(
   childval = val_first_child_name(
       parentval,
       "SnmpV3Username");
+  entry->SnmpV3Username = malloc(sizeof(*entry->SnmpV3Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SnmpV3Username = VAL_STRING(childval);
@@ -6296,6 +6337,7 @@ status_t build_to_priv_event_TargetSysLog(
   childval = val_first_child_name(
       parentval,
       "HostAddress");
+  entry->HostAddress = malloc(sizeof(*entry->HostAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HostAddress = VAL_STRING(childval);
@@ -6400,6 +6442,7 @@ status_t build_to_priv_event_TargetLog(
   childval = val_first_child_name(
       parentval,
       "Message");
+  entry->Message = malloc(sizeof(*entry->Message));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Message = VAL_STRING(childval);

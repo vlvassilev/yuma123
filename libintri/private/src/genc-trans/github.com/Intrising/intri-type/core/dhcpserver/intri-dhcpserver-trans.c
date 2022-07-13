@@ -676,6 +676,7 @@ status_t build_to_priv_dhcpserver_PoolEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -742,6 +743,7 @@ status_t build_to_priv_dhcpserver_PoolEntry(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -756,6 +758,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "RangeLow");
+  entry->RangeLow = malloc(sizeof(*entry->RangeLow));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->RangeLow = VAL_STRING(childval);
@@ -763,6 +766,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "RangeHigh");
+  entry->RangeHigh = malloc(sizeof(*entry->RangeHigh));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->RangeHigh = VAL_STRING(childval);
@@ -770,6 +774,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "Netmask");
+  entry->Netmask = malloc(sizeof(*entry->Netmask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Netmask = VAL_STRING(childval);
@@ -777,6 +782,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "Gateway");
+  entry->Gateway = malloc(sizeof(*entry->Gateway));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Gateway = VAL_STRING(childval);
@@ -784,6 +790,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "PrimaryDNS");
+  entry->PrimaryDNS = malloc(sizeof(*entry->PrimaryDNS));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PrimaryDNS = VAL_STRING(childval);
@@ -791,6 +798,7 @@ status_t build_to_priv_dhcpserver_Basic(
   childval = val_first_child_name(
       parentval,
       "SecondaryDNS");
+  entry->SecondaryDNS = malloc(sizeof(*entry->SecondaryDNS));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SecondaryDNS = VAL_STRING(childval);
@@ -812,6 +820,7 @@ status_t build_to_priv_dhcpserver_MACBased(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -819,6 +828,7 @@ status_t build_to_priv_dhcpserver_MACBased(
   childval = val_first_child_name(
       parentval,
       "DesiredIP");
+  entry->DesiredIP = malloc(sizeof(*entry->DesiredIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DesiredIP = VAL_STRING(childval);
@@ -847,6 +857,7 @@ status_t build_to_priv_dhcpserver_PortBased(
   childval = val_first_child_name(
       parentval,
       "DesiredIP");
+  entry->DesiredIP = malloc(sizeof(*entry->DesiredIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DesiredIP = VAL_STRING(childval);
@@ -861,6 +872,7 @@ status_t build_to_priv_dhcpserver_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -888,6 +900,7 @@ status_t build_to_priv_dhcpserver_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -895,6 +908,7 @@ status_t build_to_priv_dhcpserver_StatusEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);

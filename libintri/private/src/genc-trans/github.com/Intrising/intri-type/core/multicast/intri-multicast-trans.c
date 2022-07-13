@@ -1715,6 +1715,7 @@ status_t build_to_priv_multicast_StaticGroupsConfigEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1722,6 +1723,7 @@ status_t build_to_priv_multicast_StaticGroupsConfigEntry(
   childval = val_first_child_name(
       parentval,
       "MulticastAddress");
+  entry->MulticastAddress = malloc(sizeof(*entry->MulticastAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MulticastAddress = VAL_STRING(childval);
@@ -1977,6 +1979,7 @@ status_t build_to_priv_multicast_DynamicGroupEntry(
   childval = val_first_child_name(
       parentval,
       "Address");
+  entry->Address = malloc(sizeof(*entry->Address));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Address = VAL_STRING(childval);

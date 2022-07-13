@@ -628,6 +628,7 @@ status_t build_to_priv_network_BasicConfig(
   childval = val_first_child_name(
       parentval,
       "HostName");
+  entry->HostName = malloc(sizeof(*entry->HostName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HostName = VAL_STRING(childval);
@@ -635,6 +636,7 @@ status_t build_to_priv_network_BasicConfig(
   childval = val_first_child_name(
       parentval,
       "DomainName");
+  entry->DomainName = malloc(sizeof(*entry->DomainName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DomainName = VAL_STRING(childval);
@@ -716,6 +718,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -723,6 +726,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "SubnetMask");
+  entry->SubnetMask = malloc(sizeof(*entry->SubnetMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SubnetMask = VAL_STRING(childval);
@@ -730,6 +734,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "Gateway");
+  entry->Gateway = malloc(sizeof(*entry->Gateway));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Gateway = VAL_STRING(childval);
@@ -737,6 +742,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "DNSServer");
+  entry->DNSServer = malloc(sizeof(*entry->DNSServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DNSServer = VAL_STRING(childval);
@@ -744,6 +750,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "SecondaryDeviceIP");
+  entry->SecondaryDeviceIP = malloc(sizeof(*entry->SecondaryDeviceIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SecondaryDeviceIP = VAL_STRING(childval);
@@ -751,6 +758,7 @@ status_t build_to_priv_network_IPv4Static(
   childval = val_first_child_name(
       parentval,
       "SecondarySubnetMask");
+  entry->SecondarySubnetMask = malloc(sizeof(*entry->SecondarySubnetMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SecondarySubnetMask = VAL_STRING(childval);
@@ -813,6 +821,7 @@ status_t build_to_priv_network_IPv6Static(
   childval = val_first_child_name(
       parentval,
       "DNSServer");
+  entry->DNSServer = malloc(sizeof(*entry->DNSServer));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DNSServer = VAL_STRING(childval);
@@ -820,6 +829,7 @@ status_t build_to_priv_network_IPv6Static(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -834,6 +844,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicDeviceIP");
+  entry->DynamicDeviceIP = malloc(sizeof(*entry->DynamicDeviceIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicDeviceIP = VAL_STRING(childval);
@@ -841,6 +852,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicSubnetMask");
+  entry->DynamicSubnetMask = malloc(sizeof(*entry->DynamicSubnetMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicSubnetMask = VAL_STRING(childval);
@@ -848,6 +860,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicGateway");
+  entry->DynamicGateway = malloc(sizeof(*entry->DynamicGateway));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicGateway = VAL_STRING(childval);
@@ -855,6 +868,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicDNSServer1");
+  entry->DynamicDNSServer1 = malloc(sizeof(*entry->DynamicDNSServer1));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicDNSServer1 = VAL_STRING(childval);
@@ -862,6 +876,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicDNSServer2");
+  entry->DynamicDNSServer2 = malloc(sizeof(*entry->DynamicDNSServer2));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicDNSServer2 = VAL_STRING(childval);
@@ -869,6 +884,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicDNSServer3");
+  entry->DynamicDNSServer3 = malloc(sizeof(*entry->DynamicDNSServer3));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicDNSServer3 = VAL_STRING(childval);
@@ -876,6 +892,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "DynamicDNSServer4");
+  entry->DynamicDNSServer4 = malloc(sizeof(*entry->DynamicDNSServer4));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DynamicDNSServer4 = VAL_STRING(childval);
@@ -883,6 +900,7 @@ status_t build_to_priv_network_IPv4Status(
   childval = val_first_child_name(
       parentval,
       "OutgoingDeviceIP");
+  entry->OutgoingDeviceIP = malloc(sizeof(*entry->OutgoingDeviceIP));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->OutgoingDeviceIP = VAL_STRING(childval);
@@ -897,6 +915,7 @@ status_t build_to_priv_network_IPv6StatusEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);

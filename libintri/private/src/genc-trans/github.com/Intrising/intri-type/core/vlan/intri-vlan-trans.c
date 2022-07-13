@@ -1698,6 +1698,7 @@ status_t build_to_priv_vlan_MACBasedGroupEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -1705,6 +1706,7 @@ status_t build_to_priv_vlan_MACBasedGroupEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddressMask");
+  entry->MACAddressMask = malloc(sizeof(*entry->MACAddressMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddressMask = VAL_STRING(childval);
@@ -1840,6 +1842,7 @@ status_t build_to_priv_vlan_ProtocolBasedGroupEntry(
   childval = val_first_child_name(
       parentval,
       "Protocol");
+  entry->Protocol = malloc(sizeof(*entry->Protocol));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Protocol = VAL_STRING(childval);
@@ -2006,6 +2009,7 @@ status_t build_to_priv_vlan_SubnetBasedGroupEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddress");
+  entry->IPAddress = malloc(sizeof(*entry->IPAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddress = VAL_STRING(childval);
@@ -2013,6 +2017,7 @@ status_t build_to_priv_vlan_SubnetBasedGroupEntry(
   childval = val_first_child_name(
       parentval,
       "IPAddressMask");
+  entry->IPAddressMask = malloc(sizeof(*entry->IPAddressMask));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddressMask = VAL_STRING(childval);
@@ -2629,6 +2634,7 @@ status_t build_to_priv_vlan_FilterEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);

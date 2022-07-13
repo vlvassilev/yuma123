@@ -491,6 +491,7 @@ status_t build_to_priv_files_CertificateID(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -530,6 +531,7 @@ status_t build_to_priv_files_CertificateData(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -537,6 +539,7 @@ status_t build_to_priv_files_CertificateData(
   childval = val_first_child_name(
       parentval,
       "CrtPath");
+  entry->CrtPath = malloc(sizeof(*entry->CrtPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CrtPath = VAL_STRING(childval);
@@ -544,6 +547,7 @@ status_t build_to_priv_files_CertificateData(
   childval = val_first_child_name(
       parentval,
       "KeyPath");
+  entry->KeyPath = malloc(sizeof(*entry->KeyPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->KeyPath = VAL_STRING(childval);
@@ -558,6 +562,7 @@ status_t build_to_priv_files_CertificateData(
   childval = val_first_child_name(
       parentval,
       "AuthCrtPath");
+  entry->AuthCrtPath = malloc(sizeof(*entry->AuthCrtPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AuthCrtPath = VAL_STRING(childval);
@@ -572,6 +577,7 @@ status_t build_to_priv_files_CertificateUserID(
   childval = val_first_child_name(
       parentval,
       "ID");
+  entry->ID = malloc(sizeof(*entry->ID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ID = VAL_STRING(childval);
@@ -579,6 +585,7 @@ status_t build_to_priv_files_CertificateUserID(
   childval = val_first_child_name(
       parentval,
       "Username");
+  entry->Username = malloc(sizeof(*entry->Username));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Username = VAL_STRING(childval);
@@ -638,6 +645,7 @@ status_t build_to_priv_files_CertificateInfo(
   childval = val_first_child_name(
       parentval,
       "CrtPath");
+  entry->CrtPath = malloc(sizeof(*entry->CrtPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CrtPath = VAL_STRING(childval);
@@ -645,6 +653,7 @@ status_t build_to_priv_files_CertificateInfo(
   childval = val_first_child_name(
       parentval,
       "KeyPath");
+  entry->KeyPath = malloc(sizeof(*entry->KeyPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->KeyPath = VAL_STRING(childval);
@@ -652,6 +661,7 @@ status_t build_to_priv_files_CertificateInfo(
   childval = val_first_child_name(
       parentval,
       "Passphrase");
+  entry->Passphrase = malloc(sizeof(*entry->Passphrase));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Passphrase = VAL_STRING(childval);
@@ -659,6 +669,7 @@ status_t build_to_priv_files_CertificateInfo(
   childval = val_first_child_name(
       parentval,
       "AuthCrtPath");
+  entry->AuthCrtPath = malloc(sizeof(*entry->AuthCrtPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AuthCrtPath = VAL_STRING(childval);

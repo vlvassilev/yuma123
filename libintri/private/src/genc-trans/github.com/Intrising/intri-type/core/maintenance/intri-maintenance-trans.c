@@ -130,6 +130,7 @@ status_t build_to_priv_maintenance_FirmwareInfo(
   childval = val_first_child_name(
       parentval,
       "Version");
+  entry->Version = malloc(sizeof(*entry->Version));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Version = VAL_STRING(childval);
@@ -137,6 +138,7 @@ status_t build_to_priv_maintenance_FirmwareInfo(
   childval = val_first_child_name(
       parentval,
       "BuildDate");
+  entry->BuildDate = malloc(sizeof(*entry->BuildDate));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BuildDate = VAL_STRING(childval);
@@ -144,6 +146,7 @@ status_t build_to_priv_maintenance_FirmwareInfo(
   childval = val_first_child_name(
       parentval,
       "BuildNumber");
+  entry->BuildNumber = malloc(sizeof(*entry->BuildNumber));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BuildNumber = VAL_STRING(childval);
@@ -158,6 +161,7 @@ status_t build_to_priv_maintenance_UpgradePathRequest(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);

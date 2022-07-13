@@ -2321,6 +2321,7 @@ status_t build_to_priv_monitor_DisplayValue(
   childval = val_first_child_name(
       parentval,
       "ValueUnit");
+  entry->ValueUnit = malloc(sizeof(*entry->ValueUnit));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ValueUnit = VAL_STRING(childval);

@@ -1202,6 +1202,7 @@ status_t build_to_priv_portauthentication_AuthorizedMACsEntry(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -1209,6 +1210,7 @@ status_t build_to_priv_portauthentication_AuthorizedMACsEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -1299,6 +1301,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "NASIdentifier");
+  entry->NASIdentifier = malloc(sizeof(*entry->NASIdentifier));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->NASIdentifier = VAL_STRING(childval);
@@ -1306,6 +1309,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "MACSeparatorChar");
+  entry->MACSeparatorChar = malloc(sizeof(*entry->MACSeparatorChar));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACSeparatorChar = VAL_STRING(childval);
@@ -1327,6 +1331,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "MACPasswordString");
+  entry->MACPasswordString = malloc(sizeof(*entry->MACPasswordString));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACPasswordString = VAL_STRING(childval);
@@ -1334,6 +1339,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "PrimaryAuthServerName");
+  entry->PrimaryAuthServerName = malloc(sizeof(*entry->PrimaryAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PrimaryAuthServerName = VAL_STRING(childval);
@@ -1341,6 +1347,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "PrimaryAcctServerName");
+  entry->PrimaryAcctServerName = malloc(sizeof(*entry->PrimaryAcctServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->PrimaryAcctServerName = VAL_STRING(childval);
@@ -1348,6 +1355,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "FallbackAuthServerName");
+  entry->FallbackAuthServerName = malloc(sizeof(*entry->FallbackAuthServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FallbackAuthServerName = VAL_STRING(childval);
@@ -1355,6 +1363,7 @@ status_t build_to_priv_portauthentication_SystemConfig(
   childval = val_first_child_name(
       parentval,
       "FallbackAcctServerName");
+  entry->FallbackAcctServerName = malloc(sizeof(*entry->FallbackAcctServerName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FallbackAcctServerName = VAL_STRING(childval);
@@ -1520,6 +1529,7 @@ status_t build_to_priv_portauthentication_PortStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LastStateChange");
+  entry->LastStateChange = malloc(sizeof(*entry->LastStateChange));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastStateChange = VAL_STRING(childval);
@@ -1599,6 +1609,7 @@ status_t build_to_priv_portauthentication_PortAuthorizationStatusEntry(
   childval = val_first_child_name(
       parentval,
       "UserMAC");
+  entry->UserMAC = malloc(sizeof(*entry->UserMAC));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserMAC = VAL_STRING(childval);
@@ -1606,6 +1617,7 @@ status_t build_to_priv_portauthentication_PortAuthorizationStatusEntry(
   childval = val_first_child_name(
       parentval,
       "UserName");
+  entry->UserName = malloc(sizeof(*entry->UserName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserName = VAL_STRING(childval);
@@ -1627,6 +1639,7 @@ status_t build_to_priv_portauthentication_PortAuthorizationStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LastStateChange");
+  entry->LastStateChange = malloc(sizeof(*entry->LastStateChange));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastStateChange = VAL_STRING(childval);
@@ -1706,6 +1719,7 @@ status_t build_to_priv_portauthentication_UserStatusEntry(
   childval = val_first_child_name(
       parentval,
       "UserMAC");
+  entry->UserMAC = malloc(sizeof(*entry->UserMAC));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserMAC = VAL_STRING(childval);
@@ -1713,6 +1727,7 @@ status_t build_to_priv_portauthentication_UserStatusEntry(
   childval = val_first_child_name(
       parentval,
       "UserName");
+  entry->UserName = malloc(sizeof(*entry->UserName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->UserName = VAL_STRING(childval);
@@ -1741,6 +1756,7 @@ status_t build_to_priv_portauthentication_UserStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LoginTimeStamp");
+  entry->LoginTimeStamp = malloc(sizeof(*entry->LoginTimeStamp));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LoginTimeStamp = VAL_STRING(childval);
@@ -1795,6 +1811,7 @@ status_t build_to_priv_portauthentication_UnauthorizeMACEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);

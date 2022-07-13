@@ -513,6 +513,7 @@ status_t build_to_priv_common_Path(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -527,6 +528,7 @@ status_t build_to_priv_common_ExportPathRequest(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -548,6 +550,7 @@ status_t build_to_priv_common_ImportPathRequest(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -590,6 +593,7 @@ status_t build_to_priv_common_MACAddress(
   childval = val_first_child_name(
       parentval,
       "MACAddr");
+  entry->MACAddr = malloc(sizeof(*entry->MACAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddr = VAL_STRING(childval);
@@ -604,6 +608,7 @@ status_t build_to_priv_common_IPAddress(
   childval = val_first_child_name(
       parentval,
       "IPAddr");
+  entry->IPAddr = malloc(sizeof(*entry->IPAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddr = VAL_STRING(childval);
@@ -650,6 +655,7 @@ status_t build_to_priv_common_IPv6Entry(
   childval = val_first_child_name(
       parentval,
       "IPAddr");
+  entry->IPAddr = malloc(sizeof(*entry->IPAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPAddr = VAL_STRING(childval);
@@ -695,6 +701,7 @@ status_t build_to_priv_common_Name(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -734,6 +741,7 @@ status_t build_to_priv_common_Reply(
   childval = val_first_child_name(
       parentval,
       "Reply");
+  entry->Reply = malloc(sizeof(*entry->Reply));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Reply = VAL_STRING(childval);
@@ -748,6 +756,7 @@ status_t build_to_priv_common_Confirm(
   childval = val_first_child_name(
       parentval,
       "Confirm");
+  entry->Confirm = malloc(sizeof(*entry->Confirm));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Confirm = VAL_STRING(childval);
@@ -762,6 +771,7 @@ status_t build_to_priv_common_DateTime(
   childval = val_first_child_name(
       parentval,
       "Ts");
+  entry->Ts = malloc(sizeof(*entry->Ts));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Ts = VAL_STRING(childval);
@@ -776,6 +786,7 @@ status_t build_to_priv_common_AllStatus(
   childval = val_first_child_name(
       parentval,
       "Status");
+  entry->Status = malloc(sizeof(*entry->Status));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Status = VAL_STRING(childval);

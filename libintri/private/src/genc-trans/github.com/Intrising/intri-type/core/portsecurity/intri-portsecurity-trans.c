@@ -594,6 +594,7 @@ status_t build_to_priv_portsecurity_SecureEntry(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -720,6 +721,7 @@ status_t build_to_priv_portsecurity_PortSecurityStatusEntry(
   childval = val_first_child_name(
       parentval,
       "LastSourceMACaddressVlan");
+  entry->LastSourceMACaddressVlan = malloc(sizeof(*entry->LastSourceMACaddressVlan));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastSourceMACaddressVlan = VAL_STRING(childval);

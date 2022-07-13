@@ -4963,6 +4963,7 @@ status_t build_to_priv_device_LedInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -4984,6 +4985,7 @@ status_t build_to_priv_device_LedInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5040,6 +5042,7 @@ status_t build_to_priv_device_MonitorInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5054,6 +5057,7 @@ status_t build_to_priv_device_MonitorInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5110,6 +5114,7 @@ status_t build_to_priv_device_PSUInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5124,6 +5129,7 @@ status_t build_to_priv_device_PSUInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5390,6 +5396,7 @@ status_t build_to_priv_device_I2Cinfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5397,6 +5404,7 @@ status_t build_to_priv_device_I2Cinfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5424,6 +5432,7 @@ status_t build_to_priv_device_GPIOInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5431,6 +5440,7 @@ status_t build_to_priv_device_GPIOInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5458,6 +5468,7 @@ status_t build_to_priv_device_PTPClockSynchronizerInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5465,6 +5476,7 @@ status_t build_to_priv_device_PTPClockSynchronizerInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5492,6 +5504,7 @@ status_t build_to_priv_device_GPSInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5499,6 +5512,7 @@ status_t build_to_priv_device_GPSInfo(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -5506,6 +5520,7 @@ status_t build_to_priv_device_GPSInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5520,6 +5535,7 @@ status_t build_to_priv_device_ToDInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5527,6 +5543,7 @@ status_t build_to_priv_device_ToDInfo(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -5534,6 +5551,7 @@ status_t build_to_priv_device_ToDInfo(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5548,6 +5566,7 @@ status_t build_to_priv_device_UARTDevice(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5555,6 +5574,7 @@ status_t build_to_priv_device_UARTDevice(
   childval = val_first_child_name(
       parentval,
       "Path");
+  entry->Path = malloc(sizeof(*entry->Path));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Path = VAL_STRING(childval);
@@ -5562,6 +5582,7 @@ status_t build_to_priv_device_UARTDevice(
   childval = val_first_child_name(
       parentval,
       "Direction");
+  entry->Direction = malloc(sizeof(*entry->Direction));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Direction = VAL_STRING(childval);
@@ -5583,6 +5604,7 @@ status_t build_to_priv_device_FanInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -5653,6 +5675,7 @@ status_t build_to_priv_device_PoEInfo(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -6226,6 +6249,7 @@ status_t build_to_priv_device_BoardInfo(
   childval = val_first_child_name(
       parentval,
       "SystemDescription");
+  entry->SystemDescription = malloc(sizeof(*entry->SystemDescription));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SystemDescription = VAL_STRING(childval);
@@ -6321,6 +6345,7 @@ status_t build_to_priv_device_BoardInfo(
   childval = val_first_child_name(
       parentval,
       "EnterpriseOID");
+  entry->EnterpriseOID = malloc(sizeof(*entry->EnterpriseOID));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->EnterpriseOID = VAL_STRING(childval);
@@ -7755,6 +7780,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "LogRamDisk");
+  entry->LogRamDisk = malloc(sizeof(*entry->LogRamDisk));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LogRamDisk = VAL_STRING(childval);
@@ -7762,6 +7788,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "LogFlash");
+  entry->LogFlash = malloc(sizeof(*entry->LogFlash));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LogFlash = VAL_STRING(childval);
@@ -7769,6 +7796,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "ConfigDefault");
+  entry->ConfigDefault = malloc(sizeof(*entry->ConfigDefault));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ConfigDefault = VAL_STRING(childval);
@@ -7776,6 +7804,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "ConfigSaved");
+  entry->ConfigSaved = malloc(sizeof(*entry->ConfigSaved));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->ConfigSaved = VAL_STRING(childval);
@@ -7783,6 +7812,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "User");
+  entry->User = malloc(sizeof(*entry->User));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->User = VAL_STRING(childval);
@@ -7790,6 +7820,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "IPTables");
+  entry->IPTables = malloc(sizeof(*entry->IPTables));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPTables = VAL_STRING(childval);
@@ -7797,6 +7828,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "CoreReboot");
+  entry->CoreReboot = malloc(sizeof(*entry->CoreReboot));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CoreReboot = VAL_STRING(childval);
@@ -7804,6 +7836,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "WarmStart");
+  entry->WarmStart = malloc(sizeof(*entry->WarmStart));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->WarmStart = VAL_STRING(childval);
@@ -7811,6 +7844,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "VlanMgmt");
+  entry->VlanMgmt = malloc(sizeof(*entry->VlanMgmt));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->VlanMgmt = VAL_STRING(childval);
@@ -7818,6 +7852,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "TimeCfg");
+  entry->TimeCfg = malloc(sizeof(*entry->TimeCfg));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TimeCfg = VAL_STRING(childval);
@@ -7825,6 +7860,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "BootReady");
+  entry->BootReady = malloc(sizeof(*entry->BootReady));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BootReady = VAL_STRING(childval);
@@ -7832,6 +7868,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "IPv6LinkLocal");
+  entry->IPv6LinkLocal = malloc(sizeof(*entry->IPv6LinkLocal));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPv6LinkLocal = VAL_STRING(childval);
@@ -7839,6 +7876,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "TimeZone");
+  entry->TimeZone = malloc(sizeof(*entry->TimeZone));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TimeZone = VAL_STRING(childval);
@@ -7846,6 +7884,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "Resolv");
+  entry->Resolv = malloc(sizeof(*entry->Resolv));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Resolv = VAL_STRING(childval);
@@ -7853,6 +7892,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "DropbearProc");
+  entry->DropbearProc = malloc(sizeof(*entry->DropbearProc));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DropbearProc = VAL_STRING(childval);
@@ -7860,6 +7900,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "TelnetProc");
+  entry->TelnetProc = malloc(sizeof(*entry->TelnetProc));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->TelnetProc = VAL_STRING(childval);
@@ -7867,6 +7908,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "FTPProc");
+  entry->FTPProc = malloc(sizeof(*entry->FTPProc));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->FTPProc = VAL_STRING(childval);
@@ -7874,6 +7916,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "LocalUser");
+  entry->LocalUser = malloc(sizeof(*entry->LocalUser));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LocalUser = VAL_STRING(childval);
@@ -7881,6 +7924,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "Certificates");
+  entry->Certificates = malloc(sizeof(*entry->Certificates));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Certificates = VAL_STRING(childval);
@@ -7888,6 +7932,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "OpenSSLCertificates");
+  entry->OpenSSLCertificates = malloc(sizeof(*entry->OpenSSLCertificates));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->OpenSSLCertificates = VAL_STRING(childval);
@@ -7895,6 +7940,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "SNMPdCertificates");
+  entry->SNMPdCertificates = malloc(sizeof(*entry->SNMPdCertificates));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SNMPdCertificates = VAL_STRING(childval);
@@ -7902,6 +7948,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "SNMPdCertificatesKey");
+  entry->SNMPdCertificatesKey = malloc(sizeof(*entry->SNMPdCertificatesKey));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SNMPdCertificatesKey = VAL_STRING(childval);
@@ -7909,6 +7956,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "NetCfg");
+  entry->NetCfg = malloc(sizeof(*entry->NetCfg));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->NetCfg = VAL_STRING(childval);
@@ -7916,6 +7964,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "IPv4Script");
+  entry->IPv4Script = malloc(sizeof(*entry->IPv4Script));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPv4Script = VAL_STRING(childval);
@@ -7923,6 +7972,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "IPv6Script");
+  entry->IPv6Script = malloc(sizeof(*entry->IPv6Script));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->IPv6Script = VAL_STRING(childval);
@@ -7930,6 +7980,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "LastSaveTime");
+  entry->LastSaveTime = malloc(sizeof(*entry->LastSaveTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->LastSaveTime = VAL_STRING(childval);
@@ -7937,6 +7988,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "Image");
+  entry->Image = malloc(sizeof(*entry->Image));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Image = VAL_STRING(childval);
@@ -7944,6 +7996,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "AltVersion");
+  entry->AltVersion = malloc(sizeof(*entry->AltVersion));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AltVersion = VAL_STRING(childval);
@@ -7951,6 +8004,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "AltBuildDateTime");
+  entry->AltBuildDateTime = malloc(sizeof(*entry->AltBuildDateTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AltBuildDateTime = VAL_STRING(childval);
@@ -7958,6 +8012,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "Version");
+  entry->Version = malloc(sizeof(*entry->Version));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Version = VAL_STRING(childval);
@@ -7965,6 +8020,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "BuildDateTime");
+  entry->BuildDateTime = malloc(sizeof(*entry->BuildDateTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BuildDateTime = VAL_STRING(childval);
@@ -7972,6 +8028,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "DhcpServerDnsmasqLeasePath");
+  entry->DhcpServerDnsmasqLeasePath = malloc(sizeof(*entry->DhcpServerDnsmasqLeasePath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DhcpServerDnsmasqLeasePath = VAL_STRING(childval);
@@ -7979,6 +8036,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "DhcpServerDnsmasqCfgPath");
+  entry->DhcpServerDnsmasqCfgPath = malloc(sizeof(*entry->DhcpServerDnsmasqCfgPath));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DhcpServerDnsmasqCfgPath = VAL_STRING(childval);
@@ -7986,6 +8044,7 @@ status_t build_to_priv_device_PathAll(
   childval = val_first_child_name(
       parentval,
       "DhcpServerPortBasedInfo");
+  entry->DhcpServerPortBasedInfo = malloc(sizeof(*entry->DhcpServerPortBasedInfo));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->DhcpServerPortBasedInfo = VAL_STRING(childval);
@@ -8042,6 +8101,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "Model");
+  entry->Model = malloc(sizeof(*entry->Model));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Model = VAL_STRING(childval);
@@ -8049,6 +8109,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "MACAddr");
+  entry->MACAddr = malloc(sizeof(*entry->MACAddr));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddr = VAL_STRING(childval);
@@ -8056,6 +8117,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "MACAddrFactory");
+  entry->MACAddrFactory = malloc(sizeof(*entry->MACAddrFactory));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddrFactory = VAL_STRING(childval);
@@ -8063,6 +8125,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "SerialNo");
+  entry->SerialNo = malloc(sizeof(*entry->SerialNo));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->SerialNo = VAL_STRING(childval);
@@ -8070,6 +8133,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "Vendor");
+  entry->Vendor = malloc(sizeof(*entry->Vendor));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Vendor = VAL_STRING(childval);
@@ -8077,6 +8141,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "AltBuildDateTime");
+  entry->AltBuildDateTime = malloc(sizeof(*entry->AltBuildDateTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AltBuildDateTime = VAL_STRING(childval);
@@ -8084,6 +8149,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "CurrentBuildDateTime");
+  entry->CurrentBuildDateTime = malloc(sizeof(*entry->CurrentBuildDateTime));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CurrentBuildDateTime = VAL_STRING(childval);
@@ -8091,6 +8157,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "AltSwVersion");
+  entry->AltSwVersion = malloc(sizeof(*entry->AltSwVersion));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->AltSwVersion = VAL_STRING(childval);
@@ -8098,6 +8165,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "CurrentSwVersion");
+  entry->CurrentSwVersion = malloc(sizeof(*entry->CurrentSwVersion));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CurrentSwVersion = VAL_STRING(childval);
@@ -8105,6 +8173,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "HwVersion");
+  entry->HwVersion = malloc(sizeof(*entry->HwVersion));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->HwVersion = VAL_STRING(childval);
@@ -8112,6 +8181,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "CurrentImage");
+  entry->CurrentImage = malloc(sizeof(*entry->CurrentImage));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->CurrentImage = VAL_STRING(childval);
@@ -8119,6 +8189,7 @@ status_t build_to_priv_device_Info(
   childval = val_first_child_name(
       parentval,
       "Board");
+  entry->Board = malloc(sizeof(*entry->Board));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Board = VAL_STRING(childval);

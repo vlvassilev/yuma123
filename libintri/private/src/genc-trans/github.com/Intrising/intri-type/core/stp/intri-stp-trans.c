@@ -2973,6 +2973,7 @@ status_t build_to_priv_stp_MSTPConfig(
   childval = val_first_child_name(
       parentval,
       "Name");
+  entry->Name = malloc(sizeof(*entry->Name));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Name = VAL_STRING(childval);
@@ -3303,6 +3304,7 @@ status_t build_to_priv_stp_MSTPID(
   childval = val_first_child_name(
       parentval,
       "MACAddress");
+  entry->MACAddress = malloc(sizeof(*entry->MACAddress));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MACAddress = VAL_STRING(childval);
@@ -3450,6 +3452,7 @@ status_t build_to_priv_stp_CISTPortEntryStatus(
   childval = val_first_child_name(
       parentval,
       "Role");
+  entry->Role = malloc(sizeof(*entry->Role));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Role = VAL_STRING(childval);
@@ -3457,6 +3460,7 @@ status_t build_to_priv_stp_CISTPortEntryStatus(
   childval = val_first_child_name(
       parentval,
       "State");
+  entry->State = malloc(sizeof(*entry->State));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->State = VAL_STRING(childval);
@@ -3499,6 +3503,7 @@ status_t build_to_priv_stp_CISTPortEntryStatus(
   childval = val_first_child_name(
       parentval,
       "BPDUGuard");
+  entry->BPDUGuard = malloc(sizeof(*entry->BPDUGuard));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->BPDUGuard = VAL_STRING(childval);
@@ -3650,6 +3655,7 @@ status_t build_to_priv_stp_MSTIPortStatusEntry(
   childval = val_first_child_name(
       parentval,
       "Role");
+  entry->Role = malloc(sizeof(*entry->Role));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->Role = VAL_STRING(childval);
@@ -3657,6 +3663,7 @@ status_t build_to_priv_stp_MSTIPortStatusEntry(
   childval = val_first_child_name(
       parentval,
       "State");
+  entry->State = malloc(sizeof(*entry->State));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->State = VAL_STRING(childval);
@@ -3793,6 +3800,7 @@ status_t build_to_priv_stp_STPConfigBridge(
   childval = val_first_child_name(
       parentval,
       "MSTPRegionName");
+  entry->MSTPRegionName = malloc(sizeof(*entry->MSTPRegionName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MSTPRegionName = VAL_STRING(childval);
@@ -4118,6 +4126,7 @@ status_t build_to_priv_stp_BridgeConfigMSTPRegionName(
   childval = val_first_child_name(
       parentval,
       "MSTPRegionName");
+  entry->MSTPRegionName = malloc(sizeof(*entry->MSTPRegionName));
   if (childval != NULL && childval->res == NO_ERR) {
     /* string */
     entry->MSTPRegionName = VAL_STRING(childval);

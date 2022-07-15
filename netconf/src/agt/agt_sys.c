@@ -259,7 +259,32 @@ static obj_template_t *sysCapabilityChangeobj;
 static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
 
-static xmlChar *fake_string;
+static val_value_t           *ietf_system_val=NULL;
+static val_value_t           *ietf_system_state_val=NULL;
+
+
+/********************************************************************
+* FUNCTION init_static_vars
+*
+* Init the static vars
+*
+*********************************************************************/
+static void
+    init_static_sys_vars (void)
+{
+    ietf_sysmod = NULL;
+    sysmod = NULL;
+    ietf_system_state_obj = NULL;
+    ietf_system_obj = NULL;
+    yuma_system_obj = NULL;
+    sysStartupobj = NULL;
+    sysCapabilityChangeobj = NULL;
+    sysSessionEndobj = NULL;
+    sysConfirmedCommitobj = NULL;
+    ietf_system_val = NULL;
+    ietf_system_state_val = NULL;
+
+} /* init_static_sys_vars */
 
 /********************************************************************
 * FUNCTION get_api_string_router
@@ -449,42 +474,12 @@ static status_t
 }
 
 
-static status_t
-    get_ntp_enabled (ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         const val_value_t *virval,
-                         val_value_t  *dstval)
-{
-    boolean      buff=false;
-
-    (void)scb;
-    (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-        struct timepb_Config *time_out;
-        struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
-        time_out = malloc(sizeof(*(time_out)));
-
-        time_Time_GetConfig(epty, time_out);
-        if (time_out->Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO){
-            buff = true;
-        }
-        free(time_out);
-        free(epty);
-        VAL_BOOL(dstval) = buff;
-        return NO_ERR;
-    } else {
-        return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_ntp_enabled */
-
-
 status_t set_api_string_router(int api_indicator, xmlChar *arg) {
     status_t res = NO_ERR;
     struct emptypb_Empty *epty;
     struct systempb_Config *sys_config;
     struct networkpb_Config *network_config;
+    struct timepb_Config *time_config;
     if (LOGDEBUG) {
         log_debug("\n in set_api_string_router, args is %s", arg);
     }
@@ -509,12 +504,740 @@ status_t set_api_string_router(int api_indicator, xmlChar *arg) {
             system_System_SetConfig(sys_config, epty);
             break;
         case private_api_set_time_timezone:
+            epty = malloc(sizeof(*epty));
+            time_config = malloc(sizeof(*time_config));
+            printf("\n whay1 ");
+            time_Time_GetConfig(epty, time_config);
+            printf("\n whay2 ");
+            time_config->TimeZone = arg;
+            printf("\n whay3 ");
+            time_Time_SetConfig(time_config, epty);
+            printf("\n whay4 ");
             break;
     }
     return res;
 }
 
 
+
+/************* E X T E R N A L    F U N C T I O N S ***************/
+static status_t
+ietf_system_state_clock_get(
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval
+){
+    status_t res = NO_ERR;
+    val_value_t *childval;
+
+    /* Add /system-state/clock/current-datetime */
+    xmlChar *current_datetime;
+    current_datetime = malloc(sizeof(current_datetime)*20);
+    memset(current_datetime, 0, sizeof(current_datetime)*20);
+    res = get_clock_current_datetime(current_datetime);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_current_datetime,
+        current_datetime,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system-state/clock/boot-datetime */
+    xmlChar *boot_datetime;
+    boot_datetime = malloc(sizeof(boot_datetime)*20);
+    memset(boot_datetime, 0, sizeof(boot_datetime)*20);
+    res = get_clock_boot_datetime(boot_datetime);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_boot_datetime,
+        boot_datetime,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    return res;
+}
+
+status_t ietf_system_state_clock_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_init_virtual(
+        parentval,
+        ietf_system_state_clock_get,
+        parentval->obj);
+    return res;
+}
+
+status_t ieft_system_state_platform_get(
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval
+) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+
+    /* Add /system-state/platform/os-name */
+    xmlChar *os_name;
+    os_name = malloc(sizeof(os_name)*512);
+    memset(os_name, 0, sizeof(os_name)*512);
+    res = get_platform_os_name(os_name);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_os_name,
+        os_name,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system-state/platform/os-release */
+    xmlChar *os_release;
+    os_release = malloc(sizeof(os_release)*512);
+    memset(os_release, 0, sizeof(os_release)*512);
+    res = get_platform_os_release(os_release);
+    if (res != NO_ERR) {
+        return res;
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_os_release,
+        os_release,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system-state/platform/os-version */
+    xmlChar *os_version;
+    os_version = malloc(sizeof(os_version)*512);
+    memset(os_version, 0, sizeof(os_version)*512);
+    res = get_platform_os_version(os_version);
+    if (res != NO_ERR) {
+        return res;
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_os_version,
+        os_version,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system-state/platform/machine */
+    xmlChar *machine;
+    machine = malloc(sizeof(machine)*512);
+    memset(machine, 0, sizeof(machine)*512);
+    res = get_platform_machine(machine);
+    if (res != NO_ERR) {
+        return res;
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_state_machine,
+        machine,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    return res;
+}
+
+status_t ietf_system_state_platform_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_init_virtual(
+        parentval,
+        ieft_system_state_platform_get,
+        parentval->obj);
+    return res;
+}
+
+status_t ietf_system_state_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    /* Add /system-state/clock */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_clock,
+        parentval,
+        &childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    res = ietf_system_state_clock_mro(childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system-state/platform */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_state_platform,
+        parentval,
+        &childval);
+
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = ietf_system_state_platform_mro(childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    return res;
+}
+
+status_t build_ntp_server (val_value_t *parentval, char *name, char *address) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    val_value_t *udp_val = NULL;
+
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_system_ntp_server_name,
+        name,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_ntp_server_udp,
+        parentval,
+        &udp_val);
+
+    childval = agt_make_leaf(
+        udp_val->obj,
+        ietf_system_ntp_server_udp_address,
+        address,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, udp_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    printf("\n======================");
+    return res;
+}
+
+/********************************************************************
+ * FUNCTION ietf_system_ntp_server_get
+ *
+ * Get database object callback
+ * Path: /system/ntp
+ * Fill in 'dstval' contents
+ *
+ * INPUTS:
+ *     see ncx/getcb.h for details
+ *
+ * RETURNS:
+ *     error status
+ ********************************************************************/
+
+static status_t
+ietf_system_ntp_get (
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+
+    val_value_t *childval = NULL;
+    val_value_t *primary_list_val = NULL;
+    val_value_t *secondary_list_val = NULL;
+    val_value_t *ntp_val = NULL;
+
+    status_t res = NO_ERR;
+    if (LOGDEBUG) {
+        log_debug("\nEnter ietf_system_ntp_get");
+    }
+    /* calls the private api */
+    struct emptypb_Empty *in = malloc(sizeof(*in));
+    struct timepb_Config *out = malloc(sizeof(*out));
+    time_Time_GetConfig(in, out);
+
+
+    if (LOGDEBUG) {
+        log_debug("\nadding ntp/enabled");
+    }
+    /* Add /system/ntp/enabled */
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_ntp_enabled,
+        "true",
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system/ntp/server */
+    primary_list_val = agt_make_list(
+        dstval->obj,
+        ietf_system_ntp_server,
+        &res);
+    if (primary_list_val != NULL) {
+        val_add_child(primary_list_val, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    res = build_ntp_server(primary_list_val, "primary", out->MainNTPServer);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    if (strlen(out->BackupNTPServer)!=0) {
+        /* Add /system/ntp/server */
+        secondary_list_val = agt_make_list(
+            dstval->obj,
+            ietf_system_ntp_server,
+            &res);
+        if (secondary_list_val != NULL) {
+            val_add_child(secondary_list_val, dstval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        res = build_ntp_server(secondary_list_val, "secondary", out->BackupNTPServer);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+
+    return res;
+}
+
+status_t ietf_system_ntp_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_init_virtual(
+        parentval,
+        ietf_system_ntp_get,
+        parentval->obj);
+    return res;
+}
+
+status_t build_radius_server (
+    val_value_t *parentval,
+    struct accesspb_AuthenticationServerEntry *entry) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    val_value_t *udp_val = NULL;
+
+    childval = agt_make_object(
+        parentval->obj,
+        ietf_system_radius_server_name,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = val_set_simval_obj(
+        childval,
+        childval->obj,
+        entry->Name);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_radius_server_udp,
+        parentval,
+        &udp_val);
+
+    childval = agt_make_leaf(
+        udp_val->obj,
+        ietf_system_radius_server_udp_address,
+        entry->HostAddress,
+        &res);
+
+    if (childval != NULL) {
+        val_add_child(childval, udp_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    childval = agt_make_int_leaf(
+        udp_val->obj,
+        ietf_system_radius_server_udp_authentication_port,
+        entry->PortNumber,
+        &res);
+
+    if (childval != NULL) {
+        val_add_child(childval, udp_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    childval = agt_make_leaf(
+        udp_val->obj,
+        ietf_system_radius_server_udp_shared_secret,
+        entry->SharedSecret,
+        &res);
+
+    if (childval != NULL) {
+        val_add_child(childval, udp_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    return res;
+}
+
+
+static status_t
+ietf_system_radius_get (
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+
+    status_t res = NO_ERR;
+    if (LOGDEBUG) {
+        log_debug("\nEnter ietf_system_radius_get");
+    }
+    /* calls the private api */
+    struct emptypb_Empty *in = malloc(sizeof(*in));
+    struct accesspb_AuthenticationServersConfig *out=malloc(sizeof(*out));
+    access_Access_GetAuthenticatorServerConfig(in, out);
+
+    for (int i = 0; i<(out->List_Len);i++) {
+        /* Only show the tacacs server*/
+        if (out->List[i]->ServerType == accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS) {
+            continue;
+        }
+        val_value_t *child_val = NULL;
+
+        child_val = agt_make_list(
+            dstval->obj,
+            ietf_system_radius_server,
+            &res);
+        if (child_val != NULL) {
+            val_add_child(child_val, dstval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        res = build_radius_server(child_val, out->List[i]);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+
+    return res;
+}
+
+status_t build_authentication_user (
+    val_value_t *parentval,
+    struct accesspb_UserEntry *entry) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    val_value_t *udp_val = NULL;
+
+    childval = agt_make_object(
+        parentval->obj,
+        ietf_system_ntp_server_name,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = val_set_simval_obj(
+        childval,
+        childval->obj,
+        entry->Name);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    return res;
+}
+
+static status_t
+ietf_system_authentication_get (
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+
+    status_t res = NO_ERR;
+    if (LOGDEBUG) {
+        log_debug("\nEnter ietf_system_authentication_get");
+    }
+    /* calls the private api */
+    struct emptypb_Empty *in = malloc(sizeof(*in));
+    struct accesspb_UsersConfig *out = malloc(sizeof(*out));
+    access_Access_GetUsers(in, out);
+
+    for (int i = 0; i<(out->List_Len);i++) {
+        val_value_t *child_val = NULL;
+
+        child_val = agt_make_list(
+            dstval->obj,
+            ietf_system_authentication_user,
+            &res);
+
+        if (child_val != NULL) {
+            val_add_child(child_val, dstval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        res = build_authentication_user(child_val, out->List[i]);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+    free(in);
+    free(out);
+
+    return res;
+}
+
+status_t ietf_system_radius_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    printf("\n@@@@ obj name %s\n", obj_get_name(parentval->obj));
+    val_init_virtual(
+        parentval,
+        ietf_system_radius_get,
+        parentval->obj);
+    return res;
+}
+
+status_t ietf_system_authentication_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    printf("\n@@@@ obj name %s\n", obj_get_name(parentval->obj));
+    val_init_virtual(
+        parentval,
+        ietf_system_authentication_get,
+        parentval->obj);
+    return res;
+}
+
+static status_t
+ietf_system_clock_timezone_get (
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+
+    status_t res = NO_ERR;
+    if (LOGDEBUG) {
+        log_debug("\nEnter ietf_system_clock_timezone_get");
+    }
+
+    val_value_t *childval;
+    xmlChar *timezone;
+    timezone = malloc(sizeof(timezone)*512);
+    memset(timezone, 0, sizeof(timezone)*512);
+    res = get_clock_timezone(timezone);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_clock_timezone_name,
+        timezone,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+        res = val_instance_check(childval, dstval->obj);
+        log_debug("\n instance_check result %s ", get_error_string(res));
+        boolean is_set = val_choice_is_set(dstval, dstval->obj);
+        log_debug("\n choice_is_set result %s ", is_set ? "yes" : "false");
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    } else {
+        log_debug("\n wwwwwwwwwwwwwwwwwww");
+
+    }
+    return res;
+}
+
+
+status_t ietf_system_clock_timezone_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    val_init_virtual(
+        parentval,
+        ietf_system_clock_timezone_get,
+        parentval->obj);
+    return res;
+}
+
+
+status_t ietf_system_get(
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+    status_t res = NO_ERR;
+    val_value_t *childval = NULL;
+    val_value_t *clockval = NULL;
+    val_value_t *radiusval = NULL;
+    val_value_t *authenticationval = NULL;
+    val_value_t *ntpval = NULL;
+
+    xmlChar *hostname;
+    hostname = malloc(sizeof(hostname)*512);
+    memset(hostname, 0, sizeof(hostname)*512);
+    res = get_system_hostname(hostname);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_hostname,
+        hostname,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system/location */
+    xmlChar *location;
+    location = malloc(sizeof(location)*512);
+    memset(location, 0, sizeof(location)*512);
+    // res = get_api_string_router(private_api_get_system_location, location);
+    res = get_system_location(location);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_location,
+        location,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system/contact */
+    xmlChar *contact;
+    contact = malloc(sizeof(contact)*512);
+    memset(contact, 0, sizeof(contact)*512);
+    // res = get_api_string_router(private_api_get_system_contact, contact);
+    res = get_system_contact(contact);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    childval = agt_make_leaf(
+        dstval->obj,
+        ietf_system_contact,
+        contact,
+        &res);
+    if (childval != NULL) {
+        val_add_child(childval, dstval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* Add /system/clock */
+    printf("\n@@@@ add /system/clock\n");
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_clock,
+        dstval,
+        &clockval);
+
+    printf("\n@@@@ add /system/clock/timezone-name\n");
+    res = ietf_system_clock_timezone_mro(clockval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* calls the private api */
+    struct emptypb_Empty *epty1 = malloc(sizeof(*epty1));
+    struct accesspb_AuthenticationServersConfig *radius_out=malloc(sizeof(*radius_out));
+    access_Access_GetAuthenticatorServerConfig(epty1, radius_out);
+    if (radius_out->List_Len != 0) {
+        res = agt_add_container(
+            ietf_system,
+            ietf_system_radius,
+            dstval,
+            &radiusval);
+        res = ietf_system_radius_mro(radiusval);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+
+    /* Add /system/authentication */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_authentication,
+        dstval,
+        &authenticationval);
+
+    /* Add /system/authentication/user/name */
+    res = ietf_system_authentication_mro(authenticationval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    struct emptypb_Empty *ety = malloc(sizeof(*ety));
+    struct timepb_Config *time_confg = malloc(sizeof(*time_confg));
+    time_Time_GetConfig(ety, time_confg);
+
+    if (time_confg->Mode == timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+        res = agt_add_container(
+            ietf_system,
+            ietf_system_ntp,
+            dstval,
+            &ntpval);
+        res = ietf_system_ntp_mro(ntpval);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+
+    return res;
+}
+
+status_t ietf_system_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+    val_init_virtual(
+        parentval,
+        ietf_system_get,
+        parentval->obj);
+    return res;
+}
 
 static status_t
     ietf_system_callback_router(
@@ -538,8 +1261,12 @@ static status_t
         log_debug("\n >>>>> walter: func = api_indicator %d", api_indicator);
         log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
         log_debug("\n newval = %d, curval = %d", newval == NULL, curval == NULL);
-        val_dump_value(newval, 0);
-        val_dump_value(curval, 0);
+        if (newval!=NULL) {
+            log_debug("\n newval = %s, curval = %s", VAL_STRING(newval), VAL_STRING(curval));
+            log_debug("\n newval.name is %s, curval.name is = %s", newval->name, curval->name);
+        }
+        // val_dump_value(newval, 0);
+        // val_dump_value(curval, 0);
     }
 
     switch (cbtyp) {
@@ -554,7 +1281,6 @@ static status_t
         case OP_EDITOP_LOAD:
             break;
         case OP_EDITOP_MERGE:
-            break;
         case OP_EDITOP_REPLACE:
             if(newval!=NULL) {
                 printf("\nSetting newval %s\n", VAL_STRING(newval));
@@ -574,6 +1300,7 @@ static status_t
     default:
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+    log_debug("\n res is %s", get_error_string(res));
     /* if error: set the res, errorstr, and errorval parms */
     if (res != NO_ERR) {
         agt_record_error(
@@ -587,7 +1314,98 @@ static status_t
             NCX_NT_VAL,
             errorval);
     }
+    log_debug("\n walter: b4 ietf_system_callback_router return");
+    return res;
+}
 
+static status_t
+    ietf_system_clock_timzone_name_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    if (LOGDEBUG) {
+        log_debug("\n >>>>> walter: func = ietf_system_clock_timzone_name_edit ");
+        log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\n newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        if (newval!=NULL) {
+            log_debug("\n newval11 ");
+            log_debug("\n newval.name is %s, curval.name is = %s", newval->name, curval->name);
+            log_debug("\n newval22 ");
+            log_debug("\n newval = %s",VAL_STRING(newval));
+            log_debug("\n newval33 ");
+            log_debug("\n curval = %s",VAL_STRING(curval));
+            log_debug("\n newval44 ");
+        }
+        val_dump_value(newval, 0);
+        val_dump_value(curval, 0);
+    }
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            if(newval!=NULL) {
+                log_debug("\nSetting newval %s\n", VAL_STRING(newval));
+                // res = set_api_string_router(private_api_set_time_timezone, VAL_STRING(newval));
+                struct timepb_Config *time_config = malloc(sizeof(*time_config));
+                struct emptypb_Empty *epty = malloc(sizeof(*epty));
+                log_debug("\n whay1 ");
+                time_Time_GetConfig(epty, time_config);
+                log_debug("\n whay2 ");
+                time_config->TimeZone = VAL_STRING(newval);
+                log_debug("\n whay3 ");
+                time_Time_SetConfig(time_config, epty);
+            }
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\n walter: b4 ietf_system_callback_router return");
     return res;
 }
 
@@ -647,6 +1465,25 @@ static status_t
         newval,
         curval);
 } /* ietf_system_location_edit */
+
+// static status_t
+//     ietf_system_clock_timzone_name_edit (
+//         ses_cb_t *scb,
+//         rpc_msg_t *msg,
+//         agt_cbtyp_t cbtyp,
+//         op_editop_t editop,
+//         val_value_t *newval,
+//         val_value_t *curval)
+// {
+//    return ietf_system_callback_router(
+//         private_api_set_time_timezone,
+//         scb,
+//         msg,
+//         cbtyp,
+//         editop,
+//         newval,
+//         curval);
+// } /* ietf_system_location_edit */
 
 
 /********************************************************************
@@ -990,750 +1827,8 @@ status_t
 }
 
 
-/********************************************************************
-* FUNCTION init_static_vars
-*
-* Init the static vars
-*
-*********************************************************************/
-static void
-    init_static_sys_vars (void)
-{
-    ietf_sysmod = NULL;
-    sysmod = NULL;
-    ietf_system_state_obj = NULL;
-    ietf_system_obj = NULL;
-    yuma_system_obj = NULL;
-    sysStartupobj = NULL;
-    sysCapabilityChangeobj = NULL;
-    sysSessionEndobj = NULL;
-    sysConfirmedCommitobj = NULL;
 
-} /* init_static_sys_vars */
 
-
-/************* E X T E R N A L    F U N C T I O N S ***************/
-static status_t
-ietf_system_state_clock_get(
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval
-){
-    status_t res = NO_ERR;
-    val_value_t *childval;
-
-    /* Add /system-state/clock/current-datetime */
-    xmlChar *current_datetime;
-    current_datetime = malloc(sizeof(current_datetime)*20);
-    memset(current_datetime, 0, sizeof(current_datetime)*20);
-    res = get_clock_current_datetime(current_datetime);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_current_datetime,
-        current_datetime,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system-state/clock/boot-datetime */
-    xmlChar *boot_datetime;
-    boot_datetime = malloc(sizeof(boot_datetime)*20);
-    memset(boot_datetime, 0, sizeof(boot_datetime)*20);
-    res = get_clock_boot_datetime(boot_datetime);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_boot_datetime,
-        boot_datetime,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    return res;
-}
-
-status_t ietf_system_state_clock_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    val_init_virtual(
-        parentval,
-        ietf_system_state_clock_get,
-        parentval->obj);
-    return res;
-}
-
-status_t ieft_system_state_platform_get(
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval
-) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-
-    /* Add /system-state/platform/os-name */
-    xmlChar *os_name;
-    os_name = malloc(sizeof(os_name)*512);
-    memset(os_name, 0, sizeof(os_name)*512);
-    res = get_platform_os_name(os_name);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_os_name,
-        os_name,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system-state/platform/os-release */
-    xmlChar *os_release;
-    os_release = malloc(sizeof(os_release)*512);
-    memset(os_release, 0, sizeof(os_release)*512);
-    res = get_platform_os_release(os_release);
-    if (res != NO_ERR) {
-        return res;
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_os_release,
-        os_release,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system-state/platform/os-version */
-    xmlChar *os_version;
-    os_version = malloc(sizeof(os_version)*512);
-    memset(os_version, 0, sizeof(os_version)*512);
-    res = get_platform_os_version(os_version);
-    if (res != NO_ERR) {
-        return res;
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_os_version,
-        os_version,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system-state/platform/machine */
-    xmlChar *machine;
-    machine = malloc(sizeof(machine)*512);
-    memset(machine, 0, sizeof(machine)*512);
-    res = get_platform_machine(machine);
-    if (res != NO_ERR) {
-        return res;
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_state_machine,
-        machine,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    return res;
-}
-
-status_t ietf_system_state_platform_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    val_init_virtual(
-        parentval,
-        ieft_system_state_platform_get,
-        parentval->obj);
-    return res;
-}
-
-status_t ietf_system_state_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    /* Add /system-state/clock */
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_clock,
-        parentval,
-        &childval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    res = ietf_system_state_clock_mro(childval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system-state/platform */
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_state_platform,
-        parentval,
-        &childval);
-
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    res = ietf_system_state_platform_mro(childval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    return res;
-}
-
-status_t build_ntp_server (val_value_t *parentval, char *name, char *address) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    val_value_t *udp_val = NULL;
-
-    childval = agt_make_leaf(
-        parentval->obj,
-        ietf_system_ntp_server_name,
-        name,
-        &res);
-    if (childval != NULL) {
-        val_add_child_sorted(childval, parentval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_ntp_server_udp,
-        parentval,
-        &udp_val);
-
-    childval = agt_make_leaf(
-        udp_val->obj,
-        ietf_system_ntp_server_udp_address,
-        address,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, udp_val);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    printf("\n======================");
-    return res;
-}
-
-/********************************************************************
- * FUNCTION ietf_system_ntp_server_get
- *
- * Get database object callback
- * Path: /system/ntp
- * Fill in 'dstval' contents
- *
- * INPUTS:
- *     see ncx/getcb.h for details
- *
- * RETURNS:
- *     error status
- ********************************************************************/
-
-static status_t
-ietf_system_ntp_get (
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval) {
-
-    val_value_t *childval = NULL;
-    val_value_t *primary_list_val = NULL;
-    val_value_t *secondary_list_val = NULL;
-    val_value_t *ntp_val = NULL;
-
-    status_t res = NO_ERR;
-    if (LOGDEBUG) {
-        log_debug("\nEnter ietf_system_ntp_get");
-    }
-    /* calls the private api */
-    struct emptypb_Empty *in = malloc(sizeof(*in));
-    struct timepb_Config *out = malloc(sizeof(*out));
-    time_Time_GetConfig(in, out);
-
-
-    if (LOGDEBUG) {
-        log_debug("\nadding ntp/enabled");
-    }
-    /* Add /system/ntp/enabled */
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_ntp_enabled,
-        "true",
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system/ntp/server */
-    primary_list_val = agt_make_list(
-        dstval->obj,
-        ietf_system_ntp_server,
-        &res);
-    if (primary_list_val != NULL) {
-        val_add_child(primary_list_val, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    printf("\n b4 add, secondallist val name is %s", primary_list_val->name);
-    res = build_ntp_server(primary_list_val, "primary", out->MainNTPServer);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    if (strlen(out->BackupNTPServer)!=0) {
-        /* Add /system/ntp/server */
-        secondary_list_val = agt_make_list(
-            dstval->obj,
-            ietf_system_ntp_server,
-            &res);
-        if (secondary_list_val != NULL) {
-            val_add_child(secondary_list_val, dstval);
-        } else if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-
-        printf("\n b4 add, secondallist val name is %s", secondary_list_val->name);
-
-        res = build_ntp_server(secondary_list_val, "secondary", out->BackupNTPServer);
-        if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-    }
-
-    return res;
-}
-
-status_t ietf_system_ntp_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    val_init_virtual(
-        parentval,
-        ietf_system_ntp_get,
-        parentval->obj);
-    return res;
-}
-
-status_t build_radius_server (
-    val_value_t *parentval,
-    struct accesspb_AuthenticationServerEntry *entry) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    val_value_t *udp_val = NULL;
-
-    childval = agt_make_object(
-        parentval->obj,
-        ietf_system_radius_server_name,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, parentval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    res = val_set_simval_obj(
-        childval,
-        childval->obj,
-        entry->Name);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_radius_server_udp,
-        parentval,
-        &udp_val);
-
-    childval = agt_make_leaf(
-        udp_val->obj,
-        ietf_system_radius_server_udp_address,
-        entry->HostAddress,
-        &res);
-
-    if (childval != NULL) {
-        val_add_child(childval, udp_val);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    childval = agt_make_int_leaf(
-        udp_val->obj,
-        ietf_system_radius_server_udp_authentication_port,
-        entry->PortNumber,
-        &res);
-
-    if (childval != NULL) {
-        val_add_child(childval, udp_val);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    childval = agt_make_leaf(
-        udp_val->obj,
-        ietf_system_radius_server_udp_shared_secret,
-        entry->SharedSecret,
-        &res);
-
-    if (childval != NULL) {
-        val_add_child(childval, udp_val);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    return res;
-}
-
-
-static status_t
-ietf_system_radius_get (
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval) {
-
-    status_t res = NO_ERR;
-    if (LOGDEBUG) {
-        log_debug("\nEnter ietf_system_radius_get");
-    }
-    /* calls the private api */
-    struct emptypb_Empty *in = malloc(sizeof(*in));
-    struct accesspb_AuthenticationServersConfig *out=malloc(sizeof(*out));
-    access_Access_GetAuthenticatorServerConfig(in, out);
-
-    for (int i = 0; i<(out->List_Len);i++) {
-        /* Only show the tacacs server*/
-        if (out->List[i]->ServerType == accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS) {
-            continue;
-        }
-        val_value_t *child_val = NULL;
-
-        child_val = agt_make_list(
-            dstval->obj,
-            ietf_system_radius_server,
-            &res);
-        if (child_val != NULL) {
-            val_add_child(child_val, dstval);
-        } else if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-
-        res = build_radius_server(child_val, out->List[i]);
-        if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-    }
-
-    return res;
-}
-
-status_t build_authentication_user (
-    val_value_t *parentval,
-    struct accesspb_UserEntry *entry) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    val_value_t *udp_val = NULL;
-
-    childval = agt_make_object(
-        parentval->obj,
-        ietf_system_ntp_server_name,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, parentval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    res = val_set_simval_obj(
-        childval,
-        childval->obj,
-        entry->Name);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    return res;
-}
-
-static status_t
-ietf_system_authentication_get (
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval) {
-
-    status_t res = NO_ERR;
-    if (LOGDEBUG) {
-        log_debug("\nEnter ietf_system_authentication_get");
-    }
-    /* calls the private api */
-    struct emptypb_Empty *in = malloc(sizeof(*in));
-    struct accesspb_UsersConfig *out = malloc(sizeof(*out));
-    access_Access_GetUsers(in, out);
-
-    for (int i = 0; i<(out->List_Len);i++) {
-        val_value_t *child_val = NULL;
-
-        child_val = agt_make_list(
-            dstval->obj,
-            ietf_system_authentication_user,
-            &res);
-
-        if (child_val != NULL) {
-            val_add_child(child_val, dstval);
-        } else if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-
-        res = build_authentication_user(child_val, out->List[i]);
-        if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-    }
-    free(in);
-    free(out);
-
-    return res;
-}
-
-status_t ietf_system_radius_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    printf("\n@@@@ obj name %s\n", obj_get_name(parentval->obj));
-    val_init_virtual(
-        parentval,
-        ietf_system_radius_get,
-        parentval->obj);
-    return res;
-}
-
-status_t ietf_system_authentication_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    printf("\n@@@@ obj name %s\n", obj_get_name(parentval->obj));
-    val_init_virtual(
-        parentval,
-        ietf_system_authentication_get,
-        parentval->obj);
-    return res;
-}
-
-static status_t
-ietf_system_clock_timezone_get (
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval) {
-    const xmlChar *timezone;
-
-    status_t res = NO_ERR;
-    if (LOGDEBUG) {
-        log_debug("\nEnter ietf_system_clock_timezone_get");
-    }
-
-    /* remove the next line if scb is used */
-    (void)scb;
-
-    /* remove the next line if virval is used */
-    (void)virval;
-
-    if (cbmode != GETCB_GET_VALUE) {
-        return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-    val_value_t *child_val;
-
-    /* calls the private api */
-    struct emptypb_Empty in;
-    struct timepb_Config out;
-    time_Time_GetConfig(&in, &out);
-
-    /* Add /system/clock/timezone_name */
-    child_val = agt_make_leaf(
-        dstval->obj,
-        ietf_system_clock_timezone_name,
-        out.TimeZone,
-        &res);
-    if (res == NO_ERR) {
-        val_add_child(child_val, dstval);
-    }
-    return res;
-}
-
-
-status_t ietf_system_clock_timezone_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    val_init_virtual(
-        parentval,
-        ietf_system_clock_timezone_get,
-        parentval->obj);
-    return res;
-}
-
-status_t ietf_system_get(
-    ses_cb_t *scb,
-    getcb_mode_t cbmode,
-    const val_value_t *virval,
-    val_value_t *dstval) {
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-    val_value_t *clockval = NULL;
-    val_value_t *radiusval = NULL;
-    val_value_t *authenticationval = NULL;
-    val_value_t *ntpval = NULL;
-
-    xmlChar *hostname;
-    hostname = malloc(sizeof(hostname)*512);
-    memset(hostname, 0, sizeof(hostname)*512);
-    res = get_api_string_router(private_api_get_network_hostname, hostname);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_hostname,
-        hostname,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system/location */
-    xmlChar *location;
-    location = malloc(sizeof(location)*512);
-    memset(location, 0, sizeof(location)*512);
-    res = get_api_string_router(private_api_get_system_location, location);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_location,
-        location,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system/contact */
-    xmlChar *contact;
-    contact = malloc(sizeof(contact)*512);
-    memset(contact, 0, sizeof(contact)*512);
-    res = get_api_string_router(private_api_get_system_contact, contact);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    childval = agt_make_leaf(
-        dstval->obj,
-        ietf_system_contact,
-        contact,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, dstval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-    /* Add /system/clock */
-    printf("\n@@@@ add /system/clock\n");
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_clock,
-        dstval,
-        &clockval);
-
-    printf("\n@@@@ add /system/clock/timezone\n");
-    res = ietf_system_clock_timezone_mro(clockval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-
-
-    /* calls the private api */
-    struct emptypb_Empty *epty1 = malloc(sizeof(*epty1));
-    struct accesspb_AuthenticationServersConfig *radius_out=malloc(sizeof(*radius_out));
-    access_Access_GetAuthenticatorServerConfig(epty1, radius_out);
-    if (radius_out->List_Len != 0) {
-        res = agt_add_container(
-            ietf_system,
-            ietf_system_radius,
-            dstval,
-            &radiusval);
-        res = ietf_system_radius_mro(radiusval);
-        if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-    }
-
-    /* Add /system/authentication */
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_authentication,
-        dstval,
-        &authenticationval);
-
-    /* Add /system/authentication/user/name */
-    res = ietf_system_authentication_mro(authenticationval);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    struct emptypb_Empty *ety = malloc(sizeof(*ety));
-    struct timepb_Config *time_confg = malloc(sizeof(*time_confg));
-    time_Time_GetConfig(ety, time_confg);
-
-    if (time_confg->Mode == timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
-        res = agt_add_container(
-            ietf_system,
-            ietf_system_ntp,
-            dstval,
-            &ntpval);
-        res = ietf_system_ntp_mro(ntpval);
-        if (res != NO_ERR) {
-            return SET_ERROR(res);
-        }
-    }
-
-    return res;
-}
-
-status_t ietf_system_mro(val_value_t *parentval) {
-    status_t res = NO_ERR;
-
-
-    val_init_virtual(
-        parentval,
-        ietf_system_get,
-        parentval->obj);
-    return res;
-}
 
 /********************************************************************
 * FUNCTION agt_sys_init
@@ -1806,6 +1901,9 @@ status_t
     if (!ietf_system_obj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
+
+    agt_disable_feature(ietf_system, "dns-resolver");
+
     res = agt_cb_register_callback(
         "ietf-system",
         (const xmlChar *)"/system/hostname",
@@ -1832,6 +1930,16 @@ status_t
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+
+    // [FIXME] after all other callback is done
+    // res = agt_cb_register_callback(
+    //     "ietf-system",
+    //     (const xmlChar *)"/system/clock/timezone-name",
+    //     (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+    //     ietf_system_clock_timzone_name_edit);
+    // if (res != NO_ERR) {
+    //     return SET_ERROR(res);
+    // }
 
     yuma_system_obj =
         obj_find_child(ietf_system_state_obj,
@@ -1876,8 +1984,7 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *ietf_system_val=NULL;
-    val_value_t           *ietf_system_state_val=NULL;
+
     cfg_template_t        *runningcfg;
     status_t               res;
 
@@ -1954,6 +2061,24 @@ void
         agt_rpc_unregister_method(AGT_SYS_MODULE,
                                   system_N_set_log_level);
     }
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/clock");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/hostname");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/contact");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/location");
+
+
 }  /* agt_sys_cleanup */
 
 

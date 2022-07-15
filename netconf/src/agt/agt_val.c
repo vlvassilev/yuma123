@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: agt_val.c
 
@@ -169,7 +169,7 @@ static op_editop_t cvt_editop( op_editop_t editop,
 
 /********************************************************************
 * FUNCTION skip_obj_commit_test
-* 
+*
 * Check if the commit tests should be skipped for this object
 * These tests on the object tree are more strict than the data tree
 * because the data tree will never contain instances of obsolete,
@@ -184,7 +184,7 @@ static op_editop_t cvt_editop( op_editop_t editop,
 *********************************************************************/
 static boolean skip_obj_commit_test(obj_template_t *obj)
 {
-    if (obj_is_cli(obj) || 
+    if (obj_is_cli(obj) ||
         !obj_has_name(obj) ||
         !obj_is_config(obj) ||
         (obj_is_abstract(obj) && !obj_is_root(obj)) ||
@@ -201,7 +201,7 @@ static boolean skip_obj_commit_test(obj_template_t *obj)
 
 /********************************************************************
 * FUNCTION clean_node
-* 
+*
 * Clean the value node and its ancestors from editvars and flags
 *
 * INPUTS:
@@ -231,7 +231,7 @@ static void
 
 /********************************************************************
  * Create and store a change-audit record, if needed
- * this function generates a log message if log level 
+ * this function generates a log message if log level
  * set to LOG_INFO or higher; An audit record for a sysConfigChange
  * event is also generated
  *
@@ -252,7 +252,7 @@ static void
 {
     if (editop == OP_EDITOP_LOAD) {
         return;
-    } 
+    }
 
     xmlChar *ibuff = NULL;
     const xmlChar *name = NULL;
@@ -260,9 +260,9 @@ static void
     ncx_cfg_t cfgid;
     cfg_transaction_id_t txid;
     ses_id_t sid = (scb) ? SES_MY_SID(scb) : 0;
-    const xmlChar *username = (scb && scb->username) ? scb->username 
+    const xmlChar *username = (scb && scb->username) ? scb->username
         : (const xmlChar *)"nobody";
-    const xmlChar *peeraddr = (scb && scb->peeraddr) ? scb->peeraddr : 
+    const xmlChar *peeraddr = (scb && scb->peeraddr) ? scb->peeraddr :
         (const xmlChar *)"localhost";
 
     editop = cvt_editop(editop, newnode, curnode);
@@ -282,7 +282,7 @@ static void
 
     val_value_t *usenode = newnode ? newnode : curnode;
     if (usenode) {
-        status_t res = val_gen_instance_id(NULL, usenode, NCX_IFMT_XPATH1, 
+        status_t res = val_gen_instance_id(NULL, usenode, NCX_IFMT_XPATH1,
                                            &ibuff);
         if (res != NO_ERR) {
             log_error("\nError: Generate instance id failed (%s)",
@@ -293,7 +293,7 @@ static void
     log_info( "\nedit-transaction %llu: operation %s on session %d by %s@%s"
               "\n  at %s on target '%s'\n  data: %s\n",
               (unsigned long long)txid, op_editop_name(editop), sid,
-              username, peeraddr, tbuff, name, 
+              username, peeraddr, tbuff, name,
               (ibuff) ? (const char *)ibuff : "??" );
 
     if (cfgid == NCX_CFGID_RUNNING && log_audit_is_open()) {
@@ -324,7 +324,7 @@ static void
 
 /********************************************************************
 * FUNCTION handle_subtree_node_callback
-* 
+*
 * Compare current node if config
 * find the nodes that changed and call the
 * relevant user callback functions
@@ -351,7 +351,7 @@ static status_t
 {
     const xmlChar     *name;
     status_t           res;
-
+    printf("\nwalter: make a guess 9, in handle_subtree_node_callback");
     if (newnode != NULL) {
         name = newnode->name;
     } else if (curnode != NULL) {
@@ -359,18 +359,20 @@ static status_t
     } else {
         name = NULL;
     }
+    printf("\nwalter: make a guess 9.1, name is NULL: %s", name == NULL ? "true":"false");
 
     if (newnode && curnode) {
         int  retval;
-        if (newnode->parent && 
+        if (newnode->parent &&
             newnode->parent->editop == OP_EDITOP_REPLACE &&
-            newnode->parent->editvars && 
+            newnode->parent->editvars &&
             newnode->parent->editvars->operset) {
-            /* replace parent was explicitly requested and this 
+            printf("\nwalter: make a guess 9.2, in replace");
+            /* replace parent was explicitly requested and this
              * function would not have been called unless something
-             * in the replaced node changed.  
+             * in the replaced node changed.
              * Invoke the SIL callbacks for the child nodes
-             * even if oldval == newval; 
+             * even if oldval == newval;
              *
              * Operation must be explicitly set w/ operation="replace"
              * attribute because <copy-config> will also
@@ -396,19 +398,19 @@ static status_t
         }
     }
 
-    res = handle_user_callback(cbtyp, editop, scb, msg, newnode, 
+    res = handle_user_callback(cbtyp, editop, scb, msg, newnode,
                                curnode, FALSE,
                                (editop == OP_EDITOP_DELETE) ? TRUE : FALSE);
 
     return res;
 
-} /* handle_subtree_node_callback */        
+} /* handle_subtree_node_callback */
 
 
 /********************************************************************
 * FUNCTION handle_subtree_callback
-* 
-* Search the subtrees and find the correct user callback 
+*
+* Search the subtrees and find the correct user callback
 * functions and invoke them
 *
 * INPUTS:
@@ -433,13 +435,33 @@ static status_t
 {
     val_value_t  *newchild, *curchild;
     status_t      res = NO_ERR;
+    printf("\nwalter: make a guess 7");
+
 
     if (newnode == NULL) {
+        printf("\nwalter: newnode is null");
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
+    log_debug("\nwalter: make a guess 8");
+    log_debug("\nwalter: make a guess 8.11");
+    log_debug("\nwalter: make a guess 8.12");
+    log_debug("\nwalter: make a guess 8.13");
+    log_debug("\nwalter: make a guess 8.17, newNode->name: %s", newnode->name);
+    log_debug("\nwalter: make a guess 8.14");
+    log_debug("\nwalter: make a guess 8.15");
+    log_debug("\nwalter: make a guess 8.16");
+    newchild = val_get_first_child(newnode);
+    log_debug("\nwalter: make a guess 8.17");
+    log_debug("\nwalter: make a guess 8.18");
+    log_debug("\nwalter: make a guess 8.19");
+    newchild = val_get_next_child(newchild);
+    log_debug("\nwalter: make a guess 8.20");
+    log_debug("\nwalter: make a guess 8.21");
+    log_debug("\nwalter: make a guess 8.22");
     for (newchild = val_get_first_child(newnode);
          newchild != NULL;
          newchild = val_get_next_child(newchild)) {
+        log_debug("\nwalter: make a guess 8.2, newchild->name: %s", newchild->name);
 
         if (!obj_is_config(newchild->obj)) {
             continue;
@@ -458,9 +480,19 @@ static status_t
         }
     }
 
+    log_debug("\nwalter: make a guess 8.2322");
     if (curnode == NULL) {
         return NO_ERR;
     }
+
+    log_debug("\nwalter: make a guess 8.23");
+    log_debug("\nwalter: make a guess 8.24");
+    log_debug("\nwalter: make a guess 8.25");
+    curchild = val_get_first_child(curnode);
+    log_debug("\nwalter: make a guess 8.26");
+    curchild = val_get_next_child(curchild);
+    log_debug("\nwalter: make a guess 8.27");
+    log_debug("\nwalter: make a guess 8.28");
 
     for (curchild = val_get_first_child(curnode);
          curchild != NULL;
@@ -487,8 +519,8 @@ static status_t
 
 /********************************************************************
 * FUNCTION delete_children_first
-* 
-* Doing a delete operation and checking for the 
+*
+* Doing a delete operation and checking for the
 * sil-delete-children-first flag. Just calling the
 * SIL callback functions, not actually removing the
 * child nodes in case a rollback is needed
@@ -538,6 +570,9 @@ static status_t
         if (obj_is_sil_delete_children_first(curchild->obj)) {
             res = delete_children_first(cbtyp, scb, msg, curchild);
         } else {
+            if (LOGDEBUG) {
+                log_debug("\n in delete_children_first, calling handle_subtree_node_callback");
+            }
             res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
                                                msg, NULL, curchild);
         }
@@ -547,6 +582,9 @@ static status_t
     }
 
     if (!obj_is_leafy(curnode->obj)) {
+        if (LOGDEBUG) {
+            log_debug("\n in delete_children_first222222, calling handle_subtree_node_callback");
+        }
         res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
                                            msg, NULL, curnode);
     }
@@ -558,7 +596,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION handle_user_callback
-* 
+*
 * Find the correct user callback function and invoke it
 *
 * INPUTS:
@@ -630,9 +668,12 @@ static status_t
      */
     if (obj_is_sil_delete_children_first(val->obj) &&
         !obj_is_leafy(val->obj) &&
-        !indelete && 
+        !indelete &&
         editop == OP_EDITOP_DELETE &&
         cbtyp == AGT_CB_COMMIT) {
+        if (LOGDEBUG) {
+            log_debug("\n Start to delete_children_first");
+        }
         res = delete_children_first(cbtyp, scb, msg, curnode);
         return res;
     }
@@ -642,12 +683,17 @@ static status_t
     while (!done) {
         agt_cb_fnset_node_t *cbset_node;
         unsigned int cbfn_calls=0;
-
+        int counter = 0;
         for(cbset_node=val->obj?(agt_cb_fnset_node_t *)dlq_firstEntry(&val->obj->cbsetQ):NULL;
             cbset_node!=NULL;
             cbset_node=(agt_cb_fnset_node_t *)dlq_nextEntry(cbset_node)) {
+            log_debug("\n counter is %d", counter);
+            counter++;
+            log_debug("\n val-> obj %p", val->obj);
             cbset = cbset_node->fnset_ptr;
             if(cbset->cbfn[cbtyp]==NULL) {
+                log_debug("\n walter: cbset is %s", cbset);
+                log_debug("\n walter: cbtyp is %d, got NULL, ignore", cbtyp);
                 continue;
             } else {
                 cbfn_calls++;
@@ -659,11 +705,15 @@ static status_t
                            val_get_mod_name(val),
                            val->name);
             }
+            printf("\nwalter: make a guess 2");
 
             editop = cvt_editop(editop, newnode, curnode);
-
-            res = (*cbset->cbfn[cbtyp])(scb, msg, cbtyp, editop, 
+            printf("\nwalter: make a guess 3");
+            res = (*cbset->cbfn[cbtyp])(scb, msg, cbtyp, editop,
                                         newnode, curnode);
+
+            printf("\nwalter: make a guess 4");
+
             if(res != NO_ERR) {
                 if (LOGDEBUG) {
                     log_debug("\n%s user callback failed (%s) for %s on %s:%s",
@@ -675,10 +725,24 @@ static status_t
                 }
                 return res;
             }
+            printf("\nwalter: make a guess 5");
         }
+        printf("\nwalter: make a guess 6");
+        log_debug("\n cnfn_calls is %d", cbfn_calls);
+        log_debug("\n val is %s", val->name);
+        printf("\nwalter: make a guess 6.11");
+        log_debug("\nwalter: cbtyp is %p", cbtyp);
+        log_debug("\nwalter: editop is %p", editop);
+        log_debug("\nwalter: scb is %p", scb);
+        log_debug("\nwalter: msg is %p", msg);
+        log_debug("\nwalter: newnode is %p", newnode);
+        log_debug("\nwalter: curnode is %p", curnode);
         if(cbfn_calls>0) {
+            log_debug("\n cnfn_calls2 is %d", cbfn_calls);
             if (res == NO_ERR) {
+                log_debug("\n res is NO_ERR");
                 val->res = NO_ERR;
+                log_debug("\n set val->res = no_error");
 
                 switch (editop) {
                 case OP_EDITOP_CREATE:
@@ -686,23 +750,28 @@ static status_t
                 case OP_EDITOP_REPLACE:
                 case OP_EDITOP_LOAD:
                     if (cbtyp != AGT_CB_VALIDATE) {
+                        printf("\nwalter: make a guess 6.12");
+
                         res = handle_subtree_callback(cbtyp, editop, scb, msg,
                                                       newnode, curnode);
+                        printf("\nwalter: make a guess 6.20");
                     }
                     break;
                 default:
-                    ;
+                    log_debug("\n switch editop default, edittop is %d", editop);
                 }
             }
             return res;
-
         } else if (!lookparent) {
+            log_debug("\n!lookparent");
             done = TRUE;
         } else if (val->parent != NULL &&
                    !obj_is_root(val->parent->obj) &&
                    val_get_nsid(val) == val_get_nsid(val->parent)) {
+            log_debug("\ncheck parent");
             val = val->parent;
         } else {
+            log_debug("\n else");
             done = TRUE;
         }
     }
@@ -714,7 +783,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION add_undo_node
-* 
+*
 * Add an undo node to the msg->undoQ
 *
 * INPUTS:
@@ -775,7 +844,7 @@ static agt_cfg_undo_rec_t *
 
 /********************************************************************
 * FUNCTION add_child_clean
-* 
+*
 *  Add a child value node to a parent value node
 *  This is only called by the agent when adding nodes
 *  to a target database.
@@ -820,7 +889,7 @@ static status_t
              testval = nextval) {
 
             nextval = val_get_next_child(testval);
-            if (testval->casobj && 
+            if (testval->casobj &&
                 (testval->casobj->parent == child->casobj->parent)) {
 
                 if (testval->casobj != child->casobj) {
@@ -907,7 +976,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION add_child_node
-* 
+*
 * Add a child node
 *
 * INPUTS:
@@ -935,7 +1004,7 @@ static status_t
 {
     if (LOGDEBUG3) {
         log_debug3("\nAdd child '%s' to parent '%s'",
-                   child->name, 
+                   child->name,
                    parent->name);
     }
 
@@ -945,7 +1014,7 @@ static status_t
         val_free_value(marker);
         return ERR_INTERNAL_MEM;
     }
-    undo->apply_res = add_child_clean(child->editvars, child, parent, 
+    undo->apply_res = add_child_clean(child->editvars, child, parent,
                                       &undo->extra_deleteQ);
     undo->edit_action = AGT_CFG_EDIT_ACTION_ADD;
     return undo->apply_res;
@@ -955,7 +1024,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION move_child_node
-* 
+*
 * Move a child list or leaf-list node
 *
 * INPUTS:
@@ -985,12 +1054,12 @@ static status_t
 {
     if (LOGDEBUG3) {
         log_debug3("\nMove child '%s' in parent '%s'",
-                   newchild->name, 
+                   newchild->name,
                    parent->name);
     }
 
-    agt_cfg_undo_rec_t *undo = add_undo_node(msg, editop, newchild, 
-                                             newchild_marker, curchild, 
+    agt_cfg_undo_rec_t *undo = add_undo_node(msg, editop, newchild,
+                                             newchild_marker, curchild,
                                              NULL, parent);
     if (undo == NULL) {
         /* no detailed rpc-error is recorded here!!!
@@ -1001,7 +1070,7 @@ static status_t
 
     VAL_MARK_DELETED(curchild);
 
-    undo->apply_res = add_child_clean(newchild->editvars, newchild, parent, 
+    undo->apply_res = add_child_clean(newchild->editvars, newchild, parent,
                                       &undo->extra_deleteQ);
     undo->edit_action = AGT_CFG_EDIT_ACTION_MOVE;
     return undo->apply_res;
@@ -1011,7 +1080,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION move_mergedlist_node
-* 
+*
 * Move a list node that was just merged with
 * the contents of the newval; now the curval needs
 * to be moved
@@ -1038,7 +1107,7 @@ static status_t
 {
     if (LOGDEBUG3) {
         log_debug3("\nMove list '%s' in parent '%s'",
-                   newchild->name, 
+                   newchild->name,
                    parent->name);
     }
 
@@ -1058,7 +1127,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION restore_newnode
-* 
+*
 * Swap the newnode and newnode_pointers
 *
 * INPUTS:
@@ -1082,7 +1151,7 @@ static void
 
 /********************************************************************
 * FUNCTION restore_newnode2
-* 
+*
 * Swap the newnode and newnode_pointers
 * There was no undo record created
 *
@@ -1104,8 +1173,8 @@ static void
 
 /********************************************************************
 * FUNCTION restore_curnode
-* 
-* Restore the curnode 
+*
+* Restore the curnode
 *
 * INPUTS:
 *   undo == undo record to use
@@ -1144,7 +1213,7 @@ static void
         undo->curnode_clone = NULL;
         undo->free_curnode = TRUE;
     } else {
-        // should not happen 
+        // should not happen
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -1153,7 +1222,7 @@ static void
 
 /********************************************************************
 * FUNCTION restore_extra_deletes
-* 
+*
 * Restore any extra deleted nodes from other YANG cases
 *
 * INPUTS:
@@ -1178,7 +1247,7 @@ static void
 
 /********************************************************************
 * FUNCTION finish_extra_deletes
-* 
+*
 * Finish deleting any extra deleted nodes from other YANG cases
 *
 * INPUTS:
@@ -1213,7 +1282,7 @@ static void
 
 /********************************************************************
 * FUNCTION check_insert_attr
-* 
+*
 * Check the YANG insert attribute
 *
 * INPUTS:
@@ -1221,7 +1290,7 @@ static void
 *   msg == incoming rpc_msg_t in progress
 *   newval == val_value_t from the PDU
 *   curparent == current parent node for inserting children
-*   
+*
 * RETURNS:
 *   status
 *********************************************************************/
@@ -1299,7 +1368,7 @@ static status_t
                 newval->editvars->insertval = testval;
             }
         }
-                    
+
         if (simval) {
             val_free_value(simval);
         }
@@ -1377,7 +1446,7 @@ static status_t
                              NCX_LAYER_CONTENT,
                              res,
                              NULL,
-                             newval->editvars->insertstr ? 
+                             newval->editvars->insertstr ?
                              NCX_NT_STRING : NCX_NT_NONE,
                              newval->editvars->insertstr,
                              NCX_NT_VAL,
@@ -1385,7 +1454,7 @@ static status_t
             return res;
         }
     }
-             
+
     if (res != NO_ERR) {
         agt_record_insert_error(scb, &msg->mhdr, res, newval);
     }
@@ -1397,7 +1466,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION commit_delete_allowed
-* 
+*
 * Check if the current session is allowed to delete
 * the node found in the requested commit delete operation
 *
@@ -1407,7 +1476,7 @@ static status_t
 *   deleteval == value struct to check
 *   isfirst == TRUE if top-level caller; FALSE if recursive call
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhdr.errQ
 *
 * RETURNS:
@@ -1439,10 +1508,10 @@ static status_t
     op_editop_t op = (isfirst) ? OP_EDITOP_DELETE : OP_EDITOP_MERGE;
 
     /* check if access control allows the delete */
-    if (!agt_acm_val_write_allowed(&msg->mhdr, scb->username, 
+    if (!agt_acm_val_write_allowed(&msg->mhdr, scb->username,
                                    NULL, deleteval, op)) {
         res = ERR_NCX_ACCESS_DENIED;
-        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL, 
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
                          NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
         return res;
     }
@@ -1464,7 +1533,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION check_commit_deletes
-* 
+*
 * Check the requested commit delete operations
 *
 * INPUTS:
@@ -1474,7 +1543,7 @@ static status_t
 *   runval == value struct from the running config
 *
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhdr.errQ
 *
 * RETURNS:
@@ -1521,15 +1590,15 @@ static status_t
 
 /********************************************************************
 * FUNCTION apply_write_val
-* 
-* Invoke all the AGT_CB_APPLY callbacks for a 
+*
+* Invoke all the AGT_CB_APPLY callbacks for a
 * source and target and write operation
 *
 * INPUTS:
 *   editop == edit operation in effect on the current node
 *   scb == session control block
 *   msg == incoming rpc_msg_t in progress
-*   target == config database target 
+*   target == config database target
 *   parent == parent value of curval and newval
 *   newval == new value to apply
 *   curval == current instance of value (may be NULL if none)
@@ -1563,7 +1632,7 @@ static status_t
     boolean          add_defs_done = FALSE;
 
     if (newval) {
-        cur_editop = (newval->editop == OP_EDITOP_NONE) 
+        cur_editop = (newval->editop == OP_EDITOP_NONE)
             ? editop : newval->editop;
         name = newval->name;
     } else if (curval) {
@@ -1576,7 +1645,7 @@ static status_t
 
     /* check if this is a top-level replace via <copy-config> or
      * a restore-from-backup replace operation   */
-    if (newval && obj_is_root(newval->obj) && 
+    if (newval && obj_is_root(newval->obj) &&
         msg->rpc_txcb->edit_type == AGT_CFG_EDIT_TYPE_FULL) {
         topreplace = TRUE;
     }
@@ -1603,7 +1672,7 @@ static status_t
         /* check corner case applying to the config root */
         if (obj_is_root(newval->obj)) {
             ;
-        } else if (!typ_is_simple(newval->btyp) && !add_defs_done && 
+        } else if (!typ_is_simple(newval->btyp) && !add_defs_done &&
                    editop != OP_EDITOP_DELETE && editop != OP_EDITOP_REMOVE) {
 
             res = val_add_defaults(newval, (target) ? target->root : NULL,
@@ -1615,7 +1684,7 @@ static status_t
         }
     }
 
-    /* apply the requested edit operation */    
+    /* apply the requested edit operation */
     if (applyhere) {
 
         if (LOGDEBUG) {
@@ -1633,10 +1702,10 @@ static status_t
                 res = val_gen_instance_id(&msg->mhdr, logval,
                                           NCX_IFMT_XPATH1, &buff);
                 if (res == NO_ERR) {
-                    log_debug("\napply_write_val: apply %s on %s",
+                    log_debug("\napply_write_val with buff: apply %s on %s",
                               op_editop_name(editop), buff);
                 } else {
-                    log_debug("\napply_write_val: apply %s on %s", 
+                    log_debug("\napply_write_val with name: apply %s on %s",
                               op_editop_name(editop), name);
                 }
                 if (buff) {
@@ -1653,7 +1722,7 @@ static status_t
              * Also there is no corresponding callback
              * to cleanup the candidate if <discard-changes>
              * is invoked by the client or the server */
-            res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
+            res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg,
                                        newval, curval, TRUE, FALSE);
             if (res != NO_ERR) {
                 /* assuming SIL added an rpc-error already
@@ -1714,11 +1783,11 @@ static status_t
                 } else if (newval) {
                     /* merging a simple leaf or leaf-list
                      * make a copy of the current node first */
-                    undo = add_undo_node(msg, cur_editop, newval, 
+                    undo = add_undo_node(msg, cur_editop, newval,
                                          newval_marker, curval, NULL, parent);
                     if (undo == NULL) {
                         /* no detailed rpc-error is recorded here!!!
-                         * relying on catch-all operation-failed in 
+                         * relying on catch-all operation-failed in
                          * agt_rpc_dispatch */
                         restore_newnode2(newval, newval_marker);
                         return ERR_INTERNAL_MEM;
@@ -1730,7 +1799,7 @@ static status_t
                     res = SET_ERROR(ERR_INTERNAL_VAL);
                 }
             } else if (newval) {
-                res = add_child_node(newval, newval_marker, parent, msg, 
+                res = add_child_node(newval, newval_marker, parent, msg,
                                      cur_editop);
             } else {
                 res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1739,16 +1808,16 @@ static status_t
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_COMMIT:
             if (curval) {
-                 if (newval && newval->editvars && 
+                 if (newval && newval->editvars &&
                      newval->editvars->insertstr) {
                      res = move_child_node(newval, newval_marker, curval,
                                            parent, msg, cur_editop);
                  } else if (newval) {
-                     undo = add_undo_node(msg, cur_editop, newval, 
+                     undo = add_undo_node(msg, cur_editop, newval,
                                           newval_marker, curval, NULL, parent);
                      if (undo == NULL) {
                          /* no detailed rpc-error is recorded here!!!
-                          * relying on catch-all operation-failed in 
+                          * relying on catch-all operation-failed in
                           * agt_rpc_dispatch */
                          restore_newnode2(newval, newval_marker);
                          return ERR_INTERNAL_MEM;
@@ -1777,11 +1846,11 @@ static status_t
          case OP_EDITOP_CREATE:
              if (newval && curval) {
                  /* there must be a default leaf */
-                 undo = add_undo_node(msg, cur_editop, newval, 
+                 undo = add_undo_node(msg, cur_editop, newval,
                                       newval_marker, curval, NULL, parent);
                  if (undo == NULL) {
                      /* no detailed rpc-error is recorded here!!!
-                      * relying on catch-all operation-failed in 
+                      * relying on catch-all operation-failed in
                       * agt_rpc_dispatch */
                      restore_newnode2(newval, newval_marker);
                      return ERR_INTERNAL_MEM;
@@ -1798,11 +1867,11 @@ static status_t
              break;
          case OP_EDITOP_LOAD:
              assert( newval && "newval NULL in LOAD" );
-             undo = add_undo_node(msg, cur_editop, newval, newval_marker, 
+             undo = add_undo_node(msg, cur_editop, newval, newval_marker,
                                   curval, NULL, parent);
              if (undo == NULL) {
                  /* no detailed rpc-error is recorded here!!!
-                  * relying on catch-all operation-failed in 
+                  * relying on catch-all operation-failed in
                   * agt_rpc_dispatch */
                  restore_newnode2(newval, newval_marker);
                  return ERR_INTERNAL_MEM;
@@ -1887,14 +1956,14 @@ static status_t
 
  /********************************************************************
  * FUNCTION check_withdef_default
- * 
+ *
  * Check the wd:default node for correctness
  *
  * INPUTS:
  *   scb == session control block
  *   msg == incoming rpc_msg_t in progress
  *   newval == val_value_t from the PDU
- *   
+ *
  * RETURNS:
  *   status
  *********************************************************************/
@@ -1927,7 +1996,7 @@ static status_t
          }
 
     if (res != NO_ERR) {
-        agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL, 
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
                          NCX_NT_VAL, newval, NCX_NT_VAL, newval);
     }
 
@@ -1945,7 +2014,7 @@ static status_t
  * \param newval val_value_t from the PDU, this cannot be null!
  * \param curval current value (if any) from the target config
  * \param curparent current parent value for inserting children
- *   
+ *
  * \return status
  *********************************************************************/
 static status_t invoke_simval_cb_validate( op_editop_t editop,
@@ -1957,7 +2026,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
 {
     assert ( newval && "newval is NULL!" );
 
-    log_debug4( "\ninvoke_simval:validate: %s:%s start", 
+    log_debug4( "\ninvoke_simval:validate: %s:%s start",
                 obj_get_mod_name(newval->obj), newval->name);
 
     /* check and adjust the operation attribute */
@@ -1965,7 +2034,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
     ncx_iqual_t iqual = val_get_iqualval(newval);
     op_editop_t cur_editop = OP_EDITOP_NONE;
     op_editop_t cvtop = cvt_editop(editop, newval, curval);
-    status_t res = agt_check_editop( cvtop, &cur_editop, newval, curval, 
+    status_t res = agt_check_editop( cvtop, &cur_editop, newval, curval,
                                      iqual, ses_get_protocol(scb) );
     if (cur_editop == OP_EDITOP_NONE) {
         cur_editop = editop;
@@ -1981,7 +2050,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
         errattr.attr_name = NC_OPERATION_ATTR_NAME;
         errattr.attr_val = (xmlChar *)NULL;
 
-        agt_record_attr_error( scb, &msg->mhdr, NCX_LAYER_CONTENT, res, 
+        agt_record_attr_error( scb, &msg->mhdr, NCX_LAYER_CONTENT, res,
                                &errattr, NULL, NULL, NCX_NT_VAL, newval );
         return res;
     } else if (res != NO_ERR) {
@@ -1990,26 +2059,26 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
         return res;
     }
 
-    /* check the operation against the object definition and whether or not 
+    /* check the operation against the object definition and whether or not
      * the entry currently exists */
     res = agt_check_max_access(newval, (curval != NULL));
     if ( res != NO_ERR ) {
-        agt_record_error( scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL, 
+        agt_record_error( scb, &msg->mhdr, NCX_LAYER_CONTENT, res, NULL,
                           NCX_NT_VAL, newval, NCX_NT_VAL, newval );
         return res;
     }
 
-    /* make sure the node is not partial locked by another session; there is a 
-     * corner case where all the PDU nodes are OP_EDITOP_NONE, and so nodes 
+    /* make sure the node is not partial locked by another session; there is a
+     * corner case where all the PDU nodes are OP_EDITOP_NONE, and so nodes
      * that touch a partial lock will never actually request an operation; treat
-     * this as an error anyway, since it is too hard to defer the test until 
+     * this as an error anyway, since it is too hard to defer the test until
      * later, and this is a useless corner-case so clients should not do it */
     if (curval) {
         uint32   lockid = 0;
         res = val_write_ok( curval, cur_editop, SES_MY_SID(scb),
                             FALSE, &lockid );
         if (res != NO_ERR) {
-            agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL, 
+            agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
                               NCX_NT_UINT32_PTR, &lockid, NCX_NT_VAL, curval );
             return res;
         }
@@ -2021,8 +2090,8 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
         return res;
     }
 
-    /* check if the wd:default attribute is present and if so, that it is used 
-     * properly; this needs to be done after the effective operation is set for 
+    /* check if the wd:default attribute is present and if so, that it is used
+     * properly; this needs to be done after the effective operation is set for
      * newval */
     if ( val_has_withdef_default(newval) ) {
          res = check_withdef_default( scb, msg, newval );
@@ -2031,7 +2100,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
          }
     }
 
-    /* check the user callback only if there is some operation in 
+    /* check the user callback only if there is some operation in
      * affect already */
     if ( agt_apply_this_node(cur_editop, newval, curval)) {
         res = handle_user_callback( AGT_CB_VALIDATE, cur_editop,  scb, msg,
@@ -2049,10 +2118,10 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
  * \param target cfg_template_t for the config database to write
  * \param newval val_value_t from the PDU
  * \param curval current value (if any) from the target config
- *   
+ *
  * \return status
  *********************************************************************/
-static status_t 
+static status_t
     invoke_simval_cb_apply_commit_check( op_editop_t editop,
                                          ses_cb_t *scb,
                                          rpc_msg_t *msg,
@@ -2073,13 +2142,13 @@ static status_t
         }
     }
 
-    return apply_write_val( cureditop, scb, msg, target, curparent, 
+    return apply_write_val( cureditop, scb, msg, target, curparent,
                             newval, curval, &done );
 }
 
 
 /********************************************************************
- * Invoke all the specified agent simple type callbacks for a 
+ * Invoke all the specified agent simple type callbacks for a
  * source and target and write operation
  *
  * \param cbtyp callback type being invoked
@@ -2090,7 +2159,7 @@ static status_t
  * \param newval val_value_t from the PDU
  * \param curval current value (if any) from the target config
  * \param curparent current parent node for inserting children
- *   
+ *
  * \return status
  *********************************************************************/
 static status_t
@@ -2098,13 +2167,13 @@ static status_t
                       op_editop_t editop,
                       ses_cb_t  *scb,
                       rpc_msg_t  *msg,
-                      cfg_template_t *target,                      
+                      cfg_template_t *target,
                       val_value_t  *newval,
                       val_value_t  *curval,
                       val_value_t *curparent)
 {
     status_t res = NO_ERR;
-    
+
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
@@ -2131,7 +2200,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION check_keys_present
-* 
+*
 * Check that the specified list entry has all key leafs present
 * Generate and record <rpc-error>s for each missing key
 *
@@ -2167,14 +2236,14 @@ static status_t
         }
 
         res = ERR_NCX_MISSING_KEY;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_CONTENT, 
+        agt_record_error(scb,
+                         &msg->mhdr,
+                         NCX_LAYER_CONTENT,
                          res,
-                         NULL, 
-                         NCX_NT_OBJ, 
+                         NULL,
+                         NCX_NT_OBJ,
                          objkey->keyobj, /* error-info */
-                         NCX_NT_VAL, 
+                         NCX_NT_VAL,
                          newval);  /* error-path */
     }
 
@@ -2185,8 +2254,8 @@ static status_t
 
 /********************************************************************
 * FUNCTION invoke_cpxval_cb
-* 
-* Invoke all the specified agent complex type callbacks for a 
+*
+* Invoke all the specified agent complex type callbacks for a
 * source and target and write operation
 *
 * INPUTS:
@@ -2219,7 +2288,7 @@ static status_t
     status_t          res = NO_ERR, retres = NO_ERR;
     op_editop_t       cur_editop = OP_EDITOP_NONE, cvtop = OP_EDITOP_NONE;
     boolean           isroot = FALSE, isdirty = TRUE;
-    
+
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
@@ -2228,7 +2297,7 @@ static status_t
         isroot = obj_is_root(newval->obj);
 
         if (LOGDEBUG4 && !isroot) {
-            log_debug4("\ninvoke_cpxval:validate: %s:%s start", 
+            log_debug4("\ninvoke_cpxval:validate: %s:%s start",
                        obj_get_mod_name(newval->obj),
                        newval->name);
         }
@@ -2242,7 +2311,7 @@ static status_t
 
             cvtop = cvt_editop(editop, newval, curval);
 
-            res = agt_check_editop(cvtop, &cur_editop, newval, curval, 
+            res = agt_check_editop(cvtop, &cur_editop, newval, curval,
                                    iqual, ses_get_protocol(scb));
 
             if (editop != OP_EDITOP_COMMIT ) {
@@ -2273,7 +2342,7 @@ static status_t
         }
 
         if (res != NO_ERR) {
-            agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res, 
+            agt_record_error(scb, &msg->mhdr, NCX_LAYER_CONTENT, res,
                              NULL, NCX_NT_VAL, newval, NCX_NT_VAL, newval);
             CHK_EXIT(res, retres);
         }
@@ -2333,8 +2402,8 @@ static status_t
                                    FALSE, &lockid);
             }
             if (res != NO_ERR) {
-                agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
-                                 NULL, NCX_NT_UINT32_PTR, &lockid, NCX_NT_VAL, 
+                agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                                 NULL, NCX_NT_UINT32_PTR, &lockid, NCX_NT_VAL,
                                  useval);
             }
         }
@@ -2410,7 +2479,7 @@ static status_t
             if (cur_editop == OP_EDITOP_NONE) {
                 cur_editop = editop;
             }
-            res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, target, 
+            res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, target,
                                   chval, curch, curval);
             //if (chval->res == NO_ERR) {
             //    chval->res = res;
@@ -2426,8 +2495,8 @@ static status_t
 
 /********************************************************************
 * FUNCTION invoke_btype_cb
-* 
-* Invoke all the specified agent typedef callbacks for a 
+*
+* Invoke all the specified agent typedef callbacks for a
 * source and target and write operation
 *
 * INPUTS:
@@ -2465,13 +2534,13 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
 
     if (editop == OP_EDITOP_COMMIT && !is_root && !val_dirty_subtree(useval)) {
         log_debug2("\nSkipping unaffected %s in %s commit for %s:%s",
-                   obj_get_typestr(useval->obj), 
+                   obj_get_typestr(useval->obj),
                    agt_cbtype_name(cbtyp),
-                   val_get_mod_name(useval), 
+                   val_get_mod_name(useval),
                    useval->name);
         return NO_ERR;
     }
-    
+
     val_value_t *v_val = NULL;
     status_t res = NO_ERR;
     boolean has_children = !typ_is_simple(useval->btyp);
@@ -2501,7 +2570,7 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
 
         /* check if allowed access to this node */
         if (check_acm && scb &&
-            !agt_acm_val_write_allowed(&msg->mhdr, scb->username, 
+            !agt_acm_val_write_allowed(&msg->mhdr, scb->username,
                                        newval, curval, cvtop)) {
             res = ERR_NCX_ACCESS_DENIED;
             agt_record_error(scb,&msg->mhdr, NCX_LAYER_OPERATION, res,
@@ -2520,9 +2589,9 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
         }
 
         /* check if there are commit deletes to validate */
-        if (has_children && 
+        if (has_children &&
             msg->rpc_txcb->edit_type == AGT_CFG_EDIT_TYPE_FULL) {
-            res = check_commit_deletes(scb, msg, newval, 
+            res = check_commit_deletes(scb, msg, newval,
                                        v_val ? v_val : curval);
             if (res != NO_ERR) {
                 return res;
@@ -2545,10 +2614,10 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
 
     /* first traverse all the nodes until leaf nodes are reached */
     if (has_children) {
-        res = invoke_cpxval_cb(cbtyp,  editop, scb, msg, target, newval, 
+        res = invoke_cpxval_cb(cbtyp,  editop, scb, msg, target, newval,
                                (v_val) ? v_val : curval, curparent, FALSE);
     } else {
-        res = invoke_simval_cb(cbtyp, editop, scb, msg, target, newval, 
+        res = invoke_simval_cb(cbtyp, editop, scb, msg, target, newval,
                                (v_val) ? v_val : curval, curparent );
         if (newval != NULL && res != NO_ERR) {
             VAL_MARK_DELETED(newval);
@@ -2563,7 +2632,7 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
 
 /********************************************************************
 * FUNCTION commit_edit   AGT_CB_COMMIT
-* 
+*
 * Finish the database editing for an undo-rec
 * The SIL callbacks have already completed; this step cannot fail
 *
@@ -2659,7 +2728,7 @@ static void
 
 /********************************************************************
 * FUNCTION reverse_edit
-* 
+*
 * Attempt to invoke SIL callbacks to reverse an edit that
 * was already commited; database tree was never undone
 * The apply and commit phases completed OK
@@ -2693,7 +2762,7 @@ static status_t
     status_t res = NO_ERR;
     boolean lookparent = TRUE;
     boolean indelete = FALSE;
-    
+
     switch (undo->edit_action) {
     case AGT_CFG_EDIT_ACTION_NONE:
         log_warn("\nError: undo record has no action set");
@@ -2712,13 +2781,13 @@ static status_t
         assert( undo->newnode && "undo newnode is NULL!" );
         curval = undo->newnode;
         newval = (undo->curnode_clone) ? undo->curnode_clone : undo->curnode;
-        assert( newval && "undo curnode is NULL!" );        
+        assert( newval && "undo curnode is NULL!" );
         editop = undo->editop;
         break;
 
     case AGT_CFG_EDIT_ACTION_MOVE:
         /* need to generate a similar operation to move the old entry
-         * back to its old location   
+         * back to its old location
          * !!! FIXME: are the editvars correct, and do SIL callbacks
          * !!! look at the editvars?    */
         assert( undo->newnode && "undo newnode is NULL!" );
@@ -2739,7 +2808,7 @@ static status_t
 
     case AGT_CFG_EDIT_ACTION_DELETE:
         /* need to generate a create for the deleted value */
-        assert( undo->curnode && "undo curnode is NULL!" );        
+        assert( undo->curnode && "undo curnode is NULL!" );
         newval = undo->curnode;
         editop = OP_EDITOP_CREATE;
         break;
@@ -2757,11 +2826,11 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
+    res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg,
                                newval, curval, lookparent, indelete);
 
     if (res == NO_ERR) {
-        res = handle_user_callback(AGT_CB_COMMIT, editop, scb, msg, 
+        res = handle_user_callback(AGT_CB_COMMIT, editop, scb, msg,
                                    newval, curval, lookparent, indelete);
     }
 
@@ -2774,16 +2843,16 @@ static status_t
 
         agt_cfg_nodeptr_t *nodeptr = (agt_cfg_nodeptr_t *)
             dlq_firstEntry(&undo->extra_deleteQ);
-        for (; nodeptr && res == NO_ERR; 
+        for (; nodeptr && res == NO_ERR;
              nodeptr = (agt_cfg_nodeptr_t *)dlq_nextEntry(nodeptr)) {
             if (nodeptr && nodeptr->node) {
                 newval = nodeptr->node;
-                res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
-                                           newval, curval, lookparent, 
+                res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg,
+                                           newval, curval, lookparent,
                                            indelete);
                 if (res == NO_ERR) {
-                    res = handle_user_callback(AGT_CB_COMMIT, editop, scb, msg, 
-                                               newval, curval, lookparent, 
+                    res = handle_user_callback(AGT_CB_COMMIT, editop, scb, msg,
+                                               newval, curval, lookparent,
                                                indelete);
                 }
             } else {
@@ -2804,8 +2873,8 @@ static status_t
 
 /********************************************************************
 * FUNCTION rollback_edit
-* 
-* Attempt to rollback an edit 
+*
+* Attempt to rollback an edit
 *
 * INPUTS:
 *   undo == agt_cfg_undo_rec_t struct to process
@@ -2858,16 +2927,16 @@ static status_t
          * first call the SIL with the ROLLBACK request
          */
         if (cfgid == NCX_CFGID_RUNNING) {
-            undo->rollback_res = handle_user_callback(AGT_CB_ROLLBACK, 
+            undo->rollback_res = handle_user_callback(AGT_CB_ROLLBACK,
                                                       undo->editop,
-                                                      scb, msg, undo->newnode, 
+                                                      scb, msg, undo->newnode,
                                                       curval, TRUE, FALSE);
             if (undo->rollback_res != NO_ERR) {
                 val_value_t *logval = undo->newnode ? undo->newnode : curval;
                 log_warn("\nWarning: SIL rollback for %s:%s in transaction "
                          "%llu failed (%s)",
                          (unsigned long long)msg->rpc_txcb->txid,
-                         val_get_mod_name(logval), 
+                         val_get_mod_name(logval),
                          logval->name,
                          get_error_string(undo->rollback_res));
                 res = undo->rollback_res;
@@ -2938,7 +3007,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION attempt_commit
-* 
+*
 * Attempt complete commit by asking all SIL COMMIT callbacks
 * to complete the requested edit
 *
@@ -2961,7 +3030,9 @@ static status_t
 {
     agt_cfg_undo_rec_t  *undo = NULL;
     agt_cfg_transaction_t *txcb = msg->rpc_txcb;
-
+    if (LOGDEBUG) {
+        log_debug("\n in attempt_commit");
+    }
     if (LOGDEBUG) {
         uint32 editcnt = dlq_count(&txcb->undoQ);
         const xmlChar *cntstr = NULL;
@@ -2995,17 +3066,19 @@ static status_t
                 undo->curnode->parent = undo->parentnode;
             }
 
-            undo->commit_res = 
-                handle_user_callback(AGT_CB_COMMIT, undo->editop, scb, msg, 
+            undo->commit_res =
+                handle_user_callback(AGT_CB_COMMIT, undo->editop, scb, msg,
                                      undo->newnode, undo->curnode, TRUE, FALSE);
+            log_debug("\n what a guess0 ");
+
             if (undo->commit_res != NO_ERR) {
-                val_value_t *logval = undo->newnode ? undo->newnode : 
+                val_value_t *logval = undo->newnode ? undo->newnode :
                     undo->curnode;
                 if (LOGDEBUG) {
                     log_debug("\nHalting commit %llu: %s:%s SIL returned error"
                               " (%s)",
                               (unsigned long long)txcb->txid,
-                              val_get_mod_name(logval), 
+                              val_get_mod_name(logval),
                               logval->name,
                               get_error_string(undo->commit_res));
                 }
@@ -3013,9 +3086,12 @@ static status_t
             }
         }
     }
+    log_debug("\n what a guess ");
+    log_debug("\n what a guess1 ");
+    log_debug("\n what a guess2 ");
 
     /* all SIL commit callbacks accepted and finalized the commit
-     * now go through and finalize the edit; this step should not fail 
+     * now go through and finalize the edit; this step should not fail
      * first, finish deleting any false when-stmt nodes then commit edits */
     while (!dlq_empty(&txcb->deadnodeQ)) {
         agt_cfg_nodeptr_t *nodeptr = (agt_cfg_nodeptr_t *)
@@ -3049,7 +3125,7 @@ static status_t
                   " on %s database",  (unsigned long long)txcb->txid,
                   target->name);
     }
-
+    log_debug("\n @@@@ leaving attempt_commit");
     return NO_ERR;
 
 }  /* attempt_commit */
@@ -3057,7 +3133,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION attempt_rollback
-* 
+*
 * Attempt to rollback a transaction attempt
 *  if commit not tried:
 *   All edits have a status of NCX_ERR_SKIPPED
@@ -3125,8 +3201,8 @@ static status_t
 
 /********************************************************************
 * FUNCTION handle_callback
-* 
-* Invoke all the specified agent typedef callbacks for a 
+*
+* Invoke all the specified agent typedef callbacks for a
 * source and target and write operation
 *
 * INPUTS:
@@ -3161,7 +3237,7 @@ static status_t
         if (editop == OP_EDITOP_DELETE) {
             log_debug2("\n\n***** start commit_deletes for "
                        "session %d, transaction %llu *****\n",
-                       scb ? SES_MY_SID(scb) : 0, 
+                       scb ? SES_MY_SID(scb) : 0,
                        (unsigned long long)txcb->txid);
         } else {
             log_debug2("\n\n***** start %s callback phase for "
@@ -3187,7 +3263,7 @@ static status_t
     /* check if trying to delete a config=false node */
     if (newval == NULL && curval != NULL && !val_is_config_data(curval)) {
         res = ERR_NCX_ACCESS_READ_ONLY;
-        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL, 
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
                          NCX_NT_NONE, NULL, NCX_NT_VAL, curval);
         return res;
     }
@@ -3235,10 +3311,10 @@ static status_t
 
 /********************************************************************
 * FUNCTION apply_commit_deletes
-* 
+*
 * Apply the requested commit delete operations
 *
-* Invoke all the AGT_CB_COMMIT callbacks for a 
+* Invoke all the AGT_CB_COMMIT callbacks for a
 * source and target and write operation
 *
 * INPUTS:
@@ -3249,7 +3325,7 @@ static status_t
 *   runval == value struct from the running config
 *
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhsr.errQ
 *
 * RETURNS:
@@ -3274,7 +3350,7 @@ static status_t
      * then delete that node in the running config as well
      */
     for (curval = val_get_first_child(runval);
-         curval != NULL && res == NO_ERR; 
+         curval != NULL && res == NO_ERR;
          curval = nextval) {
 
         nextval = val_get_next_child(curval);
@@ -3290,7 +3366,7 @@ static status_t
                 val_set_dirty_flag(curval);
 
                 /* deleted in the source, so delete in the target */
-                res = handle_callback(AGT_CB_APPLY, OP_EDITOP_DELETE, 
+                res = handle_callback(AGT_CB_APPLY, OP_EDITOP_DELETE,
                                       scb, msg, target, NULL, curval, runval);
                 assert(res==NO_ERR);
             } else {
@@ -3307,7 +3383,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION compare_unique_testsets
-* 
+*
 * Compare 2 Qs of val_unique_t structs
 *
 * INPUTS:
@@ -3390,7 +3466,7 @@ static void free_unique_set (unique_set_t *uset)
 
 /********************************************************************
 * FUNCTION make_unique_testset
-* 
+*
 * Construct a Q of val_unique_t records, each with the
 * current value of the corresponding obj_unique_comp_t
 * If a node is not present the test will be stopped,
@@ -3412,7 +3488,7 @@ static void free_unique_set (unique_set_t *uset)
 * RETURNS:
 *   status of the operation, NO_ERR if all nodes found and stored OK
 *********************************************************************/
-static status_t 
+static status_t
     make_unique_testset (val_value_t *curval,
                          obj_unique_t *unidef,
                          val_value_t *root,
@@ -3482,12 +3558,12 @@ static status_t
 
 /********************************************************************
 * FUNCTION one_unique_stmt_check
-* 
+*
 * Run the unique-stmt test for the specified list object type
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use
 *   root == XPath docroot to use
@@ -3496,14 +3572,14 @@ static status_t
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     one_unique_stmt_check (ses_cb_t *scb,
                            xml_msg_hdr_t *msg,
                            agt_cfg_commit_test_t *ct,
@@ -3521,12 +3597,12 @@ static status_t
     assert( unidef->xpath && "xpath is NULL!" );
 
     status_t retres = NO_ERR;
-    dlq_createSQue(&uniQ);   // Q of val_unique_t 
+    dlq_createSQue(&uniQ);   // Q of val_unique_t
     dlq_createSQue(&freeQ);  // Q of val_unique_t
     dlq_createSQue(&usetQ);  // Q of unique_set_t
 
     if (LOGDEBUG3) {
-        log_debug3("\nunique_chk: %s:%s start unique # %u (%s)", 
+        log_debug3("\nunique_chk: %s:%s start unique # %u (%s)",
                    obj_get_mod_name(ct->obj), obj_get_name(ct->obj),
                    uninum, unidef->xpath);
     }
@@ -3534,7 +3610,7 @@ static status_t
     /* create a unique test set for each list instance that has
      * complete tuple to test; skip all instances with partial tuples */
     xpath_resnode_t *resnode = xpath_get_first_resnode(ct->result);
-    for (; resnode && retres == NO_ERR; 
+    for (; resnode && retres == NO_ERR;
          resnode = xpath_get_next_resnode(resnode)) {
 
         val_value_t *valnode = xpath_get_resnode_valptr(resnode);
@@ -3585,7 +3661,7 @@ static status_t
                         // if it is flagged with a unique-test failed error
                         continue;
                     }
-                    if (compare_unique_testsets(&set1->uniqueQ, 
+                    if (compare_unique_testsets(&set1->uniqueQ,
                                                 &set2->uniqueQ)) {
                         /* 2 lists have the same values so generate an error */
                         agt_record_unique_error(scb, msg, set1->valnode,
@@ -3611,27 +3687,27 @@ static status_t
 
 /********************************************************************
 * FUNCTION unique_stmt_check
-* 
+*
 * Check for the proper uniqueness of the tuples within
 * the set of list instances for the specified node
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use
 *   root == XPath docroot to use
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     unique_stmt_check (ses_cb_t *scb,
                        xml_msg_hdr_t *msg,
                        agt_cfg_commit_test_t *ct,
@@ -3662,14 +3738,14 @@ static status_t
 
 /********************************************************************
 * FUNCTION instance_xpath_check
-* 
+*
 * Check the leafref or instance-identifier leaf or leaf-list node
 * Test 'require-instance' for the NCX_BT_LEAFREF
 * and NCX_BT_INSTANCE_ID data types
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   val == value node to check
 *   root == config root for 'val'
@@ -3677,15 +3753,15 @@ static status_t
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
 
-*      which must be freed by the called with the 
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     instance_xpath_check (ses_cb_t *scb,
                           xml_msg_hdr_t *msg,
                           val_value_t *val,
@@ -3726,12 +3802,12 @@ static status_t
                  * must match one of the values in the
                  * result set
                  */
-                fnresult = 
-                    xpath1_compare_result_to_string(val->xpathpcb, result, 
+                fnresult =
+                    xpath1_compare_result_to_string(val->xpathpcb, result,
                                                     VAL_STR(val), &res);
 
                 if (res == NO_ERR && !fnresult) {
-                    /* did not match any of the 
+                    /* did not match any of the
                      * current instances  (13.5)
                      */
                     res = ERR_NCX_MISSING_VAL_INST;
@@ -3781,23 +3857,23 @@ static status_t
     }
 
     return res;
-    
+
 }  /* instance_xpath_check */
 
 
 /********************************************************************
 * FUNCTION instance_check
-* 
+*
 * Check for the proper number of object instances for
 * the specified value struct. Checks the direct accessible
 * children of 'val' only!!!
-* 
+*
 * The top-level value set passed cannot represent a choice
-* or a case within a choice. 
+* or a case within a choice.
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   obj == object template for child node in valset to check
 *   val == val_value_t list, leaf-list, or container to check
@@ -3806,14 +3882,14 @@ static status_t
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     instance_check (ses_cb_t *scb,
                     xml_msg_hdr_t *msg,
                     obj_template_t *obj,
@@ -3862,7 +3938,7 @@ static status_t
     boolean minset = obj_get_min_elements(obj, &minelems);
     boolean maxset = obj_get_max_elements(obj, &maxelems);
 
-    uint32 cnt = val_instance_count(val, obj_get_mod_name(obj), 
+    uint32 cnt = val_instance_count(val, obj_get_mod_name(obj),
                                     obj_get_name(obj));
 
     if (LOGDEBUG3) {
@@ -3906,9 +3982,9 @@ static status_t
                    obj_get_mod_name(obj),
                    obj_get_name(obj),
                    obj_get_mod_name(val->obj),
-                   val->name, 
-                   cnt, 
-                   minelems, 
+                   val->name,
+                   cnt,
+                   minelems,
                    maxelems ? buff : "unbounded");
     }
 
@@ -3917,20 +3993,20 @@ static status_t
             if (cnt == 0) {
                 /* need to check if this node is conditional because
                  * of when stmt, and if so, whether when-cond is false  */
-                res = val_check_obj_when(val, valroot, NULL, obj, 
+                res = val_check_obj_when(val, valroot, NULL, obj,
                                          &cond, &whencnt);
                 if (res == NO_ERR) {
                     whendone = TRUE;
                     if (whencnt && !cond) {
                         if (LOGDEBUG2) {
                             log_debug2("\nwhen_chk: skip false when-stmt for "
-                                       "node '%s:%s'", obj_get_mod_name(obj), 
+                                       "node '%s:%s'", obj_get_mod_name(obj),
                                        obj_get_name(obj));
                         }
                         return NO_ERR;
                     }
                 } else {
-                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE,
                                      NULL, NCX_NT_VAL, errval);
                     return res;
                 }
@@ -3947,7 +4023,7 @@ static status_t
                  */
                 errval = val_find_child(val, obj_get_mod_name(obj),
                                         obj_get_name(obj));
-                agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE,
                                  NULL, NCX_NT_VAL, errval);
 
 
@@ -3959,10 +4035,10 @@ static status_t
                                                  obj_get_name(obj),
                                                  FALSE, &instbuff);
                 if (res2 == NO_ERR && instbuff) {
-                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE,
                                      NULL, NCX_NT_STRING, instbuff);
                 } else {
-                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE,
                                      NULL, NCX_NT_VAL, val);
                 }
                 if (instbuff) {
@@ -3988,7 +4064,7 @@ static status_t
                                           maxelems);
             /* use the first extra child instance as the
              * value node for the error-path
-             * this should always find a node, since 'cnt' > 0 
+             * this should always find a node, since 'cnt' > 0
              */
             errval = val_find_child(val, obj_get_mod_name(obj),
                                     obj_get_name(obj));
@@ -3997,7 +4073,7 @@ static status_t
                 errval = val_get_next_child(errval);
                 i++;
             }
-            agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ, obj, 
+            agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ, obj,
                              NCX_NT_VAL, (errval) ? errval : val);
         }
     }
@@ -4011,19 +4087,19 @@ static status_t
             if (!whendone) {
                 cond = FALSE;
                 whencnt = 0;
-                res = val_check_obj_when(val, valroot, NULL, obj, 
+                res = val_check_obj_when(val, valroot, NULL, obj,
                                          &cond, &whencnt);
                 if (res == NO_ERR) {
                     if (whencnt && !cond) {
                         if (LOGDEBUG2) {
                             log_debug2("\nwhen_chk: skip false when-stmt for "
-                                       "node '%s:%s'", obj_get_mod_name(obj), 
+                                       "node '%s:%s'", obj_get_mod_name(obj),
                                        obj_get_name(obj));
                         }
                         return NO_ERR;
                     }
                 } else {
-                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE,
                                      NULL, NCX_NT_VAL, errval);
                     return res;
                 }
@@ -4098,24 +4174,24 @@ static status_t
     default:
         res = SET_ERROR(ERR_INTERNAL_VAL);
         val->res = res;
-        agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ, obj, 
+        agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ, obj,
                          NCX_NT_VAL, val);
 
     }
 
     return res;
-    
+
 }  /* instance_check */
 
 /********************************************************************
 * FUNCTION choice_check_agt
-* 
+*
 * Agent version of ncx/val_util.c/choice_check
 *
 * Check a val_value_t struct against its expected OBJ
 * for instance validation:
 *
-*    - choice validation: 
+*    - choice validation:
 *      only one case allowed if the data type is choice
 *      Only issue errors based on the instance test qualifiers
 *
@@ -4123,7 +4199,7 @@ static status_t
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   choicobj == object template for the choice to check
 *   val == parent val_value_t list or container to check
@@ -4132,14 +4208,14 @@ static status_t
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     choice_check_agt (ses_cb_t  *scb,
                       xml_msg_hdr_t *msg,
                       obj_template_t *choicobj,
@@ -4152,13 +4228,13 @@ static status_t
     if (LOGDEBUG3) {
         log_debug3("\nchoice_check_agt: check '%s:%s' against '%s:%s'",
                    obj_get_mod_name(choicobj),
-                   obj_get_name(choicobj), 
+                   obj_get_name(choicobj),
                    obj_get_mod_name(val->obj),
                    val->name);
     }
 
     /* Go through all the child nodes for this object
-     * and look for choices against the value set to see if each 
+     * and look for choices against the value set to see if each
      * a choice case is present in the correct number of instances.
      *
      * The current value could never be a OBJ_TYP_CHOICE since
@@ -4172,14 +4248,14 @@ static status_t
         if (obj_is_mandatory(choicobj)) {
             /* error missing choice (13.6) */
             res = ERR_NCX_MISSING_CHOICE;
-            agt_record_error(scb, msg, layer, res, NULL, NCX_NT_VAL, val, 
+            agt_record_error(scb, msg, layer, res, NULL, NCX_NT_VAL, val,
                                  NCX_NT_VAL, val);
         }
         return res;
     }
 
     /* else a choice was selected
-     * first make sure all the mandatory case 
+     * first make sure all the mandatory case
      * objects are present
      */
     obj_template_t *testobj = obj_first_child(chval->casobj);
@@ -4195,7 +4271,7 @@ static status_t
         if (val123_get_case_for_choice(choicobj, testval) != val123_get_case_for_choice(choicobj, chval)) {
             /* error: extra case object in this choice */
             retres = res = ERR_NCX_EXTRA_CHOICE;
-            agt_record_error(scb, msg, layer, res, NULL, 
+            agt_record_error(scb, msg, layer, res, NULL,
                              NCX_NT_OBJ, choicobj, NCX_NT_VAL, testval);
         }
         testval = val_get_choice_next_set(choicobj, testval);
@@ -4215,9 +4291,9 @@ static status_t
 * Check for any must-stmts in the object tree and validate the Xpath
 * expression against the complete database 'root' and current
 * context node 'curval'.
-* 
+*
 * \param scb session control block (may be NULL; no session stats)
-* \param msg xml_msg_hdr t from msg in progress, NULL means no RPC-ERROR 
+* \param msg xml_msg_hdr t from msg in progress, NULL means no RPC-ERROR
              recording.
 * \param root val_value_t or the target database root to validate
 * \param curval val_value_t for the current context node in the tree
@@ -4242,15 +4318,15 @@ static status_t must_stmt_check ( ses_cb_t *scb,
         return NO_ERR;
     }
 
-    /* execute all the must tests top down, so* foo/bar errors are reported 
+    /* execute all the must tests top down, so* foo/bar errors are reported
      * before /foo/bar/child */
     xpath_pcb_t *must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
     for ( ; must; must = (xpath_pcb_t *)dlq_nextEntry(must)) {
         res = NO_ERR;
-        xpath_result_t *result = xpath1_eval_expr( must, curval, root, FALSE, 
+        xpath_result_t *result = xpath1_eval_expr( must, curval, root, FALSE,
                                                    TRUE, &res );
         if ( !result || res != NO_ERR ) {
-            log_error("\nmust_chk: failed for %s:%s (%s) expr '%s'", 
+            log_error("\nmust_chk: failed for %s:%s (%s) expr '%s'",
                     obj_get_mod_name(obj), curval->name, get_error_string(res),
                     must->exprstr );
 
@@ -4259,23 +4335,23 @@ static status_t must_stmt_check ( ses_cb_t *scb,
                 SET_ERROR( res );
             }
         } else if (!xpath_cvt_boolean(result)) {
-            log_debug2("\nmust_chk: false for %s:%s expr '%s'", 
+            log_debug2("\nmust_chk: false for %s:%s expr '%s'",
                     obj_get_mod_name(obj), curval->name, must->exprstr);
 
             res = ERR_NCX_MUST_TEST_FAILED;
         } else {
-            log_debug3("\nmust_chk: OK for %s:%s expr '%s'", 
+            log_debug3("\nmust_chk: OK for %s:%s expr '%s'",
                     obj_get_mod_name(obj), curval->name, must->exprstr);
         }
 
         if ( NO_ERR != res ) {
-            agt_record_error_errinfo(scb, msg, NCX_LAYER_CONTENT, res, NULL, 
-                    NCX_NT_STRING, must->exprstr, NCX_NT_VAL, curval, 
-                    ( ( ncx_errinfo_set( &must->errinfo) ) ? &must->errinfo 
+            agt_record_error_errinfo(scb, msg, NCX_LAYER_CONTENT, res, NULL,
+                    NCX_NT_STRING, must->exprstr, NCX_NT_VAL, curval,
+                    ( ( ncx_errinfo_set( &must->errinfo) ) ? &must->errinfo
                                                            : NULL ) );
 
-            if ( terminate_parse( res ) )  { 
-                return res; 
+            if ( terminate_parse( res ) )  {
+                return res;
             }
             curval->res = res;
         }
@@ -4290,12 +4366,12 @@ static status_t must_stmt_check ( ses_cb_t *scb,
 
 /********************************************************************
 * FUNCTION run_when_stmt_check
-* 
+*
 * Run one when-stmt test on a node
 
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t or the target database root to validate
 *   curval == val_value_t for the current context node in the tree
@@ -4306,8 +4382,8 @@ static status_t must_stmt_check ( ses_cb_t *scb,
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *    txcb->deadnodeQ will have any deleted instance entries
 *         due to false when-stmt expressions
@@ -4315,7 +4391,7 @@ static status_t must_stmt_check ( ses_cb_t *scb,
 * RETURNS:
 *   status of the operation, NO_ERR or ERR_INTERNAL_MEM most likely
 *********************************************************************/
-static status_t 
+static status_t
     run_when_stmt_check (ses_cb_t *scb,
                          xml_msg_hdr_t *msg,
                          agt_cfg_transaction_t *txcb,
@@ -4334,16 +4410,16 @@ static status_t
                   obj_get_mod_name(obj),
                   obj_get_name(obj),
                   get_error_string(res));
-        agt_record_error(scb, msg, NCX_LAYER_OPERATION, res, NULL, 
+        agt_record_error(scb, msg, NCX_LAYER_OPERATION, res, NULL,
                          NCX_NT_NONE, NULL, NCX_NT_VAL, curval);
     } else if (whencount == 0) {
         if (LOGDEBUG) {
-            log_debug("\nwhen_chk: no when-tests found for node '%s:%s'", 
+            log_debug("\nwhen_chk: no when-tests found for node '%s:%s'",
                        obj_get_mod_name(obj), curval->name);
         }
     } else if (!condresult) {
         if (LOGDEBUG2) {
-            log_debug2("\nwhen_chk: test false for node '%s:%s'", 
+            log_debug2("\nwhen_chk: test false for node '%s:%s'",
                        obj_get_mod_name(obj), curval->name);
         }
         /* check if this session is allowed to delete this node
@@ -4360,8 +4436,8 @@ static status_t
         res = val_write_ok(curval, OP_EDITOP_DELETE, SES_MY_SID(scb),
                            TRUE, &lockid);
         if (res != NO_ERR) {
-            agt_record_error(scb, msg, NCX_LAYER_OPERATION, res, 
-                             NULL, NCX_NT_UINT32_PTR, &lockid, 
+            agt_record_error(scb, msg, NCX_LAYER_OPERATION, res,
+                             NULL, NCX_NT_UINT32_PTR, &lockid,
                              NCX_NT_VAL, curval);
             return res;
         }
@@ -4370,19 +4446,19 @@ static status_t
         agt_cfg_nodeptr_t *nodeptr = agt_cfg_new_nodeptr(curval);
         if (nodeptr == NULL) {
             res = ERR_INTERNAL_MEM;
-            agt_record_error(scb, msg, NCX_LAYER_OPERATION, res, 
+            agt_record_error(scb, msg, NCX_LAYER_OPERATION, res,
                              NULL, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
             return res;
         }
         log_debug("\nMarking false when-stmt as deleted %s:%s",
                   obj_get_mod_name(obj),
                   obj_get_name(obj));
-                  
+
         dlq_enque(nodeptr, &txcb->deadnodeQ);
         VAL_MARK_DELETED(curval);
     } else {
         if (LOGDEBUG3) {
-            log_debug3("\nwhen_chk: test passed for node '%s:%s'", 
+            log_debug3("\nwhen_chk: test passed for node '%s:%s'",
                        obj_get_mod_name(obj), curval->name);
         }
     }
@@ -4393,7 +4469,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION rpc_when_stmt_check
-* 
+*
 * Check for any when-stmts in the object tree and validate the Xpath
 * expression against the complete database 'root' and current
 * context node 'curval'.  ONLY USED FOR RPC INPUT CHECKING!!
@@ -4401,21 +4477,21 @@ static status_t
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   rpcmsg == rpc msg header for audit purposes
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t or the target database root to validate
 *   curval == val_value_t for the current context node in the tree
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-static status_t 
+static status_t
     rpc_when_stmt_check (ses_cb_t *scb,
                          rpc_msg_t *rpcmsg,
                          xml_msg_hdr_t *msg,
@@ -4433,7 +4509,7 @@ static status_t
         log_error("\nError: when_check: failed for %s:%s (%s)",
                   obj_get_mod_name(obj), obj_get_name(obj),
                   get_error_string(retres));
-        agt_record_error(scb, msg, NCX_LAYER_OPERATION, retres, NULL, 
+        agt_record_error(scb, msg, NCX_LAYER_OPERATION, retres, NULL,
                          NCX_NT_NONE, NULL, NCX_NT_VAL, curval);
         return retres;
     } else if (whencount && !condresult) {
@@ -4444,14 +4520,14 @@ static status_t
         return retres;
     } else {
         if (LOGDEBUG3 && whencount) {
-            log_debug3("\nwhen_chk: test passed for node '%s:%s'", 
+            log_debug3("\nwhen_chk: test passed for node '%s:%s'",
                        obj_get_mod_name(obj), curval->name);
         }
     }
 
     /* recurse for every child node until leafs are hit */
     val_value_t *chval = val_get_first_child(curval);
-    for (; chval != NULL && retres == NO_ERR; 
+    for (; chval != NULL && retres == NO_ERR;
          chval = val_get_next_child(chval)) {
 
         if (!obj_is_config(chval->obj)) {
@@ -4469,7 +4545,7 @@ static status_t
     }
 
     return retres;
-    
+
 }  /* rpc_when_stmt_check */
 
 
@@ -4479,9 +4555,9 @@ static status_t
 * Check for any must-stmts in the object tree and validate the Xpath
 * expression against the complete database 'root' and current
 * context node 'curval'.
-* 
+*
 * \param scb session control block (may be NULL; no session stats)
-* \param msg xml_msg_hdr t from msg in progress, NULL means no RPC-ERROR 
+* \param msg xml_msg_hdr t from msg in progress, NULL means no RPC-ERROR
              recording.
 * \param root val_value_t or the target database root to validate
 * \param curval val_value_t for the current context node in the tree
@@ -4507,15 +4583,15 @@ static status_t rpc_must_stmt_check ( ses_cb_t *scb,
         return NO_ERR;
     }
 
-    /* execute all the must tests top down, so* foo/bar errors are reported 
+    /* execute all the must tests top down, so* foo/bar errors are reported
      * before /foo/bar/child */
     xpath_pcb_t *must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
     for ( ; must; must = (xpath_pcb_t *)dlq_nextEntry(must)) {
         res = NO_ERR;
-        xpath_result_t *result = xpath1_eval_expr( must, curval, root, FALSE, 
+        xpath_result_t *result = xpath1_eval_expr( must, curval, root, FALSE,
                                                    TRUE, &res );
         if ( !result || res != NO_ERR ) {
-            log_error("\nrpc_must_chk: failed for %s:%s (%s) expr '%s'", 
+            log_error("\nrpc_must_chk: failed for %s:%s (%s) expr '%s'",
                     obj_get_mod_name(obj), curval->name, get_error_string(res),
                     must->exprstr );
 
@@ -4524,23 +4600,23 @@ static status_t rpc_must_stmt_check ( ses_cb_t *scb,
                 SET_ERROR( res );
             }
         } else if (!xpath_cvt_boolean(result)) {
-            log_debug2("\nrpc_must_chk: false for %s:%s expr '%s'", 
+            log_debug2("\nrpc_must_chk: false for %s:%s expr '%s'",
                     obj_get_mod_name(obj), curval->name, must->exprstr);
 
             res = ERR_NCX_MUST_TEST_FAILED;
         } else {
-            log_debug3("\nrpc_must_chk: OK for %s:%s expr '%s'", 
+            log_debug3("\nrpc_must_chk: OK for %s:%s expr '%s'",
                     obj_get_mod_name(obj), curval->name, must->exprstr);
         }
 
         if ( NO_ERR != res ) {
-            agt_record_error_errinfo(scb, msg, NCX_LAYER_CONTENT, res, NULL, 
-                    NCX_NT_STRING, must->exprstr, NCX_NT_VAL, curval, 
-                    ( ( ncx_errinfo_set( &must->errinfo) ) ? &must->errinfo 
+            agt_record_error_errinfo(scb, msg, NCX_LAYER_CONTENT, res, NULL,
+                    NCX_NT_STRING, must->exprstr, NCX_NT_VAL, curval,
+                    ( ( ncx_errinfo_set( &must->errinfo) ) ? &must->errinfo
                                                            : NULL ) );
 
-	        if ( terminate_parse( res ) )  { 
-	            return res; 
+	        if ( terminate_parse( res ) )  {
+	            return res;
 	        }
             curval->res = res;
             firstError = ( firstError != NO_ERR) ? firstError : res;
@@ -4548,22 +4624,22 @@ static status_t rpc_must_stmt_check ( ses_cb_t *scb,
         xpath_free_result(result);
     }
 
-    /* recurse for every child node until leafs are hit but only if the parent 
+    /* recurse for every child node until leafs are hit but only if the parent
      * must test did not fail will check sibling nodes even if some must-test
-     * already failed; this provides complete errors during validate and 
+     * already failed; this provides complete errors during validate and
      * load_running_config */
     if ( firstError == NO_ERR ) {
         val_value_t *chval = val_get_first_child(curval);
 
         for ( ; chval; chval = val_get_next_child(chval)) {
-             /* do not dive into <config> parameters and hit database 
+             /* do not dive into <config> parameters and hit database
               * must-stmts by mistake */
             if ( !obj_is_root(chval->obj) ) {
                 res = rpc_must_stmt_check(scb, msg, root, chval);
 
                 if ( NO_ERR != res ) {
-	               if ( terminate_parse( res ) )  { 
-	                   return res; 
+	               if ( terminate_parse( res ) )  {
+	                   return res;
 	               }
                    firstError = ( firstError != NO_ERR) ? firstError : res;
                 }
@@ -4589,7 +4665,7 @@ static status_t rpc_must_stmt_check ( ses_cb_t *scb,
  *
  * \return status
  *********************************************************************/
-static status_t 
+static status_t
     prep_commit_test_node ( ses_cb_t  *scb,
                             xml_msg_hdr_t *msghdr,
                             agt_cfg_transaction_t *txcb,
@@ -4613,7 +4689,7 @@ static status_t
 
     if (ct->result == NULL) {
         ct->result_txid = 0;
-        ct->result = xpath1_eval_expr(ct->objpcb, root, root, FALSE, 
+        ct->result = xpath1_eval_expr(ct->objpcb, root, root, FALSE,
                                       TRUE, &res);
         if (res != NO_ERR || ct->result->restype != XP_RT_NODESET) {
             if (res == NO_ERR) {
@@ -4632,7 +4708,7 @@ static status_t
 
 
 /********************************************************************
- * 
+ *
  * Delete all the nodes that have false when-stmt exprs
  * Also delete empty NP-containers
  *
@@ -4695,7 +4771,7 @@ static status_t delete_dead_nodes ( ses_cb_t  *scb,
 
 /********************************************************************
 * FUNCTION check_parent_tests
-* 
+*
 * Check if the specified object has any commit tests
 * to record in the parent node
 *
@@ -4728,7 +4804,7 @@ static void
     case OBJ_TYP_LEAF:
     case OBJ_TYP_CONTAINER:
         *flags |= AGT_TEST_FL_MAX_ELEMS;
-        break;       
+        break;
     case OBJ_TYP_CHOICE:
         *flags |= AGT_TEST_FL_CHOICE;
         break;
@@ -4744,8 +4820,8 @@ static void
 
 /********************************************************************
 * FUNCTION add_obj_commit_tests
-* 
-* Check if the specified object and all its descendants 
+*
+* Check if the specified object and all its descendants
 * have any commit tests to record in the commit_testQ
 * Tests are added in top-down order
 * TBD: cascade XPath lookup results to nested commmit tests
@@ -4769,7 +4845,7 @@ static void
 *
 * OUTPUTS:
 *  commit_testQ will contain an agt_cfg_commit_test_t struct
-*  for each descendant-or-self object found with 
+*  for each descendant-or-self object found with
 *  commit-time validation tests
 *  *rootflags will be altered if node is top-level and
 *   needs instance testing
@@ -4798,7 +4874,7 @@ static status_t
         if (mustQ && !dlq_empty(mustQ)) {
             testflags |= AGT_TEST_FL_MUST;
         }
-    
+
         if (obj_has_when_stmts(obj)) {
             testflags |= AGT_TEST_FL_WHEN;
         }
@@ -4831,8 +4907,8 @@ static status_t
          * check all child nodes to determine if parent needs
          * to run instance_check
          */
-        for (chobj = obj_first_child(obj); 
-             chobj != NULL; 
+        for (chobj = obj_first_child(obj);
+             chobj != NULL;
              chobj = obj_next_child(chobj)) {
 
             if (skip_obj_commit_test(chobj)) {
@@ -4840,9 +4916,9 @@ static status_t
             }
             check_parent_tests(chobj, &testflags);
         }
-    
+
         typ_def_t *typdef = obj_get_typdef(obj);
-        if (btyp == NCX_BT_LEAFREF || 
+        if (btyp == NCX_BT_LEAFREF ||
             (btyp == NCX_BT_INSTANCE_ID && typ_get_constrained(typdef))) {
             /* need to check XPath-based leaf to see that the referenced
              * instance exists in the target data tree
@@ -4856,7 +4932,7 @@ static status_t
         agt_cfg_commit_test_t *ct = agt_cfg_new_commit_test();
         if (ct == NULL) {
             return ERR_INTERNAL_MEM;
-        } 
+        }
 
         ct->objpcb = xpath_new_pcb(NULL, NULL);
         if (ct->objpcb == NULL) {
@@ -4896,7 +4972,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION check_prune_obj
-* 
+*
 * Check if the specified object test can be reduced or eliminated
 * from the current commit test
 *
@@ -4946,7 +5022,7 @@ static uint32
                     /* do not skip this node */
                     return curflags;
                 } else {
-                    testval = 
+                    testval =
                         val_find_next_child(rootval, obj_get_mod_name(testobj),
                                             obj_get_name(testobj), testval);
                     if (testval == NULL) {
@@ -4973,8 +5049,8 @@ static uint32
 
 /********************************************************************
 * FUNCTION check_no_prune_curedit
-* 
-* Check if the specified object test is needed from the current 
+*
+* Check if the specified object test is needed from the current
 * commit test, based on the current edit in the undo record
 *
 * INPUTS:
@@ -5031,7 +5107,7 @@ static boolean
 
 /********************************************************************
 * FUNCTION prune_obj_commit_tests
-* 
+*
 * Check if the specified object test can be reduced or elimated
 * from the current commit test
 *
@@ -5057,7 +5133,7 @@ static uint32
     agt_cfg_undo_rec_t *undo = NULL;
     if (txcb->cfg_id == NCX_CFGID_RUNNING) {
         if (txcb->commitcheck) {
-            /* called from <commit> 
+            /* called from <commit>
              * look for dirty or subtree dirty flags in the rootval
              * this rootval is reallt candidate->root, so it is
              * OK to check the dirty flags    */
@@ -5111,10 +5187,10 @@ static uint32
 
 /********************************************************************
 * FUNCTION run_instance_check
-* 
+*
 * Check for the proper number of object instances for
 * the specified value struct.
-* 
+*
 * The top-level value set passed cannot represent a choice
 * or a case within a choice.
 *
@@ -5125,7 +5201,7 @@ static uint32
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
 *   valroot == root node of the database
@@ -5134,14 +5210,14 @@ static uint32
 *              == FALSE to just check the curent level
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     run_instance_check (ses_cb_t *scb,
                         xml_msg_hdr_t *msg,
                         val_value_t *valset,
@@ -5152,7 +5228,7 @@ static status_t
     assert( valset && "valset is NULL!" );
 
     if (LOGDEBUG4) {
-        log_debug4("\nrun_instance_check: %s:%s start", 
+        log_debug4("\nrun_instance_check: %s:%s start",
                    obj_get_mod_name(valset->obj),
                    valset->name);
     }
@@ -5170,7 +5246,7 @@ static status_t
 
             if (!(obj_is_root(chval->obj) || obj_is_leafy(chval->obj))) {
                 /* recurse for all object types except root, leaf, leaf-list */
-                res = run_instance_check(scb, msg, chval, valroot, 
+                res = run_instance_check(scb, msg, chval, valroot,
                                          layer, all_levels);
                 CHK_EXIT(res, retres);
             }
@@ -5180,7 +5256,7 @@ static status_t
     /* check all the child nodes for correct number of instances */
     obj_template_t *chobj = obj_first_child(obj);
     for (; chobj != NULL; chobj = obj_next_child(chobj)) {
-        
+
         if (obj_is_root(chobj)) {
             continue;
         }
@@ -5197,19 +5273,19 @@ static status_t
     }
 
     return retres;
-    
+
 }  /* run_instance_check */
 
 
 /********************************************************************
 * FUNCTION run_obj_commit_tests
-* 
+*
 * Run selected validation tests from section 8 of RFC 6020
 *
 * INPUTS:
 *   profile == agt_profile pointer
 *   scb == session control block (may be NULL; no session stats)
-*   msghdr == XML message header in progress 
+*   msghdr == XML message header in progress
 *          == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use (NULL == root test)
 *   val == context node in data tree to use
@@ -5218,14 +5294,14 @@ static status_t
 *
 * OUTPUTS:
 *   if msghdr not NULL:
-*      msghdr->msg_errQ may have rpc_err_rec_t 
-*      structs added to it which must be freed by the 
+*      msghdr->msg_errQ may have rpc_err_rec_t
+*      structs added to it which must be freed by the
 *      caller with the rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     run_obj_commit_tests (agt_profile_t *profile,
                           ses_cb_t *scb,
                           xml_msg_hdr_t *msghdr,
@@ -5236,17 +5312,17 @@ static status_t
 {
     status_t res, retres = NO_ERR;
     uint32   testflags = (ct) ? ct->testflags : profile->agt_rootflags;
-    
+
     testflags &= testmask;
 
     if (testflags) {
         if (LOGDEBUG2) {
-            log_debug2("\nrun obj_commit_tests for %s", 
+            log_debug2("\nrun obj_commit_tests for %s",
                        (ct) ? ct->objpcb->exprstr : (const xmlChar *)"/");
         }
     } else {
         if (LOGDEBUG4) {
-            log_debug4("\nskip obj_commit_tests for %s", 
+            log_debug4("\nskip obj_commit_tests for %s",
                        (ct) ? ct->objpcb->exprstr : (const xmlChar *)"/");
         }
         return NO_ERR;
@@ -5309,31 +5385,31 @@ static status_t
     // defer AGT_TEST_FL_UNIQUE and process entire resnode list at once
 
     return retres;
-    
+
 }  /* run_obj_commit_tests */
 
 
 /********************************************************************
 * FUNCTION run_obj_unique_tests
-* 
+*
 * Run unique-stmt tests from section 7.8.3 of RFC 6020
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msghdr == XML message header in progress 
+*   msghdr == XML message header in progress
 *          == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use (NULL == root test)
 *   root == docroot for XPath
 * OUTPUTS:
 *   if msghdr not NULL:
-*      msghdr->msg_errQ may have rpc_err_rec_t 
-*      structs added to it which must be freed by the 
+*      msghdr->msg_errQ may have rpc_err_rec_t
+*      structs added to it which must be freed by the
 *      caller with the rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     run_obj_unique_tests (ses_cb_t *scb,
                           xml_msg_hdr_t *msghdr,
                           agt_cfg_commit_test_t *ct,
@@ -5347,7 +5423,7 @@ static status_t
     }
 
     return res;
-    
+
 }  /* run_obj_unique_tests */
 
 
@@ -5356,12 +5432,12 @@ static status_t
 
 /********************************************************************
 * FUNCTION agt_val_rpc_xpath_check
-* 
+*
 * Check for any nodes which are present
 * but have false when-stmts associated
 * with the node.  These are errors and
 * need to be flagged as unknown-element
-* 
+*
 * Any false nodes will be removed from the input PDU
 * and discarded, after the error is recorded.
 * This prevents false positives or negatives in
@@ -5375,29 +5451,29 @@ static status_t
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   rpcmsg == RPC msg header for audit purposes
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   rpcinput == RPC input node conceptually under rpcroot
 *               except this rpcinput has no parent node
-*               so a fake one will be termporarily added 
+*               so a fake one will be termporarily added
 *               to prevent false XPath validation errors
-*   rpcroot == RPC method node. 
-*              The conceptual parent of this node 
+*   rpcroot == RPC method node.
+*              The conceptual parent of this node
 *              is used as the document root (/rpc == /)
 *
 * OUTPUTS:
 *   if false nodes found under :
 *     they are deleted
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation
 *   NO_ERR if no false when or must statements found
 *********************************************************************/
-status_t 
+status_t
     agt_val_rpc_xpath_check (ses_cb_t *scb,
                              rpc_msg_t *rpcmsg,
                              xml_msg_hdr_t *msg,
@@ -5414,7 +5490,7 @@ status_t
 #endif
 
     if (LOGDEBUG3) {
-        log_debug3("\nagt_val_rpc_xpathchk: %s:%s start", 
+        log_debug3("\nagt_val_rpc_xpathchk: %s:%s start",
                    obj_get_mod_name(rpcroot),
                    obj_get_name(rpcroot));
     }
@@ -5449,10 +5525,10 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_instance_check
-* 
+*
 * Check for the proper number of object instances for
 * the specified value struct.
-* 
+*
 * The top-level value set passed cannot represent a choice
 * or a case within a choice.
 *
@@ -5463,7 +5539,7 @@ status_t
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == xml_msg_hdr t from msg in progress
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
 *   valroot == root node of the database
@@ -5471,14 +5547,14 @@ status_t
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
+*      msg->msg_errQ may have rpc_err_rec_t structs added to it
+*      which must be freed by the called with the
 *      rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-status_t 
+status_t
     agt_val_instance_check (ses_cb_t *scb,
                             xml_msg_hdr_t *msg,
                             val_value_t *valset,
@@ -5486,13 +5562,13 @@ status_t
                             ncx_layer_t layer)
 {
     return run_instance_check(scb, msg, valset, valroot, layer, TRUE);
-    
+
 }  /* agt_val_instance_check */
 
 
 /********************************************************************
 * FUNCTION agt_val_root_check
-* 
+*
 * !!! Full database validation !!!
 * Check for the proper number of object instances for
 * the specified configuration database
@@ -5528,14 +5604,14 @@ status_t
 *
 * OUTPUTS:
 *   if mshdr not NULL:
-*      msghdr->msg_errQ may have rpc_err_rec_t 
-*      structs added to it which must be freed by the 
+*      msghdr->msg_errQ may have rpc_err_rec_t
+*      structs added to it which must be freed by the
 *      caller with the rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-status_t 
+status_t
     agt_val_root_check (ses_cb_t *scb,
                         xml_msg_hdr_t *msghdr,
                         agt_cfg_transaction_t *txcb,
@@ -5553,7 +5629,7 @@ status_t
 
     /* the commit check is always run on the root because there
      * are operations such as <validate> and <copy-config> that
-     * make it impossible to flag the 'root-dirty' condition 
+     * make it impossible to flag the 'root-dirty' condition
      * during editing  */
     res = run_obj_commit_tests(profile, scb, msghdr, NULL, root, root,
                                AGT_TEST_ALL_COMMIT_MASK);
@@ -5601,7 +5677,7 @@ status_t
 
             val_value_t *valnode = xpath_get_resnode_valptr(resnode);
             valnode->res = NO_ERR;
-            res = run_obj_commit_tests(profile, scb, msghdr, ct, valnode, 
+            res = run_obj_commit_tests(profile, scb, msghdr, ct, valnode,
                                        root, tests);
             if (res != NO_ERR) {
                 valnode->res = res;
@@ -5628,14 +5704,14 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_validate_write
-* 
+*
 * Validate the requested <edit-config> write operation
 *
 * Check all the embedded operation attributes against
 * the default-operation and maintained current operation.
 *
-* Invoke all the user AGT_CB_VALIDATE callbacks for a 
-* 'new value' and 'existing value' pairs, for a given write operation, 
+* Invoke all the user AGT_CB_VALIDATE callbacks for a
+* 'new value' and 'existing value' pairs, for a given write operation,
 *
 * These callbacks are invoked bottom-up, so the first step is to
 * step through all the child nodes and traverse the
@@ -5651,7 +5727,7 @@ status_t
 * INPUTS:
 *   scb == session control block
 *   msg == incoming rpc_msg_t in progress
-*   target == cfg_template_t for the config database to write 
+*   target == cfg_template_t for the config database to write
 *          == NULL for no actual write acess (validate only)
 *   valroot == the val_value_t struct containing the root
 *              (NCX_BT_CONTAINER, ncx:root)
@@ -5704,10 +5780,10 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_apply_write
-* 
+*
 * Apply the requested write operation
 *
-* Invoke all the AGT_CB_APPLY callbacks for a 
+* Invoke all the AGT_CB_APPLY callbacks for a
 * source and target and write operation
 *
 * TBD: support for handling nested parmsets independently
@@ -5745,18 +5821,18 @@ status_t
     assert( obj_is_root(pducfg->obj) && "pducfg root is NULL!" );
 
     /* start with the config root, which is a val_value_t node */
-    status_t res = handle_callback(AGT_CB_APPLY, editop, scb, msg, target, 
+    status_t res = handle_callback(AGT_CB_APPLY, editop, scb, msg, target,
                                    pducfg, target->root, target->root);
 
     if (res == NO_ERR) {
         boolean done = FALSE;
         while (!done) {
-            /* need to delete all the false when-stmt config objects 
+            /* need to delete all the false when-stmt config objects
              * and then see if the config is valid.  This is done in
              * candidate or running in apply phase; not evaluated at commit
              * time like must-stmt or unique-stmt    */
             uint32 delcount = 0;
-            res = delete_dead_nodes(scb, &msg->mhdr, msg->rpc_txcb, 
+            res = delete_dead_nodes(scb, &msg->mhdr, msg->rpc_txcb,
                                     target->root, &delcount);
             if (res != NO_ERR || delcount == 0) {
                 done = TRUE;
@@ -5770,13 +5846,13 @@ status_t
 
     if (res == NO_ERR) {
         /* complete the operation */
-        res = handle_callback(AGT_CB_COMMIT, editop, scb, msg, target, 
+        res = handle_callback(AGT_CB_COMMIT, editop, scb, msg, target,
                               pducfg, target->root, target->root);
         /*commit_complete?*/
     } else {
         /* rollback the operation */
-        status_t res2 = handle_callback(AGT_CB_ROLLBACK, editop, scb, msg, 
-                                        target, pducfg, target->root, 
+        status_t res2 = handle_callback(AGT_CB_ROLLBACK, editop, scb, msg,
+                                        target, pducfg, target->root,
                                         target->root);
         if (res2 != NO_ERR) {
             log_error("\nagt_val: Rollback failed (%s)\n",
@@ -5791,17 +5867,17 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_apply_commit
-* 
+*
 * Apply the requested commit operation
 *
-* Invoke all the AGT_CB_COMMIT callbacks for a 
+* Invoke all the AGT_CB_COMMIT callbacks for a
 * source and target and write operation
 *
 * INPUTS:
 *   scb == session control block
 *   msg == incoming commit rpc_msg_t in progress
 *   source == cfg_template_t for the source (candidate)
-*   target == cfg_template_t for the config database to 
+*   target == cfg_template_t for the config database to
 *             write (running)
 *   save_nvstore == TRUE if the mirrored NV-store
 *                   should be updated after the commit is done
@@ -5810,7 +5886,7 @@ status_t
 *                   Never save to NV-store if :startup is supported
 *
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhdr.errQ
 *
 * RETURNS:
@@ -5822,7 +5898,7 @@ status_t
                           cfg_template_t *source,
                           cfg_template_t *target,
                           boolean save_nvstore)
-    
+
 {
     assert( scb && "scb is NULL!" );
     assert( msg && "msg is NULL!" );
@@ -5866,8 +5942,8 @@ status_t
                 res = agt_ncx_cfg_save(target, FALSE);
                 if (res != NO_ERR) {
                     /* write to NV-store failed */
-                    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
-                                     NULL, NCX_NT_CFG, target, NCX_NT_NONE, 
+                    agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                                     NULL, NCX_NT_CFG, target, NCX_NT_NONE,
                                      NULL);
                 }
             }
@@ -5880,13 +5956,13 @@ status_t
     //res = apply_commit_deletes(scb, msg, target, source->root, target->root);
     if (res == NO_ERR) {
         /* apply all the new and modified nodes */
-        res = handle_callback(AGT_CB_APPLY, OP_EDITOP_COMMIT, scb, msg, 
+        res = handle_callback(AGT_CB_APPLY, OP_EDITOP_COMMIT, scb, msg,
                               target, source->root, target->root, target->root);
     }
 
     if (res==NO_ERR) {
         /* complete the transaction */
-        res = handle_callback(AGT_CB_COMMIT, OP_EDITOP_COMMIT, scb, msg, 
+        res = handle_callback(AGT_CB_COMMIT, OP_EDITOP_COMMIT, scb, msg,
                               target, source->root, target->root, target->root);
 
         if ( NO_ERR == res ) {
@@ -5898,7 +5974,7 @@ status_t
                                         scb, msg, target, source->root,
                                         target->root, target->root);
         if (res2 != NO_ERR) {
-            log_error("\nError: rollback failed (%s)", 
+            log_error("\nError: rollback failed (%s)",
                       get_error_string(res2));
         }
     }
@@ -5908,7 +5984,7 @@ status_t
             res = agt_ncx_cfg_save(target, FALSE);
             if (res != NO_ERR) {
                 /* write to NV-store failed */
-                agt_record_error(scb,&msg->mhdr, NCX_LAYER_OPERATION, res, 
+                agt_record_error(scb,&msg->mhdr, NCX_LAYER_OPERATION, res,
                                  NULL, NCX_NT_CFG, target, NCX_NT_NONE, NULL);
             } else {
                 /* don't clear the dirty flags in running
@@ -5929,11 +6005,11 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_check_commit_edits
-* 
+*
 * Check if the requested commit operation
-* would cause any ACM or partial lock violations 
+* would cause any ACM or partial lock violations
 * in the running config
-* Invoke all the AGT_CB_VALIDATE callbacks for a 
+* Invoke all the AGT_CB_VALIDATE callbacks for a
 * source and target and write operation
 *
 * !!! Only works for the <commit> operation for applying
@@ -5944,11 +6020,11 @@ status_t
 *   scb == session control block
 *   msg == incoming commit rpc_msg_t in progress
 *   source == cfg_template_t for the source (candidate)
-*   target == cfg_template_t for the config database to 
+*   target == cfg_template_t for the config database to
 *             write (running)
 *
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhdr.errQ
 *
 * RETURNS:
@@ -5972,8 +6048,8 @@ status_t
         return NO_ERR;
     }
 
-    status_t res = handle_callback(AGT_CB_VALIDATE, OP_EDITOP_COMMIT, 
-                                   scb, msg, target, source->root, 
+    status_t res = handle_callback(AGT_CB_VALIDATE, OP_EDITOP_COMMIT,
+                                   scb, msg, target, source->root,
                                    target->root, target->root);
     return res;
 
@@ -5982,7 +6058,7 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_delete_dead_nodes
-* 
+*
 * Mark nodes deleted for each false when-stmt from <validate>
 * INPUTS:
 *   scb == session control block
@@ -5990,7 +6066,7 @@ status_t
 *   root == value tree to check for deletions
 *
 * OUTPUTS:
-*   rpc_err_rec_t structs may be malloced and added 
+*   rpc_err_rec_t structs may be malloced and added
 *   to the msg->mhdr.errQ
 *
 * RETURNS:
@@ -6009,12 +6085,12 @@ status_t
     status_t res = NO_ERR;
     boolean done = FALSE;
     while (!done) {
-        /* need to delete all the false when-stmt config objects 
+        /* need to delete all the false when-stmt config objects
          * and then see if the config is valid.  This is done in
          * candidate or running in apply phase; not evaluated at commit
          * time like must-stmt or unique-stmt    */
         uint32 delcount = 0;
-        res = delete_dead_nodes(scb, &msg->mhdr, msg->rpc_txcb, root, 
+        res = delete_dead_nodes(scb, &msg->mhdr, msg->rpc_txcb, root,
                                 &delcount);
         if (res != NO_ERR || delcount == 0) {
             done = TRUE;
@@ -6028,10 +6104,10 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_add_module_commit_tests
-* 
+*
 * !!! Initialize module data node validation !!!
 * !!! Must call after all modules are initially loaded !!!
-* 
+*
 * Find all the data node objects in the specified module
 * that need some sort database referential integrity test
 *
@@ -6046,12 +6122,12 @@ status_t
 * SIDE EFFECTS:
 *  agt_profile->commit_testQ will contain an agt_cfg_commit_test_t struct
 *  for each object found with commit-time validation tests
-*   
+*
 * RETURNS:
 *   status of the operation, NO_ERR unless internal errors found
 *   or malloc error
 *********************************************************************/
-status_t 
+status_t
     agt_val_add_module_commit_tests (ncx_module_t *mod)
 {
     assert( mod && "mod is NULL!" );
@@ -6064,7 +6140,7 @@ status_t
 
         res = add_obj_commit_tests(obj, &profile->agt_commit_testQ,
                                    &profile->agt_rootflags);
-        
+
         if (res != NO_ERR) {
             return res;
         }
@@ -6076,11 +6152,11 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_val_init_commit_tests
-* 
+*
 * !!! Initialize full database validation !!!
 * !!! Must call after all modules are initially loaded !!!
 * !!! Must be called before load_running_config is called !!!
-* 
+*
 * Find all the data node objects that need some sort
 * database referential integrity test
 * For :candidate this is done during the
@@ -6096,11 +6172,11 @@ status_t
 *   status of the operation, NO_ERR unless internal errors found
 *   or malloc error
 *********************************************************************/
-status_t 
+status_t
     agt_val_init_commit_tests (void)
 {
     status_t        res = NO_ERR;
-    
+
     /* check all the modules in the system for top-level database objects */
     ncx_module_t *mod = ncx_get_first_module();
     for (; mod != NULL; mod = ncx_get_next_module(mod)) {
@@ -6112,7 +6188,7 @@ status_t
     }
 
     return res;
-    
+
 }  /* agt_val_init_commit_tests */
 
 

@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: typ.c
 
-                
+
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -66,7 +66,7 @@ static boolean          typ_init_done = FALSE;
 
 /********************************************************************
 * FUNCTION clean_simple
-* 
+*
 * Clean a simple type struct contents, but do not delete it
 *
 * INPUTS:
@@ -104,7 +104,7 @@ static void
         m__free(sim->idref.basename);
         sim->idref.basename = NULL;
     }
-        
+
     sim->idref.base = NULL;
 
     /* clean the rangeQ only if it is used */
@@ -123,7 +123,7 @@ static void
         typ_free_pattern(pat);
     }
 
-    
+
     /* the Qs are used for differnt items, based on the type */
     switch (sim->btyp) {
     case NCX_BT_BITS:
@@ -163,7 +163,7 @@ static void
 
 /********************************************************************
 * FUNCTION clean_named
-* 
+*
 * Clean a named type struct contents, but do not delete it
 *
 * INPUTS:
@@ -194,7 +194,7 @@ static void
 
 /********************************************************************
 * FUNCTION typ_load_basetypes
-* 
+*
 * Create typ_template_t structs for the base types
 * Must be called before any modules are loaded
 * load the typ_template_t structs for the ncx_btype_t types
@@ -253,7 +253,7 @@ status_t
 
 /********************************************************************
 * FUNCTION typ_unload_basetypes
-* 
+*
 * Unload and destroy the typ_template_t structs for the base types
 * unload the typ_template_t structs for the ncx_btype_t types
 * SHOULD be called during ncx_cleanup
@@ -281,13 +281,13 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_template
-* 
+*
 * Malloc and initialize the fields in a typ_template_t
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-typ_template_t * 
+typ_template_t *
     typ_new_template (void)
 {
     typ_template_t  *typ;
@@ -307,16 +307,16 @@ typ_template_t *
 
 /********************************************************************
 * FUNCTION typ_free_template
-* 
+*
 * Scrub the memory in a typ_template_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
+* the sub-fields and then freeing the entire struct itself
 * The struct must be removed from any queue it is in before
 * this function is called.
 *
 * INPUTS:
 *    typ == typ_template_t to delete
 *********************************************************************/
-void 
+void
     typ_free_template (typ_template_t *typ)
 {
 
@@ -356,13 +356,13 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_typdef
-* 
+*
 * Malloc and initialize the fields in a typ_def_t
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-typ_def_t * 
+typ_def_t *
     typ_new_typdef (void)
 {
     typ_def_t  *typdef;
@@ -379,7 +379,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_init_typdef
-* 
+*
 * init a pre-allocated typdef (done first)
 * Initialize the fields in a typ_def_t
 * !! Still need to call typ_init_simple
@@ -408,7 +408,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_init_simple
-* 
+*
 * Init a typ_simple_t struct inside a typ_def_t
 * init a simple data type after typ_init_typdef
 *
@@ -417,7 +417,7 @@ void
 *     as a NCX_CL_SIMPLE variant
 *********************************************************************/
 void
-    typ_init_simple (typ_def_t  *tdef, 
+    typ_init_simple (typ_def_t  *tdef,
                      ncx_btype_t btyp)
 {
     typ_simple_t  *sim;
@@ -452,7 +452,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_init_named
-* 
+*
 * Init a typ_named_t struct inside a typ_def_t
 * init a named data type after typ_init_typdef
 *
@@ -497,7 +497,7 @@ void typ_free_typdef (typ_def_t *typdef)
 
 /********************************************************************
 * FUNCTION typ_clean_typdef
-* 
+*
 * Clean a typ_def_t struct, but do not delete it
 *
 * INPUTS:
@@ -543,7 +543,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_set_named_typdef
-* 
+*
 * Set the fields in a named typedef (used by YANG parser)
 *
 * INPUTS:
@@ -571,7 +571,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_get_named_typename
-* 
+*
 * Get the type name of the named typ
 *
 * INPUTS:
@@ -600,7 +600,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION typ_get_named_type_linenum
-* 
+*
 * Get the line number of the type template of the named type
 *
 * INPUTS:
@@ -622,7 +622,7 @@ uint32
     if (typdef->tclass != NCX_CL_NAMED) {
         return 0;
     }
-    return (typdef->def.named.typ) ? 
+    return (typdef->def.named.typ) ?
         typ_get_typ_linenum(typdef->def.named.typ) : 0;
 
 }  /* typ_get_named_type_linenum */
@@ -630,7 +630,7 @@ uint32
 
 /********************************************************************
 * FUNCTION typ_set_new_named
-* 
+*
 * Create a new typdef inside a typ_named_t struct inside a typ_def_t
 *
 * INPUTS:
@@ -641,7 +641,7 @@ uint32
 *    status
 *********************************************************************/
 status_t
-    typ_set_new_named (typ_def_t  *typdef, 
+    typ_set_new_named (typ_def_t  *typdef,
                        ncx_btype_t btyp)
 {
     typ_def_t *tdef;
@@ -667,7 +667,7 @@ status_t
 
 /********************************************************************
 * FUNCTION typ_get_new_named
-* 
+*
 * Access the new typdef inside a typ_named_t struct inside a typ_def_t
 *
 * INPUTS:
@@ -696,7 +696,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_cget_new_named
-* 
+*
 * Access the new typdef inside a typ_named_t struct inside a typ_def_t
 *
 * INPUTS:
@@ -725,7 +725,7 @@ const typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_set_simple_typdef
-* 
+*
 * Set the fields in a simple typedef (used by YANG parser)
 *
 * INPUTS:
@@ -752,7 +752,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_enum
-* 
+*
 * Alloc and Init a typ_enum_t struct
 * malloc and init an enumeration descriptor, strdup name ptr
 *
@@ -794,11 +794,11 @@ typ_enum_t *
 
 /********************************************************************
 * FUNCTION typ_new_enum2
-* 
+*
 * Alloc and Init a typ_enum_t struct
 * Use the string value as-=is, instead of mallocing a new one
 * malloc and init an enumeration descriptor, pass off name ptr
-* 
+*
 * INPUTS:
 *   name == name string for the enumeration (will get free-ed later!!)
 *
@@ -833,7 +833,7 @@ typ_enum_t *
 
 /********************************************************************
 * FUNCTION typ_free_enum
-* 
+*
 * Free a typ_enum_t struct
 * free an enumeration descriptor
 *
@@ -869,7 +869,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_rangedef
-* 
+*
 * Alloc and Init a typ_rangedef_t struct (range-stmt)
 *
 * RETURNS:
@@ -891,15 +891,15 @@ typ_rangedef_t *
 
 /********************************************************************
 * FUNCTION typ_free_rangedef
-* 
+*
 * Free a typ_rangedef_t struct (range-stmt)
-* 
+*
 * INPUTS:
 *   rv == rangeval struct to delete
 *   btyp == base type of range (float and double have malloced strings)
 *********************************************************************/
 void
-    typ_free_rangedef (typ_rangedef_t *rv, 
+    typ_free_rangedef (typ_rangedef_t *rv,
                        ncx_btype_t  btyp)
 {
 #ifdef DEBUG
@@ -930,7 +930,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_normalize_rangeQ
-* 
+*
 * Start with a valid rangedef chain
 * Combine any consecutive range definitions like
 *   1..4|5|6|7..9  would break replaced with 1..9
@@ -1174,7 +1174,7 @@ const dlq_hdr_t *
         }
         /*NOTREACHED*/
     case NCX_CL_REF:
-        return (typdef->def.ref.typdef) ? 
+        return (typdef->def.ref.typdef) ?
             typ_get_crangeQ(typdef->def.ref.typdef) : NULL;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -1484,7 +1484,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-    
+
     res = NO_ERR;
     switch (typdef->tclass) {
     case NCX_CL_BASE:
@@ -1543,13 +1543,13 @@ status_t
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
     return res;
-    
+
 }  /* typ_get_rangebounds_con */
 
 
 /********************************************************************
 * FUNCTION typ_get_strrest
-* 
+*
 * Get the string restrinvtion type set for this typdef
 *
 * INPUTS:
@@ -1558,7 +1558,7 @@ status_t
 * RETURNS:
 *   string restrinction enumeration value
 *********************************************************************/
-ncx_strrest_t 
+ncx_strrest_t
     typ_get_strrest (const typ_def_t *typdef)
 {
 #ifdef DEBUG
@@ -1597,7 +1597,7 @@ ncx_strrest_t
 
 /********************************************************************
 * FUNCTION typ_set_strrest
-* 
+*
 * Set the string restrinvtion type set for this typdef
 *
 * INPUTS:
@@ -1639,7 +1639,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_sval
-* 
+*
 * Alloc and Init a typ_sval_t struct
 * malloc and init a string descriptor
 *
@@ -1684,7 +1684,7 @@ typ_sval_t *
 
 /********************************************************************
 * FUNCTION typ_free_sval
-* 
+*
 * Free a typ_sval_t struct
 * free a string descriptor
 *
@@ -1712,7 +1712,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_new_listval
-* 
+*
 * Alloc and Init a typ_listval_t struct
 * malloc and init a list descriptor
 *
@@ -1737,7 +1737,7 @@ typ_listval_t *
 
 /********************************************************************
 * FUNCTION typ_free_listval
-* 
+*
 * Free a typ_listval_t struct
 * free a list descriptor
 *
@@ -1766,7 +1766,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_get_range_type
-* 
+*
 * Get the correct typ_rangedef_t data type for the
 * indicated base type
 * get the proper range base type to use for a given base type
@@ -1776,7 +1776,7 @@ void
 * RETURNS:
 *     base type enum of the range data type
 *********************************************************************/
-ncx_btype_t 
+ncx_btype_t
     typ_get_range_type (ncx_btype_t btyp)
 {
     /* figure out what type of number is in the rangeval Q */
@@ -1812,10 +1812,10 @@ ncx_btype_t
 
 /********************************************************************
 * FUNCTION typ_get_basetype
-* 
+*
 * Get the final base type of the specified typ_def_t
-* Follow any typdef links and get the actual base type of 
-* the specified typedef 
+* Follow any typdef links and get the actual base type of
+* the specified typedef
 *
 * INPUTS:
 *     typdef == typdef to  check
@@ -1839,7 +1839,7 @@ ncx_btype_t
     case NCX_CL_BASE:
         return typdef->def.base;
     case NCX_CL_SIMPLE:
-        return typdef->def.simple.btyp; 
+        return typdef->def.simple.btyp;
     case NCX_CL_NAMED:
         if (typdef->def.named.typ) {
             return typ_get_basetype(&typdef->def.named.typ->typdef);
@@ -1862,7 +1862,7 @@ ncx_btype_t
 
 /********************************************************************
 * FUNCTION typ_get_name
-* 
+*
 * Get the name for the specified typdef
 *
 * INPUTS:
@@ -1892,7 +1892,7 @@ const xmlChar *
         return (const xmlChar *)
             tk_get_btype_sym(typdef->def.simple.btyp);
     case NCX_CL_NAMED:
-        return (typdef->def.named.typ) ? 
+        return (typdef->def.named.typ) ?
             typdef->def.named.typ->name : NULL;
     case NCX_CL_REF:
         return (typdef->def.ref.typdef) ?
@@ -1908,7 +1908,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION typ_get_basetype_name
-* 
+*
 * Get the name of the final base type of the specified typ_template_t
 *
 * INPUTS:
@@ -1942,7 +1942,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION typ_get_parenttype_name
-* 
+*
 * Get the final base type of the specified typ_def_t
 *
 * INPUTS:
@@ -1974,9 +1974,9 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION typ_get_base_class
-* 
+*
 * Follow any typdef links and get the class of the base typdef
-* for the specified typedef 
+* for the specified typedef
 *
 * INPUTS:
 *     typdef == typdef to  check
@@ -2019,7 +2019,7 @@ ncx_tclass_t
 
 /********************************************************************
 * FUNCTION typ_get_basetype_typ
-* 
+*
 * Get the default typ_template_t for the specified base type
 * Get the default type template for the specified base type
 *
@@ -2046,7 +2046,7 @@ typ_template_t *
 
 /********************************************************************
 * FUNCTION typ_get_basetype_typdef
-* 
+*
 * Get the default typdef for the specified base type
 *
 * INPUTS:
@@ -2072,7 +2072,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_parent_typdef
-* 
+*
 * Get the next typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 * Ignores current named type even if if has new restrictions
@@ -2119,7 +2119,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_parent_type
-* 
+*
 * Get the next typ_template_t in a chain -- for NCX_CL_NAMED only
 *
 * INPUTS:
@@ -2158,7 +2158,7 @@ const typ_template_t *
 
 /********************************************************************
 * FUNCTION typ_get_cparent_typdef
-* 
+*
 * Get the next typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 * Ignores current named type even if if has new restrictions
@@ -2199,7 +2199,7 @@ const typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_next_typdef
-* 
+*
 * Get the next typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 * Get the next typdef in the chain for NCX_CL_NAMED or NCX_CL_REF
@@ -2246,7 +2246,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_base_typdef
-* 
+*
 * Get the base typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 * get the real typdef that describes the type, if the
@@ -2290,7 +2290,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_cbase_typdef
-* 
+*
 * Get the base typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 *
@@ -2331,7 +2331,7 @@ const typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_qual_typdef
-* 
+*
 * Get the final typ_def_t of the specified typ_def_t
 * based on the qualifier
 * Get the next typdef in the chain for NCX_CL_NAMED or NCX_CL_REF
@@ -2346,7 +2346,7 @@ const typ_def_t *
 *          NCX_SQUAL_RANGE == find the first w/ range definition
 *          NCX_SQUAL_VAL == find the first w/ stringval/pattern def
 *          NCX_SQUAL_META == find the first typdef w/ meta-data def
-*          
+*
 * RETURNS:
 *     pointer to found typ_def_t or NULL if none found
 *********************************************************************/
@@ -2377,13 +2377,13 @@ typ_def_t *
         case NCX_SQUAL_NONE:
             return typdef;
         case NCX_SQUAL_RANGE:
-            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
+            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_VAL:
-            return (dlq_empty(&typdef->def.simple.valQ)) ? 
+            return (dlq_empty(&typdef->def.simple.valQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_META:
-            return (dlq_empty(&typdef->def.simple.metaQ)) ? 
+            return (dlq_empty(&typdef->def.simple.metaQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_APPINFO:
             return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
@@ -2396,7 +2396,7 @@ typ_def_t *
         ntypdef = typdef->def.named.newtyp;
         if (!ntypdef) {
             return (typdef->def.named.typ) ?
-                typ_get_qual_typdef(&typdef->def.named.typ->typdef, 
+                typ_get_qual_typdef(&typdef->def.named.typ->typdef,
                                     squal) : NULL;
         }
         switch (squal) {
@@ -2441,7 +2441,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_get_cqual_typdef
-* 
+*
 * Get the final typ_def_t of the specified typ_def_t
 * based on the qualifier
 * INPUTS:
@@ -2451,7 +2451,7 @@ typ_def_t *
 *          NCX_SQUAL_RANGE == find the first w/ range definition
 *          NCX_SQUAL_VAL == find the first w/ stringval/pattern def
 *          NCX_SQUAL_META == find the first typdef w/ meta-data def
-*          
+*
 * RETURNS:
 *     pointer to found typ_def_t or NULL if none found
 *********************************************************************/
@@ -2482,13 +2482,13 @@ const typ_def_t *
         case NCX_SQUAL_NONE:
             return typdef;
         case NCX_SQUAL_RANGE:
-            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
+            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_VAL:
-            return (dlq_empty(&typdef->def.simple.valQ)) ? 
+            return (dlq_empty(&typdef->def.simple.valQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_META:
-            return (dlq_empty(&typdef->def.simple.metaQ)) ? 
+            return (dlq_empty(&typdef->def.simple.metaQ)) ?
                 NULL : typdef;
         case NCX_SQUAL_APPINFO:
             return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
@@ -2501,7 +2501,7 @@ const typ_def_t *
         ntypdef = typdef->def.named.newtyp;
         if (!ntypdef) {
             return (typdef->def.named.typ) ?
-                typ_get_cqual_typdef(&typdef->def.named.typ->typdef, 
+                typ_get_cqual_typdef(&typdef->def.named.typ->typdef,
                                      squal) : NULL;
         }
         switch (squal) {
@@ -2560,7 +2560,7 @@ const typ_def_t *
 const ncx_appinfo_t *
     typ_find_appinfo (const typ_def_t *typdef,
                       const xmlChar *prefix,
-                      const xmlChar *name)                    
+                      const xmlChar *name)
 {
     const typ_def_t        *appdef;
     const ncx_appinfo_t    *appinfo;
@@ -2579,8 +2579,8 @@ const ncx_appinfo_t *
     while (!done) {
         appdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_APPINFO);
         if (appdef) {
-            appinfo = ncx_find_const_appinfo(&appdef->appinfoQ, 
-                                             prefix, 
+            appinfo = ncx_find_const_appinfo(&appdef->appinfoQ,
+                                             prefix,
                                              name);
             if (appinfo) {
                 done = TRUE;
@@ -2616,7 +2616,7 @@ const ncx_appinfo_t *
 const ncx_appinfo_t *
     typ_find_appinfo_con (const typ_def_t *typdef,
                           const xmlChar *prefix,
-                          const xmlChar *name)                
+                          const xmlChar *name)
 {
 
 #ifdef DEBUG
@@ -2626,8 +2626,8 @@ const ncx_appinfo_t *
     }
 #endif
 
-    return ncx_find_const_appinfo(&typdef->appinfoQ, 
-                                  prefix, 
+    return ncx_find_const_appinfo(&typdef->appinfoQ,
+                                  prefix,
                                   name);
 
 }  /* typ_find_appinfo_con */
@@ -2661,7 +2661,7 @@ boolean
     }
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
-                               NCX_PREFIX, 
+                               NCX_PREFIX,
                                NCX_EL_XPATH)) {
         return TRUE;
     }
@@ -2669,7 +2669,7 @@ boolean
     if (typdef->tclass == NCX_CL_NAMED) {
         if (typdef->def.named.newtyp &&
             ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
-                                   NCX_PREFIX, 
+                                   NCX_PREFIX,
                                    NCX_EL_XPATH)) {
             return TRUE;
         }
@@ -2718,7 +2718,7 @@ boolean
 #endif
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
-                               NCX_PREFIX, 
+                               NCX_PREFIX,
                                NCX_EL_QNAME)) {
         return TRUE;
     }
@@ -2726,7 +2726,7 @@ boolean
     if (typdef->tclass == NCX_CL_NAMED) {
         if (typdef->def.named.newtyp &&
             ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
-                                   NCX_PREFIX, 
+                                   NCX_PREFIX,
                                    NCX_EL_QNAME)) {
             return TRUE;
         }
@@ -2745,7 +2745,7 @@ boolean
 /********************************************************************
 * FUNCTION typ_is_schema_instance_string
 *
-* Find the ncx:schema-instance extension within 
+* Find the ncx:schema-instance extension within
 * the specified typdef chain
 *
 * INPUTS:
@@ -2772,7 +2772,7 @@ boolean
     }
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
-                               NCX_PREFIX, 
+                               NCX_PREFIX,
                                NCX_EL_SCHEMA_INSTANCE)) {
         return TRUE;
     }
@@ -2780,7 +2780,7 @@ boolean
     if (typdef->tclass == NCX_CL_NAMED) {
         if (typdef->def.named.newtyp &&
             ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
-                                   NCX_PREFIX, 
+                                   NCX_PREFIX,
                                    NCX_EL_SCHEMA_INSTANCE)) {
             return TRUE;
         }
@@ -2813,7 +2813,7 @@ boolean
 * RETURNS:
 *   pointer to found defval string or NULL if none
 *********************************************************************/
-const xmlChar * 
+const xmlChar *
     typ_get_defval (const typ_template_t *typ)
 {
 
@@ -2866,14 +2866,14 @@ const xmlChar *
         return (typdef->def.named.typ) ?
             typ_get_defval(typdef->def.named.typ) : NULL;
     } else {
-        /* Unless an embedded data node is a named type 
+        /* Unless an embedded data node is a named type
          * with a simple base type, it cannot have a default
          * !!! Not sure this always applies to NCX_CL_REF !!!
          */
-        return NULL;   
+        return NULL;
     }
 
-    
+
 }  /* typ_get_default */
 
 
@@ -2899,7 +2899,7 @@ ncx_iqual_t
 #endif
 
     return typ_get_iqualval_def(&typ->typdef);
-    
+
 }  /* typ_get_iqualval */
 
 
@@ -2953,7 +2953,7 @@ ncx_iqual_t
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_IQUAL_NONE;
     }
-    
+
 }  /* typ_get_iqualval_def */
 
 
@@ -2967,7 +2967,7 @@ ncx_iqual_t
 * RETURNS:
 *   pointer to found units string or NULL if none
 *********************************************************************/
-const xmlChar * 
+const xmlChar *
     typ_get_units (const typ_template_t *typ)
 {
 
@@ -3001,7 +3001,7 @@ const xmlChar *
 * RETURNS:
 *   pointer to found units string or NULL if none
 *********************************************************************/
-const xmlChar * 
+const xmlChar *
     typ_get_units_from_typdef (const typ_def_t *typdef)
 {
     const typ_template_t *typ;
@@ -3026,7 +3026,7 @@ const xmlChar *
         }
 
         typdef = &typ->typdef;
-        
+
         if (typdef->tclass != NCX_CL_NAMED) {
             done = TRUE;
         }
@@ -3310,7 +3310,7 @@ const typ_enum_t *
         return NULL;
     }
 #endif
-    
+
     switch (typdef->tclass) {
     case NCX_CL_SIMPLE:
         break;
@@ -3363,7 +3363,7 @@ typ_enum_t *
         }
     }
     return NULL;
-    
+
 }  /* typ_find_enumdef */
 
 
@@ -3459,7 +3459,7 @@ const typ_sval_t *
 
 /********************************************************************
 * FUNCTION typ_get_maxrows
-* 
+*
 * Get the maxrows value if it exists or zero if not
 *
 * INPUTS:
@@ -3500,7 +3500,7 @@ uint32
 * FUNCTION typ_get_maxaccess
 *
 * Find the max-access value for the specified typdef
-* Follow named types to see if any parent typdef has a 
+* Follow named types to see if any parent typdef has a
 * maxaccess clause, if none found in the parameter
 *
 * INPUTS:
@@ -3539,7 +3539,7 @@ ncx_access_t
         return NCX_ACCESS_NONE;
     }
     /*NOTREACHED*/
-    
+
 }  /* typ_get_maxaccess */
 
 
@@ -3547,7 +3547,7 @@ ncx_access_t
 * FUNCTION typ_get_dataclass
 *
 * Find the data-class value for the specified typdef
-* Follow named types to see if any parent typdef has a 
+* Follow named types to see if any parent typdef has a
 * data-class clause, if none found in the parameter
 *
 * INPUTS:
@@ -3585,7 +3585,7 @@ ncx_data_class_t
         return NCX_DC_NONE;
     }
     /*NOTREACHED*/
-    
+
 }  /* typ_get_dataclass */
 
 
@@ -3642,7 +3642,7 @@ ncx_merge_t
         return mtyp;
     }
     /*NOTREACHED*/
-    
+
 }  /* typ_get_mergetype */
 
 
@@ -3668,7 +3668,7 @@ xmlns_id_t
 #endif
 
     return typ->nsid;
-    
+
 }  /* typ_get_nsid */
 
 
@@ -3719,7 +3719,7 @@ typ_template_t *
         return NULL;
     }
     /*NOTREACHED*/
-    
+
 }  /* typ_get_listtyp */
 
 
@@ -3768,13 +3768,13 @@ const typ_template_t *
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
-    
+
 }  /* typ_get_clisttyp */
 
 
 /********************************************************************
 * FUNCTION typ_new_unionnode
-* 
+*
 * Alloc and Init a typ_unionnode_t struct
 *
 * INPUTS:
@@ -3802,7 +3802,7 @@ typ_unionnode_t *
 
 /********************************************************************
 * FUNCTION typ_free_unionnode
-* 
+*
 * Free a typ_unionnode_t struct
 *
 * INPUTS:
@@ -3828,7 +3828,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_get_unionnode_ptr
-* 
+*
 * Get the proper typdef pointer from a unionnode
 *
 * INPUTS:
@@ -3860,7 +3860,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_first_unionnode
-* 
+*
 * Get the first union node in the queue for a given typdef
 *
 * INPUTS:
@@ -3906,7 +3906,7 @@ typ_unionnode_t *
 
 /********************************************************************
 * FUNCTION typ_first_con_unionnode
-* 
+*
 * Get the first union node in the queue for a given typdef
 *
 * INPUTS:
@@ -3952,7 +3952,7 @@ const typ_unionnode_t *
 
 /********************************************************************
 * FUNCTION typ_is_number
-* 
+*
 * Check if the base type is numeric
 *
 * INPUTS:
@@ -3986,7 +3986,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_is_string
-* 
+*
 * Check if the base type is a simple string (not list)
 *
 * INPUTS:
@@ -4014,7 +4014,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_is_enum
-* 
+*
 * Check if the base type is an enumeration
 *
 * INPUTS:
@@ -4039,7 +4039,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_new_pattern
-* 
+*
 *   Malloc and init a pattern struct
 *
 * INPUTS:
@@ -4071,7 +4071,7 @@ typ_pattern_t *
         m__free(pat);
         return NULL;
     }
-    
+
     ncx_init_errinfo(&pat->pat_errinfo);
 
     return pat;
@@ -4081,7 +4081,7 @@ typ_pattern_t *
 
 /********************************************************************
 * FUNCTION typ_free_pattern
-* 
+*
 *   Free a pattern struct
 *   Must be freed from any Q before calling this function
 *
@@ -4114,7 +4114,7 @@ void
 
 /********************************************************************
 * FUNCTION typ_compile_pattern
-* 
+*
 * Compile a pattern as into a regex_t struct
 *
 * INPUTS:
@@ -4149,7 +4149,7 @@ status_t
 
 /********************************************************************
 * FUNCTION typ_get_first_pattern
-* 
+*
 * Get the first pattern struct for a typdef
 *
 * INPUTS:
@@ -4197,7 +4197,7 @@ typ_pattern_t *
 
 /********************************************************************
 * FUNCTION typ_get_next_pattern
-* 
+*
 * Get the next pattern struct for a typdef
 *
 * INPUTS:
@@ -4223,7 +4223,7 @@ typ_pattern_t *
 
 /********************************************************************
 * FUNCTION typ_get_first_cpattern
-* 
+*
 * Get the first pattern struct for a typdef
 * Const version
 *
@@ -4253,7 +4253,7 @@ const typ_pattern_t *
         return (const typ_pattern_t *)
             dlq_firstEntry(&typdef->def.simple.patternQ);
         break;
-    case NCX_CL_NAMED: 
+    case NCX_CL_NAMED:
         if (typdef->def.named.newtyp) {
             return typ_get_first_cpattern(typdef->def.named.newtyp);
         } else {
@@ -4272,7 +4272,7 @@ const typ_pattern_t *
 
 /********************************************************************
 * FUNCTION typ_get_next_cpattern
-* 
+*
 * Get the next pattern struct for a typdef
 * Const version
 *
@@ -4300,7 +4300,7 @@ const typ_pattern_t *
 
 /********************************************************************
 * FUNCTION typ_get_pattern_count
-* 
+*
 * Get the number of pattern structs in a typdef
 *
 * INPUTS:
@@ -4322,7 +4322,7 @@ uint32
     }
 #endif
 
-    cnt = 1;    
+    cnt = 1;
     pat = typ_get_first_cpattern(typdef);
     if (!pat) {
         return 0;
@@ -4339,7 +4339,7 @@ uint32
 
 /********************************************************************
 * FUNCTION typ_get_range_errinfo
-* 
+*
 * Get the range errinfo for a typdef
 *
 * INPUTS:
@@ -4397,7 +4397,7 @@ void typ_clean_typeQ (dlq_hdr_t *que)
 
 /********************************************************************
 * FUNCTION typ_ok_for_inline_index
-* 
+*
 * Check if the base type is okay to use in an inline index decl
 *
 * INPUTS:
@@ -4447,7 +4447,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_ok_for_metadata
-* 
+*
 * Check if the base type is okay to use in an XML attribute
 *
 * INPUTS:
@@ -4463,7 +4463,7 @@ boolean typ_ok_for_metadata (ncx_btype_t btyp)
 
 /********************************************************************
 * FUNCTION typ_ok_for_index
-* 
+*
 * Check if the base type is okay to use in an index decl
 *
 * INPUTS:
@@ -4511,7 +4511,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_ok_for_union
-* 
+*
 * Check if the base type is okay to use in an union decl
 *
 * INPUTS:
@@ -4560,7 +4560,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_ok
-* 
+*
 * Check if the typdef chain has any errors
 * Checks the named types in the typdef chain to
 * see if they were already flagged as invalid
@@ -4611,7 +4611,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_ok_for_xsdlist
-* 
+*
 * Check if the base type is okay to use in an ncx:xsdlist typedef
 *
 * INPUTS:
@@ -4659,7 +4659,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_get_leafref_path
-* 
+*
 *   Get the path argument for the leafref data type
 *
 * INPUTS:
@@ -4698,7 +4698,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION typ_get_leafref_path_addr
-* 
+*
 *   Get the address of the path argument for the leafref data type
 *
 * INPUTS:
@@ -4737,7 +4737,7 @@ const void *
 
 /********************************************************************
 * FUNCTION typ_get_leafref_pcb
-* 
+*
 *   Get the XPath parser control block for the leafref data type
 *   returns xpath_pcb_t but cannot import due to H file loop
 * INPUTS:
@@ -4775,7 +4775,7 @@ struct xpath_pcb_t_ *
 
 /********************************************************************
 * FUNCTION typ_get_constrained
-* 
+*
 *   Get the constrained true/false field for the data type
 *   leafref or instance-identifier constrained flag
 *
@@ -4810,7 +4810,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_set_xref_typdef
-* 
+*
 *   Set the target typdef for a leafref or instance-identifier
 *   NCX_BT_LEAFREF or NCX_BT_INSTANCE_ID
 *
@@ -4833,7 +4833,7 @@ void
 #endif
 
     btyp = typ_get_basetype(typdef);
-    
+
     if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return;
@@ -4851,8 +4851,8 @@ void
 
 /********************************************************************
 * FUNCTION typ_get_xref_typdef
-* 
-*   Get the xrefdef target typdef from a leafref 
+*
+*   Get the xrefdef target typdef from a leafref
 *   or instance-identifier
 *   NCX_BT_LEAFREF or NCX_BT_INSTANCE_ID
 *
@@ -4876,7 +4876,7 @@ typ_def_t *
 #endif
 
     btyp = typ_get_basetype(typdef);
-    
+
     if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
@@ -4900,7 +4900,7 @@ typ_def_t *
 
 /********************************************************************
 * FUNCTION typ_has_subclauses
-* 
+*
 *   Check if the specified typdef has any sub-clauses
 *   Used by yangdump to reverse-engineer the YANG from the typdef
 *   If any appinfo clauses present, then the result will be TRUE
@@ -4984,7 +4984,7 @@ boolean
 
 /********************************************************************
 * FUNCTION typ_get_idref
-* 
+*
 * Get the idref field if this is an NCX_BT_IDREF typdef
 *
 * INPUTS:
@@ -5017,7 +5017,7 @@ typ_idref_t *
 
 /********************************************************************
 * FUNCTION typ_get_cidref
-* 
+*
 * Get the idref field if this is an NCX_BT_IDREF typdef
 * Const version
 *
@@ -5051,7 +5051,7 @@ const typ_idref_t *
 
 /********************************************************************
 * FUNCTION typ_get_fraction_digits
-* 
+*
 * Get the fraction-digits field from the typdef chain
 * typdef must be an NCX_BT_DECIMAL64 or 0 will be returned
 * valid values are 1..18
@@ -5087,7 +5087,7 @@ uint8
 
 /********************************************************************
 * FUNCTION typ_set_fraction_digits
-* 
+*
 * Set the fraction-digits field from the typdef chain
 *
 * INPUTS:
@@ -5109,7 +5109,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
-    
+
     if (digits < TYP_DEC64_MIN_DIGITS ||
         digits > TYP_DEC64_MAX_DIGITS) {
         return ERR_NCX_INVALID_VALUE;
@@ -5124,7 +5124,7 @@ status_t
 
 /********************************************************************
 * FUNCTION typ_get_typ_linenum
-* 
+*
 * Get the line number for the typ_template_t
 *
 * INPUTS:
@@ -5137,7 +5137,7 @@ uint32
     typ_get_typ_linenum (const typ_template_t  *typ)
 {
 #ifdef DEBUG
-    if (!typ) { 
+    if (!typ) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }
@@ -5150,7 +5150,7 @@ uint32
 
 /********************************************************************
 * FUNCTION typ_get_typdef_linenum
-* 
+*
 * Get the line number for the typ_def_t
 *
 * INPUTS:
@@ -5163,7 +5163,7 @@ uint32
     typ_get_typdef_linenum (const typ_def_t  *typdef)
 {
 #ifdef DEBUG
-    if (!typdef) { 
+    if (!typdef) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }

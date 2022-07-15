@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: val.c
 
@@ -17,7 +17,7 @@
    is not completed yet.  The string value version of the
    leafref is always returned, instead of the canonical form
    of the data type of the leafref path target
-                
+
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -71,6 +71,8 @@ date         init     comment
 #include "yangconst.h"
 #include "uptime.h"
 
+#include <unistd.h>
+
 
 /********************************************************************
 *                                                                   *
@@ -109,7 +111,7 @@ static uint32 editvars_free = 0;
 
 /********************************************************************
 * FUNCTION stdout_num
-* 
+*
 * Printf the specified ncx_num_t to stdout
 *
 * INPUTS:
@@ -137,7 +139,7 @@ static void
 
 /********************************************************************
 * FUNCTION dump_extern
-* 
+*
 * Printf the specified external file
 *
 * INPUTS:
@@ -160,7 +162,7 @@ static void
     if (!fil) {
         log_error("\nError: Open extern failed (%s)", fname);
         return;
-    } 
+    }
 
     done = FALSE;
     while (!done) {
@@ -178,7 +180,7 @@ static void
 
 /********************************************************************
 * FUNCTION dump_alt_extern
-* 
+*
 * Printf the specified external file to the alternate logfile
 *
 * INPUTS:
@@ -201,7 +203,7 @@ static void
     if (!fil) {
         log_error("\nval: Open extern failed (%s)", fname);
         return;
-    } 
+    }
 
     done = FALSE;
     while (!done) {
@@ -219,7 +221,7 @@ static void
 
 /********************************************************************
 * FUNCTION stdout_extern
-* 
+*
 * Printf the specified external file to stdout
 *
 * INPUTS:
@@ -242,7 +244,7 @@ static void
     if (!fil) {
         log_stdout("\nval: Open extern failed (%s)", fname);
         return;
-    } 
+    }
 
     done = FALSE;
     while (!done) {
@@ -260,7 +262,7 @@ static void
 
 /********************************************************************
 * FUNCTION dump_intern
-* 
+*
 * Printf the specified internal XML buffer
 *
 * INPUTS:
@@ -287,7 +289,7 @@ static void
 
 /********************************************************************
 * FUNCTION dump_alt_intern
-* 
+*
 * Printf the specified internal XML buffer to the alternate logfile
 *
 * INPUTS:
@@ -314,7 +316,7 @@ static void
 
 /********************************************************************
 * FUNCTION stdout_intern
-* 
+*
 * Printf the specified internal XML buffer to stdout
 *
 * INPUTS:
@@ -341,11 +343,11 @@ static void
 
 /********************************************************************
 * FUNCTION pattern_match
-* 
+*
 * Check the specified string against the specified pattern
 *
 * INPUTS:
-*    pattern == compiled pattern to use 
+*    pattern == compiled pattern to use
 *    strval == string to check
 *
 * RETURNS:
@@ -377,14 +379,14 @@ static boolean
 
 /********************************************************************
 * FUNCTION check_svalQ_enum
-* 
-* Check all the ncx_enum_t structs in a queue of typ_sval_t 
+*
+* Check all the ncx_enum_t structs in a queue of typ_sval_t
 *
 * INPUTS:
 *    name == enum string
 *    checkQ == pointer to Q of typ_sval_t to check
 *    reten == address of return typ_enum_t
-* 
+*
 * OUTPUTS:
 *    *reten == typ_enum_t found if matched (res == NO_ERR)
 * RETURNS:
@@ -415,7 +417,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION free_editvars
-* 
+*
 * Clean and free the val->editvars field
 *
 * INPUTS:
@@ -448,7 +450,7 @@ static void
     } else {
 #ifdef VAL_EDITVARS_DEBUG
         log_debug3("\nval_free_editvars skipped (%u, %s)",
-                   editvars_free, 
+                   editvars_free,
                    val->name);
 #endif
     }
@@ -458,9 +460,9 @@ static void
 
 /********************************************************************
 * FUNCTION clean_value
-* 
+*
 * Scrub the memory in a ncx_value_t by freeing all
-* the sub-fields. DOES NOT free the entire struct itself 
+* the sub-fields. DOES NOT free the entire struct itself
 * The struct must be removed from any queue it is in before
 * this function is called.
 *
@@ -469,7 +471,7 @@ static void
 *    full == TRUE if full clean
 *            FALSE if value only
 *********************************************************************/
-static void 
+static void
     clean_value (val_value_t *val,
                  boolean full)
 {
@@ -536,13 +538,13 @@ static void
         }
         break;
     case NCX_BT_EXTERN:
-        if (val->v.fname) { 
+        if (val->v.fname) {
             m__free(val->v.fname);
             val->v.fname = NULL;
         }
         break;
     case NCX_BT_INTERN:
-        if (val->v.intbuff) { 
+        if (val->v.intbuff) {
             m__free(val->v.intbuff);
             val->v.intbuff = NULL;
         }
@@ -583,7 +585,7 @@ static void
 
 /********************************************************************
 * FUNCTION merge_simple
-* 
+*
 * Merge simple src val into dest val (! MUST be same type !)
 * Instance qualifiers have already been checked,
 * and only zero or 1 instance is allowed, so replace
@@ -647,7 +649,7 @@ static status_t
             dest->v.binary.ubufflen = src->v.binary.ubufflen;
             dest->v.binary.ustrlen = src->v.binary.ustrlen;
             dest->v.binary.ustr = val_copy;
-            memcpy( dest->v.binary.ustr, src->v.binary.ustr, 
+            memcpy( dest->v.binary.ustr, src->v.binary.ustr,
                     src->v.binary.ustrlen );
         } else {
             res = ERR_INTERNAL_MEM;
@@ -667,7 +669,7 @@ static status_t
     case NCX_BT_IDREF:
         val_copy = xml_strdup( src->v.idref.name );
         if (val_copy) {
-            dest->v.idref.nsid = src->v.idref.nsid; 
+            dest->v.idref.nsid = src->v.idref.nsid;
             dest->v.idref.identity = src->v.idref.identity;
             if (dest->v.idref.name) {
                 m__free(dest->v.idref.name);
@@ -687,14 +689,14 @@ static status_t
 
 /********************************************************************
 * FUNCTION index_match
-* 
+*
 * Check 2 val_value structs for the same instance ID
-* 
+*
 * The node data types must match, and must be
 *    NCX_BT_LIST
 *
 * All index components must exactly match.
-* 
+*
 * INPUTS:
 *    val1 == first value to index match
 *    val2 == second value to index match
@@ -766,7 +768,7 @@ static int32
         }
 
         if (res != NO_ERR) {
-            SET_ERROR(res);     
+            SET_ERROR(res);
             return -2;
         }
 
@@ -785,7 +787,7 @@ static int32
 
 /********************************************************************
 * FUNCTION init_from_template
-* 
+*
 * Initialize a value node from its object template
 *
 * MUST CALL val_new_value FIRST
@@ -847,7 +849,7 @@ static void
 
 /********************************************************************
 * FUNCTION check_rangeQ
-* 
+*
 * Check all the typ_rangedef_t structs in the queue
 * For search qualifier NCX_SQUAL_RANGE
 *
@@ -889,7 +891,7 @@ static status_t
         } else {
             /* LB == -INF, always passes the test */
             lbok = TRUE;
-        } 
+        }
 
         /* check upper bound last, only if there is one */
         if (!(rv->flags & TYP_FL_UBINF)) {
@@ -917,7 +919,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION position_walker
-* 
+*
 * Position finder val_walker_fn for XPath support
 * Follows val_walker_fn_t template
 *
@@ -942,12 +944,12 @@ static boolean
     finderparms->foundval = val;
     finderparms->foundpos++;
 
-    if (finderparms->findval && 
+    if (finderparms->findval &&
         (finderparms->findval == val)) {
         return FALSE;
     }
 
-    if (finderparms->findpos && 
+    if (finderparms->findpos &&
         (finderparms->findpos == finderparms->foundpos)) {
         return FALSE;
     }
@@ -959,7 +961,7 @@ static boolean
 
 /********************************************************************
 * FUNCTION process_one_valwalker
-* 
+*
 * Process one child object node for
 * the obj_find_all_* functions
 *
@@ -968,7 +970,7 @@ static boolean
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
 *    obj == object to process
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -1013,7 +1015,7 @@ static boolean
             *fncalled = TRUE;
         }
     } else if (modname && name) {
-        if (!xml_strcmp(modname, 
+        if (!xml_strcmp(modname,
                         val_get_mod_name(val)) &&
             !xml_strcmp(name, val->name)) {
 
@@ -1050,7 +1052,7 @@ static boolean
 
 /********************************************************************
 * FUNCTION setup_virtual_retval
-* 
+*
 * Set an initialized val_value_t as a virtual return val
 *
 * INPUTS:
@@ -1092,7 +1094,7 @@ static void
 
 /********************************************************************
 * FUNCTION copy_editvars
-* 
+*
 * Copy the editvars struct contents
 *
 * INPUTS:
@@ -1132,7 +1134,7 @@ static status_t
         copy->editvars->operset = val->editvars->operset;
 
         if (val->editvars->insertstr) {
-            copy->editvars->insertstr = 
+            copy->editvars->insertstr =
                 xml_strdup(val->editvars->insertstr);
             if (!copy->editvars->insertstr) {
                 res = ERR_INTERNAL_MEM;
@@ -1140,7 +1142,7 @@ static status_t
         }
 
         if (val->editvars->insertxpcb) {
-            copy->editvars->insertxpcb = 
+            copy->editvars->insertxpcb =
                 xpath_clone_pcb(val->editvars->insertxpcb);
             if (!copy->editvars->insertxpcb) {
                 res = ERR_INTERNAL_MEM;
@@ -1157,11 +1159,11 @@ static status_t
 
 /********************************************************************
 * FUNCTION cache_virtual_value
-* 
+*
 * get + cache as val->virtualval; DO NOT FREE the return val
 * Get the value of a value node and store the malloced
-* pointer in the virtualval cache 
-* 
+* pointer in the virtualval cache
+*
 * If the val->getcb is NULL, then an error will be returned
 *
 * Caller should check for *res == ERR_NCX_SKIPPED
@@ -1282,7 +1284,7 @@ static val_value_t *
 
 /********************************************************************
 * FUNCTION clone_test
-* 
+*
 * Clone a specified val_value_t struct and sub-trees
 * Only clone the nodes that pass the test function callback
 *
@@ -1457,15 +1459,15 @@ static val_value_t *
             if (!copy->v.binary.ustr) {
                 *res = ERR_INTERNAL_MEM;
             } else {
-                memcpy(copy->v.binary.ustr, 
-                       val->v.binary.ustr, 
+                memcpy(copy->v.binary.ustr,
+                       val->v.binary.ustr,
                        val->v.binary.ustrlen);
                 copy->v.binary.ustrlen = val->v.binary.ustrlen;
                 copy->v.binary.ubufflen = val->v.binary.ustrlen;
             }
         }
         break;
-    case NCX_BT_STRING: 
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:
         *res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
@@ -1550,13 +1552,13 @@ static val_value_t *
 
 /********************************************************************
 * FUNCTION val_new_value
-* 
+*
 * Malloc and initialize the fields in a val_value_t
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-val_value_t * 
+val_value_t *
     val_new_value (void)
 {
     val_value_t *val = m__getObj(val_value_t);
@@ -1576,9 +1578,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_init_complex
-* 
+*
 * Initialize the fields in a complex val_value_t
-* this is deprecated and should only be called 
+* this is deprecated and should only be called
 * by val_init_from_template
 *
 * MUST CALL val_new_value FIRST
@@ -1587,7 +1589,7 @@ val_value_t *
 *   val == pointer to the malloced struct to initialize
 *********************************************************************/
 void
-    val_init_complex (val_value_t *val, 
+    val_init_complex (val_value_t *val,
                       ncx_btype_t btyp)
 {
 #ifdef DEBUG
@@ -1605,7 +1607,7 @@ void
 
 /********************************************************************
 * FUNCTION val_init_virtual
-* 
+*
 * Special function to initialize a virtual value node
 *
 * MUST CALL val_new_value FIRST
@@ -1635,7 +1637,7 @@ void
 
 /********************************************************************
 * FUNCTION val_init_from_template
-* 
+*
 * Initialize a value node from its object template
 *
 * MUST CALL val_new_value FIRST
@@ -1662,9 +1664,9 @@ void
 
 /********************************************************************
 * FUNCTION val_free_value
-* 
+*
 * Scrub the memory in a val_value_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
+* the sub-fields and then freeing the entire struct itself
 * The struct must be removed from any queue it is in before
 * this function is called.
 *
@@ -1679,7 +1681,7 @@ void val_free_value (val_value_t *val)
 
 #ifdef VAL_FREE_DEBUG
     if (LOGDEBUG4) {
-        log_debug4("\nval_free_value '%s' %p", 
+        log_debug4("\nval_free_value '%s' %p",
                    val->dname ? val->dname : NCX_EL_NONE, val);
     }
 #endif
@@ -1691,7 +1693,7 @@ void val_free_value (val_value_t *val)
 
 /********************************************************************
 * FUNCTION val_set_name
-* 
+*
 * Set (or reset) the name of a value struct
 *
 * INPUTS:
@@ -1699,7 +1701,7 @@ void val_free_value (val_value_t *val)
 *    name == name string to set
 *    namelen == length of name string
 *********************************************************************/
-void 
+void
     val_set_name (val_value_t *val,
                   const xmlChar *name,
                   uint32 namelen)
@@ -1707,7 +1709,7 @@ void
 #ifdef DEBUG
     if (!val || !name) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return;  
+        return;
     }
 #endif
 
@@ -1724,7 +1726,7 @@ void
     val->dname = xml_strndup(name, namelen);
     if (!val->dname) {
         SET_ERROR(ERR_INTERNAL_MEM);
-    } 
+    }
     val->name = val->dname;
 
 }  /* val_set_name */
@@ -1732,7 +1734,7 @@ void
 
 /********************************************************************
 * FUNCTION val_force_dname
-* 
+*
 * Set (or reset) the name of a value struct
 * Set all descendant nodes as well
 * Force dname to be used, not object name backptr
@@ -1780,7 +1782,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_qname
-* 
+*
 * Set (or reset) the name and namespace ID of a value struct
 *
 * INPUTS:
@@ -1789,7 +1791,7 @@ status_t
 *    name == name string to set
 *    namelen == length of name string
 *********************************************************************/
-void 
+void
     val_set_qname (val_value_t *val,
                    xmlns_id_t   nsid,
                    const xmlChar *name,
@@ -1798,7 +1800,7 @@ void
 #ifdef DEBUG
     if (!val || !name) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return;  
+        return;
     }
 #endif
 
@@ -1817,7 +1819,7 @@ void
     val->dname = xml_strndup(name, namelen);
     if (!val->dname) {
         SET_ERROR(ERR_INTERNAL_MEM);
-    } 
+    }
     val->name = val->dname;
 
 }  /* val_set_qname */
@@ -1825,7 +1827,7 @@ void
 
 /********************************************************************
 * FUNCTION val_string_ok
-* 
+*
 * Check a string to make sure the value is valid based
 * on the restrictions in the specified typdef
 *
@@ -1849,8 +1851,8 @@ status_t
 
 /********************************************************************
 * FUNCTION val_string_ok_errinfo
-* 
-* retrieve the YANG custom error info if any 
+*
+* retrieve the YANG custom error info if any
 * Check a string to make sure the value is valid based
 * on the restrictions in the specified typdef
 * Retrieve the configured error info struct if any error
@@ -1862,7 +1864,7 @@ status_t
 *    errinfo == address of return errinfo block (may be NULL)
 *
 * OUTPUTS:
-*   if non-NULL: 
+*   if non-NULL:
 *       *errinfo == error record to use if return error
 *
 * RETURNS:
@@ -1880,8 +1882,8 @@ status_t
 
 /********************************************************************
 * FUNCTION val_string_ok_ex
-* 
-* retrieve the YANG custom error info if any 
+*
+* retrieve the YANG custom error info if any
 * Check a string to make sure the value is valid based
 * on the restrictions in the specified typdef
 * Retrieve the configured error info struct if any error
@@ -1894,7 +1896,7 @@ status_t
 *    logerrors == TRUE to log errors
 *              == FALSE to not log errors (use for NCX_BT_UNION)
 * OUTPUTS:
-*   if non-NULL: 
+*   if non-NULL:
 *       *errinfo == error record to use if return error
 *
 * RETURNS:
@@ -1963,11 +1965,11 @@ status_t
                                            xpathpcb, logerrors);
             if (res == NO_ERR) {
                 leafobj = NULL;
-                res = xpath_yang_validate_path_ex(NULL, 
-                                                  ncx_get_gen_root(), 
-                                                  xpathpcb, 
-                                                  (xpath_source == 
-                                                   XP_SRC_INSTANCEID) 
+                res = xpath_yang_validate_path_ex(NULL,
+                                                  ncx_get_gen_root(),
+                                                  xpathpcb,
+                                                  (xpath_source ==
+                                                   XP_SRC_INSTANCEID)
                                                   ? FALSE : TRUE,
                                                   &leafobj, logerrors);
             }
@@ -1977,7 +1979,7 @@ status_t
             res = xpath1_parse_expr(NULL, NULL, xpathpcb, XP_SRC_YANG);
             if (res == NO_ERR) {
                 objroot = ncx_get_gen_root();
-                res = xpath1_validate_expr(objroot->tkerr.mod, 
+                res = xpath1_validate_expr(objroot->tkerr.mod,
                                            objroot, xpathpcb);
             }
             xpath_free_pcb(xpathpcb);
@@ -1997,7 +1999,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_list_ok
-* 
+*
 * Check a list to make sure the all the strings are valid based
 * on the specified typdef
 *
@@ -2016,7 +2018,7 @@ status_t
 *     each list->lmem.flags field may contain bits set
 *     for errors:
 *        NCX_FL_RANGE_ERR: size out of range
-*        NCX_FL_VALUE_ERR  value not permitted by value set, 
+*        NCX_FL_VALUE_ERR  value not permitted by value set,
 *                          or pattern
 * RETURNS:
 *    status
@@ -2040,7 +2042,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_list_ok_errinfo
-* 
+*
 * Check a list to make sure the all the strings are valid based
 * on the specified typdef
 *
@@ -2052,11 +2054,11 @@ status_t
 *
 * OUTPUTS:
 *   If return other than NO_ERR:
-*     *errinfo contains the YANG specified error info, if any*   
+*     *errinfo contains the YANG specified error info, if any*
 *     each list->lmem.flags field may contain bits set
 *     for errors:
 *        NCX_FL_RANGE_ERR: size out of range
-*        NCX_FL_VALUE_ERR  value not permitted by value set, 
+*        NCX_FL_VALUE_ERR  value not permitted by value set,
 *                          or pattern
 * RETURNS:
 *    status
@@ -2112,11 +2114,11 @@ status_t
 
 } /* val_list_ok_errinfo */
 
-  
+
 /********************************************************************
 * FUNCTION val_enum_ok
-* 
-* Check an enumerated integer string to make sure the value 
+*
+* Check an enumerated integer string to make sure the value
 * is valid based on the specified typdef
 *
 * INPUTS:
@@ -2124,11 +2126,11 @@ status_t
 *    enumval == enum string value to check
 *    retval == pointer to return integer variable
 *    retstr == pointer to return string name variable
-* 
+*
 * OUTPUTS:
 *    *retval == integer value of enum
-*    *retstr == pointer to return string name variable 
-* 
+*    *retstr == pointer to return string name variable
+*
 * RETURNS:
 *    status
 *********************************************************************/
@@ -2222,7 +2224,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_bit_ok
-* 
+*
 * Check a bit name is valid for the typedef
 *
 * INPUTS:
@@ -2286,7 +2288,7 @@ status_t
             }
         }
 
-        /* check if any more typdefs to search */     
+        /* check if any more typdefs to search */
         if (last) {
             return ERR_NCX_VAL_NOTINSET;
         }
@@ -2319,7 +2321,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_idref_ok
-* 
+*
 * Check if an identityref QName is valid for the typedef
 * The QName must match an identity that has the same base
 * as specified in the typdef
@@ -2370,7 +2372,7 @@ status_t
     if (!idref) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    
+
     /* find the local-name in the prefix:local-name combo */
     str = qname;
     while (*str && *str != ':') {
@@ -2438,7 +2440,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_parse_idref
-* 
+*
 * Parse a CLI BASED identityref QName into its various parts
 *
 * INPUTS:
@@ -2478,7 +2480,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_range_ok
-* 
+*
 * Check a number to see if it is in range or not
 * Could be a number or size range
 *
@@ -2508,7 +2510,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_range_ok_errinfo
-* 
+*
 * Check a number to see if it is in range or not
 * Could be a number or size range
 *
@@ -2552,7 +2554,7 @@ status_t
         /* assume this means no range specified and
          * not an internal PTR or VAL error
          */
-        return NO_ERR;   
+        return NO_ERR;
     }
 
     /* there can only be one active range, which is
@@ -2573,13 +2575,13 @@ status_t
 
 /********************************************************************
 * FUNCTION val_pattern_ok
-* 
+*
 * Check a string against all the patterns in a big AND expression
 *
 * INPUTS:
 *    typdef == typ_def_t for the designated enum type
 *    strval == string value to check
-* 
+*
 * RETURNS:
 *    NO_ERR if pattern OK or no patterns found to check; error otherwise
 *********************************************************************/
@@ -2600,7 +2602,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_pattern_ok_errinfo
-* 
+*
 * Check a string against all the patterns in a big AND expression
 *
 * INPUTS:
@@ -2612,7 +2614,7 @@ status_t
 *   *errinfo set to error info struct if any, and if error exit
 *
 * RETURNS:
-*    NO_ERR if pattern OK or no patterns found to check; 
+*    NO_ERR if pattern OK or no patterns found to check;
 *    error otherwise, and *errinfo will be set if the pattern
 *    that failed has any errinfo defined in it
 *********************************************************************/
@@ -2647,7 +2649,7 @@ status_t
              pat = typ_get_next_pattern(pat)) {
 
             if (!pattern_match(pat->pattern, strval)) {
-                if (errinfo && 
+                if (errinfo &&
                     ncx_errinfo_set(&pat->pat_errinfo)) {
                     *errinfo = &pat->pat_errinfo;
                 }
@@ -2665,7 +2667,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_simval_ok
-* 
+*
 * check any simple type to see if it is valid,
 * but do not retrieve the value; used to check the
 * default parameter for example
@@ -2694,7 +2696,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_simval_ok_errinfo
-* 
+*
 * check any simple type to see if it is valid,
 * but do not retrieve the value; used to check the
 * default parameter for example
@@ -2723,7 +2725,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_simval_ok_ex
-* 
+*
 * check any simple type to see if it is valid,
 * but do not retrieve the value; used to check the
 * default parameter for example
@@ -2754,7 +2756,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_simval_ok_max
-* 
+*
 * check any simple type to see if it is valid,
 * but do not retrieve the value; used to check the
 * default parameter for example
@@ -2880,7 +2882,7 @@ status_t
             unval->btyp = NCX_BT_UNION;
             unval->typdef = typdef;
             res = val_union_ok_ex(typdef, simval, unval, errinfo, mod);
-            unval->btyp = NCX_BT_NONE;            
+            unval->btyp = NCX_BT_NONE;
             val_free_value(unval);
         }
         break;
@@ -2948,7 +2950,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_union_ok
-* 
+*
 * Check a union to make sure the string is valid based
 * on the specified typdef, and convert the string to
 * an NCX internal format
@@ -2983,7 +2985,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_union_ok_errinfo
-* 
+*
 * Check a union to make sure the string is valid based
 * on the specified typdef, and convert the string to
 * an NCX internal format
@@ -3015,7 +3017,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_union_ok_ex
-* 
+*
 * Check a union to make sure the string is valid based
 * on the specified typdef, and convert the string to
 * an NCX internal format
@@ -3121,9 +3123,9 @@ status_t
 
 /********************************************************************
 * FUNCTION val_get_metaQ
-* 
+*
 * Get the meta Q header for the value
-* 
+*
 * INPUTS:
 *    val == value node to check
 *
@@ -3155,14 +3157,14 @@ dlq_hdr_t *
 
 /********************************************************************
 * FUNCTION val_get_first_meta
-* 
+*
 * Get the first metaQ entry from the specified Queue
-* 
+*
 * INPUTS:
 *    queue == queue of meta-vals to check
 *
 * RETURNS:
-*   pointer to the first meta-var in the Queue if found, 
+*   pointer to the first meta-var in the Queue if found,
 *   or NULL if none
 *********************************************************************/
 val_value_t *
@@ -3182,14 +3184,14 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_first_meta_val
-* 
+*
 * Get the first metaQ entry from the specified Queue
-* 
+*
 * INPUTS:
 *    value node to get the metaQ from
 *
 * RETURNS:
-*   pointer to the first meta-var in the Queue if found, 
+*   pointer to the first meta-var in the Queue if found,
 *   or NULL if none
 *********************************************************************/
 val_value_t *
@@ -3209,14 +3211,14 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_next_meta
-* 
+*
 * Get the next metaQ entry from the specified entry
-* 
+*
 * INPUTS:
 *    curnode == current meta-var node
 *
 * RETURNS:
-*   pointer to the next meta-var in the Queue if found, 
+*   pointer to the next meta-var in the Queue if found,
 *   or NULL if none
 *********************************************************************/
 val_value_t *
@@ -3236,12 +3238,12 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_meta_empty
-* 
+*
 * Check if the metaQ is empty for the value node
 *
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the metaQ for the value is empty
 *   FALSE otherwise
@@ -3271,9 +3273,9 @@ boolean
 
 /********************************************************************
 * FUNCTION val_find_meta
-* 
-* Get the corresponding meta data node 
-* 
+*
+* Get the corresponding meta data node
+*
 * INPUTS:
 *    val == value to check for metadata
 *    nsid == namespace ID of 'name'; 0 == don't use
@@ -3295,13 +3297,13 @@ val_value_t *
         return NULL;
     }
 #endif
-        
+
     for (metaval = (val_value_t *)dlq_firstEntry(&val->metaQ);
          metaval != NULL;
          metaval = (val_value_t *)dlq_nextEntry(metaval)) {
 
         /* check the node if the name matches and
-         * check for position instance match 
+         * check for position instance match
          */
         if (!xml_strcmp(metaval->name, name)) {
             if (xmlns_ids_equal(nsid, metaval->nsid)) {
@@ -3317,13 +3319,13 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_meta_match
-* 
+*
 * Return true if the corresponding attribute exists and has
-* the same value 
-* 
+* the same value
+*
 * INPUTS:
 *    val == value to check for metadata
-*    metaval == value to match in the val->metaQ 
+*    metaval == value to match in the val->metaQ
 *
 * RETURNS:
 *   TRUE if the specified attr if found and has the same value
@@ -3378,7 +3380,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_metadata_inst_count
-* 
+*
 * Get the number of instances of the specified attribute
 *
 * INPUTS:
@@ -3427,8 +3429,8 @@ uint32
 
 /********************************************************************
 * FUNCTION val_dump_value
-* 
-* Printf the specified val_value_t struct to 
+*
+* Printf the specified val_value_t struct to
 * the logfile, or stdout if none set
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3448,10 +3450,10 @@ void
     }
 #endif
 
-    val_dump_value_max(val, 
-                       startindent, 
+    val_dump_value_max(val,
+                       startindent,
                        NCX_DEF_INDENT,
-                       DUMP_VAL_LOG, 
+                       DUMP_VAL_LOG,
                        ncx_get_display_mode(),
                        FALSE,
                        FALSE);
@@ -3461,8 +3463,8 @@ void
 
 /********************************************************************
 * FUNCTION val_dump_value_ex
-* 
-* Printf the specified val_value_t struct to 
+*
+* Printf the specified val_value_t struct to
 * the logfile, or stdout if none set
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3483,8 +3485,8 @@ void
     }
 #endif
 
-    val_dump_value_max(val, 
-                       startindent, 
+    val_dump_value_max(val,
+                       startindent,
                        NCX_DEF_INDENT,
                        DUMP_VAL_LOG,
                        display_mode,
@@ -3496,8 +3498,8 @@ void
 
 /********************************************************************
 * FUNCTION val_dump_alt_value
-* 
-* Printf the specified val_value_t struct to 
+*
+* Printf the specified val_value_t struct to
 * the alternate logfile
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3517,8 +3519,8 @@ void
     }
 #endif
 
-    val_dump_value_max(val, 
-                       startindent, 
+    val_dump_value_max(val,
+                       startindent,
                        NCX_DEF_INDENT,
                        DUMP_VAL_ALT_LOG,
                        ncx_get_display_mode(),
@@ -3530,7 +3532,7 @@ void
 
 /********************************************************************
 * FUNCTION val_stdout_value
-* 
+*
 * Printf the specified val_value_t struct to stdout
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3550,8 +3552,8 @@ void
     }
 #endif
 
-    val_dump_value_max(val, 
-                       startindent, 
+    val_dump_value_max(val,
+                       startindent,
                        NCX_DEF_INDENT,
                        DUMP_VAL_STDOUT,
                        ncx_get_display_mode(),
@@ -3563,7 +3565,7 @@ void
 
 /********************************************************************
 * FUNCTION val_stdout_value_ex
-* 
+*
 * Printf the specified val_value_t struct to stdout
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3584,8 +3586,8 @@ void
     }
 #endif
 
-    val_dump_value_max(val, 
-                       startindent, 
+    val_dump_value_max(val,
+                       startindent,
                        NCX_DEF_INDENT,
                        DUMP_VAL_STDOUT,
                        display_mode,
@@ -3596,8 +3598,8 @@ void
 
 /********************************************************************
 * FUNCTION val_dump_value_max_w_file
-* 
-* Printf the specified val_value_t struct to 
+*
+* Printf the specified val_value_t struct to
 * the logfile, or stdout if none set
 * Uses conf file format (see ncx/conf.h)
 *
@@ -3880,7 +3882,7 @@ void
     (*indentfn)(startindent);
     if (display_mode == NCX_DISPLAY_MODE_PLAIN) {
         if (val->btyp == NCX_BT_EXTERN) {
-            (*dumpfn)("%s (extern=%s) ", 
+            (*dumpfn)("%s (extern=%s) ",
                       (val->name) ? (const char *)val->name : "--",
                       (val->v.fname) ? (const char *)val->v.fname : "--");
         } else if (val->btyp == NCX_BT_INTERN) {
@@ -3903,7 +3905,7 @@ void
             prefix = (const xmlChar *)"invalid";
         }
         if (val->btyp == NCX_BT_EXTERN) {
-            (*dumpfn)("%s:%s (extern=%s) ", 
+            (*dumpfn)("%s:%s (extern=%s) ",
                       prefix,
                       (val->name) ? (const char *)val->name : "--",
                       (val->v.fname) ? (const char *)val->v.fname : "--");
@@ -3915,7 +3917,7 @@ void
                    !xml_strcmp(val->name, NCX_EL_DATA)) {
             ;  /* skip the name */
         } else {
-            (*dumpfn)("%s:%s ", 
+            (*dumpfn)("%s:%s ",
                       prefix,
                       (val->name) ? (const char *)val->name : "--");
         }
@@ -3925,18 +3927,18 @@ void
 
     /* check if an index clause needs to be printed next */
     if (!dlq_empty(&val->indexQ)) {
-        res = val_get_index_string(NULL, 
-                                   NCX_IFMT_CLI, 
-                                   val, 
-                                   NULL, 
+        res = val_get_index_string(NULL,
+                                   NCX_IFMT_CLI,
+                                   val,
+                                   NULL,
                                    &len);
         if (res == NO_ERR) {
             buff = m__getMem(len+1);
             if (buff) {
-                res = val_get_index_string(NULL, 
-                                           NCX_IFMT_CLI, 
-                                           val, 
-                                           buff, 
+                res = val_get_index_string(NULL,
+                                           NCX_IFMT_CLI,
+                                           val,
+                                           buff,
                                            &len);
                 if (res == NO_ERR) {
                     (dumpfn)("%s ", buff);
@@ -4104,7 +4106,7 @@ void
                         break;
                     case NCX_BT_BOOLEAN:
                         (*dumpfn)("%s ",
-                                  (listmem->val.boo) ? 
+                                  (listmem->val.boo) ?
                                   NCX_EL_TRUE : NCX_EL_FALSE);
                         break;
                     default:
@@ -4124,7 +4126,7 @@ void
         for (chval = (val_value_t *)dlq_firstEntry(&val->v.childQ);
              chval != NULL;
              chval = (val_value_t *)dlq_nextEntry(chval)) {
-            val_dump_value_max(chval, 
+            val_dump_value_max(chval,
                                startindent+bump_amount,
                                indent_amount,
                                dumpmode,
@@ -4152,7 +4154,7 @@ void
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
         }
-        
+
         (*indentfn)(startindent);
         (*dumpfn)("}");
         break;
@@ -4179,7 +4181,7 @@ void
         break;
     default:
         (*errorfn)("\nval: illegal btype (%d)", btyp);
-    }    
+    }
 
     /* dump the metadata queue if non-empty */
     if (with_meta) {
@@ -4194,7 +4196,7 @@ void
                  metaval != NULL;
                  metaval = val_get_next_meta(metaval)) {
 
-                val_dump_value_max(metaval, 
+                val_dump_value_max(metaval,
                                    startindent+(2*bump_amount),
                                    indent_amount,
                                    dumpmode,
@@ -4210,7 +4212,7 @@ void
 
 /********************************************************************
 * FUNCTION val_set_string
-* 
+*
 * set a generic string using the builtin string typdef
 * Set an initialized val_value_t as a simple type
 * namespace set to 0 !!!
@@ -4226,7 +4228,7 @@ void
 * RETURNS:
 *  status
 *********************************************************************/
-status_t 
+status_t
     val_set_string (val_value_t  *val,
                     const xmlChar *valname,
                     const xmlChar *valstr)
@@ -4238,18 +4240,18 @@ status_t
 #endif
 
     if (valname) {
-        return val_set_simval_str(val, 
+        return val_set_simval_str(val,
                                   typ_get_basetype_typdef(NCX_BT_STRING),
-                                  0, 
-                                  valname, 
-                                  xml_strlen(valname), 
+                                  0,
+                                  valname,
+                                  xml_strlen(valname),
                                   valstr);
     } else {
-        return val_set_simval_str(val, 
+        return val_set_simval_str(val,
                                   typ_get_basetype_typdef(NCX_BT_STRING),
-                                  0, 
-                                  NULL, 
-                                  0, 
+                                  0,
+                                  NULL,
+                                  0,
                                   valstr);
 
     }
@@ -4259,7 +4261,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_string2
-* 
+*
 * set a string with any typdef
 * Set an initialized val_value_t as a simple type
 *
@@ -4278,7 +4280,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     val_set_string2 (val_value_t  *val,
                      const xmlChar *valname,
                      typ_def_t *typdef,
@@ -4351,7 +4353,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_reset_empty
-* 
+*
 * Recast an already initialized value as an NCX_BT_EMPTY
 * clean a value and set it to empty type
 * used by yangcli to delete leafs
@@ -4364,7 +4366,7 @@ status_t
 * RETURNS:
 *  status
 *********************************************************************/
-status_t 
+status_t
     val_reset_empty (val_value_t  *val)
 {
 #ifdef DEBUG
@@ -4372,7 +4374,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-    
+
     return val_set_simval(val,
                           typ_get_basetype_typdef(NCX_BT_EMPTY),
                           val_get_nsid(val),
@@ -4384,7 +4386,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_simval
-* 
+*
 * set any simple value with any typdef
 * Set an initialized val_value_t as a simple type
 *
@@ -4400,7 +4402,7 @@ status_t
 * RETURNS:
 *  status
 *********************************************************************/
-status_t 
+status_t
     val_set_simval (val_value_t  *val,
                     typ_def_t    *typdef,
                     xmlns_id_t    nsid,
@@ -4414,18 +4416,18 @@ status_t
 #endif
 
     if (valname) {
-        return val_set_simval_str(val, 
-                                  typdef, 
-                                  nsid, 
-                                  valname, 
-                                  xml_strlen(valname), 
+        return val_set_simval_str(val,
+                                  typdef,
+                                  nsid,
+                                  valname,
+                                  xml_strlen(valname),
                                   valstr);
     } else {
-        return val_set_simval_str(val, 
-                                  typdef, 
-                                  nsid, 
-                                  NULL, 
-                                  0, 
+        return val_set_simval_str(val,
+                                  typdef,
+                                  nsid,
+                                  NULL,
+                                  0,
                                   valstr);
     }
 
@@ -4434,7 +4436,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_simval_str
-* 
+*
 * set any simple value with any typdef, and a counted string
 * Set an initialized val_value_t as a simple type
 *
@@ -4442,7 +4444,7 @@ status_t
 * struct format and checked against the provided typedef
 *
 * Handles the following data types:
-* 
+*
 *  NCX_BT_INT8
 *  NCX_BT_INT16
 *  NCX_BT_INT32
@@ -4478,7 +4480,7 @@ status_t
 * RETURNS:
 *  status
 *********************************************************************/
-status_t 
+status_t
     val_set_simval_str (val_value_t  *val,
                         typ_def_t *typdef,
                         xmlns_id_t    nsid,
@@ -4524,7 +4526,7 @@ status_t
     if (!(val->btyp == NCX_BT_INSTANCE_ID ||
           typ_is_schema_instance_string(typdef) ||
           typ_is_xpath_string(typdef))) {
-          
+
         res = val_simval_ok(typdef, valstr);
         if (res != NO_ERR) {
             return res;
@@ -4545,7 +4547,7 @@ status_t
         val->obj = ncx_get_gen_string();
     }
 
-    /* set these fields even if already set by 
+    /* set these fields even if already set by
      * val_init_from_template
      */
     val->nsid = nsid;
@@ -4564,9 +4566,9 @@ status_t
     case NCX_BT_UINT64:
     case NCX_BT_FLOAT64:
         if (valstr && *valstr) {
-            res = ncx_convert_num(valstr, 
-                                  NCX_NF_NONE, 
-                                  val->btyp, 
+            res = ncx_convert_num(valstr,
+                                  NCX_NF_NONE,
+                                  val->btyp,
                                   &val->v.num);
         } else {
             res = ERR_NCX_EMPTY_VAL;
@@ -4574,9 +4576,9 @@ status_t
         break;
     case NCX_BT_DECIMAL64:
         if (valstr && *valstr) {
-            res = ncx_convert_dec64(valstr, 
-                                    NCX_NF_NONE, 
-                                    typ_get_fraction_digits(val->typdef), 
+            res = ncx_convert_dec64(valstr,
+                                    NCX_NF_NONE,
+                                    typ_get_fraction_digits(val->typdef),
                                     &val->v.num);
         } else {
             res = ERR_NCX_EMPTY_VAL;
@@ -4655,14 +4657,14 @@ status_t
                 if (!xpathpcb) {
                     res = ERR_INTERNAL_MEM;
                 } else {
-                    res = xpath1_parse_expr(NULL, 
+                    res = xpath1_parse_expr(NULL,
                                             NULL,
                                             xpathpcb,
                                             XP_SRC_YANG);
                     if (res == NO_ERR) {
                         objroot = ncx_get_gen_root();
-                        res = xpath1_validate_expr(objroot->tkerr.mod, 
-                                                   objroot, 
+                        res = xpath1_validate_expr(objroot->tkerr.mod,
+                                                   objroot,
                                                    xpathpcb);
                     }
                     if (val->xpathpcb) {
@@ -4687,17 +4689,17 @@ status_t
             if (!xpathpcb) {
                 res = ERR_INTERNAL_MEM;
             } else {
-                res = xpath_yang_parse_path(NULL, 
+                res = xpath_yang_parse_path(NULL,
                                             NULL,
                                             xpath_source,
                                             xpathpcb);
                 if (res == NO_ERR) {
                     leafobj = NULL;
-                    res = xpath_yang_validate_path(NULL, 
-                                                   ncx_get_gen_root(), 
-                                                   xpathpcb, 
-                                                   (xpath_source 
-                                                    == XP_SRC_INSTANCEID) 
+                    res = xpath_yang_validate_path(NULL,
+                                                   ncx_get_gen_root(),
+                                                   xpathpcb,
+                                                   (xpath_source
+                                                    == XP_SRC_INSTANCEID)
                                                    ? FALSE : TRUE,
                                                    &leafobj);
                 }
@@ -4748,7 +4750,7 @@ status_t
         } else {
             /* name indicates presence, so set val to TRUE */
             val->v.boo = TRUE;
-        }           
+        }
         break;
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
@@ -4776,7 +4778,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_make_simval
-* 
+*
 * Create and set a val_value_t as a simple type
 * same as val_set_simval, but malloc the value first
 *
@@ -4815,18 +4817,18 @@ val_value_t *
     }
 
     if (valname) {
-        *res = val_set_simval_str(val, 
-                                  typdef, 
-                                  nsid, 
-                                  valname, 
-                                  xml_strlen(valname), 
+        *res = val_set_simval_str(val,
+                                  typdef,
+                                  nsid,
+                                  valname,
+                                  xml_strlen(valname),
                                   valstr);
     } else {
-        *res = val_set_simval_str(val, 
-                                  typdef, 
-                                  nsid, 
-                                  NULL, 
-                                  0, 
+        *res = val_set_simval_str(val,
+                                  typdef,
+                                  nsid,
+                                  NULL,
+                                  0,
                                   valstr);
     }
     return val;
@@ -4836,7 +4838,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_make_string
-* 
+*
 * Malloc and set a val_value_t as a generic NCX_BT_STRING
 * namespace set to 0 !!!
 *
@@ -4874,7 +4876,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_merge
-* 
+*
 * Merge src val into dest val (! MUST be same type !)
 * Any meta vars in src are NOT merged into dest!!!
 *
@@ -4899,10 +4901,10 @@ status_t
     if (!src || !dest) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!typ_is_simple(src->btyp) || 
+    if (!typ_is_simple(src->btyp) ||
         !typ_is_simple(dest->btyp)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
-    }   
+    }
 #endif
 
     status_t res = NO_ERR;
@@ -4923,7 +4925,7 @@ status_t
     switch (iqual) {
     case NCX_IQUAL_1MORE:
     case NCX_IQUAL_ZMORE:
-        /* duplicates not allowed in leaf lists 
+        /* duplicates not allowed in leaf lists
          * leave the current value in place
          */
         res = SET_ERROR(ERR_NCX_DUP_ENTRY);
@@ -5014,7 +5016,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_clone
-* 
+*
 * Clone a specified val_value_t struct and sub-trees
 *
 * INPUTS:
@@ -5042,13 +5044,13 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_clone2
-* 
+*
 * Clone a specified val_value_t struct and sub-trees
 * but not the editvars
 *
 * INPUTS:
 *    val == value to clone
-*   
+*
 * RETURNS:
 *   clone of val, or NULL if a malloc failure
 *********************************************************************/
@@ -5071,7 +5073,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_clone_config_data
-* 
+*
 * Clone a specified val_value_t struct and sub-trees
 * Filter with the val_is_config_data callback function
 * pass in a config node, such as <config> root
@@ -5108,7 +5110,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_replace
-* 
+*
 * Replace a specified val_value_t struct and sub-trees
 * !!! this can be destructive to the source 'val' parameter !!!!
 *
@@ -5198,13 +5200,13 @@ status_t
     copy->flags &= ~VAL_FL_DEFSET;
 
     return res;
-    
+
 }  /* val_replace */
 
 
 /********************************************************************
 * FUNCTION val_replace_str
-* 
+*
 * Replace a specified val_value_t struct with a string type
 *
 * INPUTS:
@@ -5233,13 +5235,13 @@ status_t
     }
 #endif
 
-    strval = val_make_string(copy->nsid, 
-                             copy->name, 
+    strval = val_make_string(copy->nsid,
+                             copy->name,
                              (const xmlChar *)"dummy");
     if (strval == NULL) {
         return ERR_INTERNAL_MEM;
     }
-    
+
     dumstr = xml_strndup(str, stringlen);
     if (dumstr == NULL) {
         val_free_value(strval);
@@ -5283,10 +5285,10 @@ void
 
 /********************************************************************
 * FUNCTION val_add_child
-* 
+*
 *   Add a child value node to a parent value node
 *   Simply makes a new last child!!!
-*   Does not check siblings!!!  
+*   Does not check siblings!!!
 *   Relies on val_set_canonical_order
 *
 *   To modify existing extries, use val_add_child_sorted instead!!
@@ -5315,7 +5317,7 @@ void
 
 /********************************************************************
 * FUNCTION val_add_child_sorted
-* 
+*
 *   Add a child value node to a parent value node
 *   in the proper place
 *
@@ -5460,7 +5462,7 @@ void
                         done = TRUE;
                     } else {
                         curval = nextchild;
-                    }              
+                    }
                 }
 
                 /* make a new last instance of this node type */
@@ -5470,7 +5472,7 @@ void
 
             /* simple test; since native children
              * will be before external augmented children;
-             * any native node will insert ahead of such 
+             * any native node will insert ahead of such
              * an augment node
              */
             if (val_get_nsid(curval) != parentid && childid == parentid) {
@@ -5507,12 +5509,12 @@ void
 
 /********************************************************************
 * FUNCTION val_insert_child
-* 
+*
 *   Insert a child value node to a parent value node
 *
 * INPUTS:
 *    child == node to store in the parent
-*    current == current node to insert after; 
+*    current == current node to insert after;
 *               NULL to make new first entry
 *    parent == complex value node with a childQ
 *
@@ -5541,7 +5543,7 @@ void
 
 /********************************************************************
 * FUNCTION val_remove_child
-* 
+*
 *   Remove a child value node from its parent value node
 *
 * INPUTS:
@@ -5566,7 +5568,7 @@ void
 
 /********************************************************************
 * FUNCTION val_swap_child
-* 
+*
 *   Swap a child value node with a current value node
 *
 * INPUTS:
@@ -5597,12 +5599,12 @@ void
 
 /********************************************************************
 * FUNCTION val_first_child_match
-* 
-* Get the first instance of the corresponding child node 
-* 
+*
+* Get the first instance of the corresponding child node
+*
 * INPUTS:
 *    parent == parent value to check
-*    child == child value to find (e.g., from a NETCONF PDU) 
+*    child == child value to find (e.g., from a NETCONF PDU)
 *
 * RETURNS:
 *   pointer to the child if found or NULL if not found
@@ -5668,14 +5670,14 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_next_child_match
-* 
-* Get the next instance of the corresponding child node 
-* 
+*
+* Get the next instance of the corresponding child node
+*
 * INPUTS:
 *    parent == parent value to check
-*    child == child value to find (e.g., from a NETCONF PDU) 
+*    child == child value to find (e.g., from a NETCONF PDU)
 *    curmatch == current child of parent that matched
-*                
+*
 * RETURNS:
 *   pointer to the next child match if found or NULL if not found
 *********************************************************************/
@@ -5741,9 +5743,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_first_child
-* 
+*
 * Get the child node
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *
@@ -5759,7 +5761,6 @@ val_value_t *
         return NULL;
     }
 #endif
-
     if (!typ_has_children(parent->btyp)) {
         return NULL;
     }
@@ -5779,9 +5780,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_next_child
-* 
+*
 * Get the next child node
-* 
+*
 * INPUTS:
 *    curchild == current child node
 *
@@ -5813,12 +5814,12 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_find_child
-* 
+*
 * Find the first instance of the specified child node
 *
 * INPUTS:
 *    parent == parent complex type to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -5853,8 +5854,8 @@ val_value_t *
         if (VAL_IS_DELETED(val)) {
             continue;
         }
-        if (modname && 
-            xml_strcmp(modname, 
+        if (modname &&
+            xml_strcmp(modname,
                        val_get_mod_name(val))) {
             continue;
         }
@@ -5869,13 +5870,13 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_find_child_que
-* 
+*
 * Find the first instance of the specified child node in the
 * specified child Q
 *
 * INPUTS:
 *    parent == parent complex type to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -5906,8 +5907,8 @@ val_value_t *
         if (VAL_IS_DELETED(val)) {
             continue;
         }
-        if (modname && 
-            xml_strcmp(modname, 
+        if (modname &&
+            xml_strcmp(modname,
                        val_get_mod_name(val))) {
             continue;
         }
@@ -5922,12 +5923,12 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_match_child
-* 
+*
 * Match the first instance of the specified child node
 *
 * INPUTS:
 *    parent == parent complex type to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -5962,7 +5963,7 @@ val_value_t *
         if (VAL_IS_DELETED(val)) {
             continue;
         }
-        if (modname && 
+        if (modname &&
             xml_strcmp(modname, val_get_mod_name(val))) {
             continue;
         }
@@ -5978,12 +5979,12 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_find_next_child
-* 
+*
 * Find the next instance of the specified child node
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6020,8 +6021,8 @@ val_value_t *
         if (VAL_IS_DELETED(val)) {
             continue;
         }
-        if (modname && 
-            xml_strcmp(modname, 
+        if (modname &&
+            xml_strcmp(modname,
                        val_get_mod_name(val))) {
             continue;
         }
@@ -6036,10 +6037,10 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_first_child_name
-* 
+*
 * Get the first corresponding child node instance, by name
 * find first -- really for resolve index function
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *    name == child name to find
@@ -6063,7 +6064,7 @@ val_value_t *
     if (!typ_has_children(parent->btyp)) {
         return NULL;
     }
-        
+
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
@@ -6085,9 +6086,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_first_child_qname
-* 
+*
 * Get the first corresponding child node instance, by QName
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *    nsid == namespace ID to use, 0 for any
@@ -6113,7 +6114,7 @@ val_value_t *
     if (!typ_has_children(parent->btyp)) {
         return NULL;
     }
-        
+
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
@@ -6139,9 +6140,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_next_child_qname
-* 
+*
 * Get the next corresponding child node instance, by QName
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *    nsid == namespace ID to use, 0 for any
@@ -6169,7 +6170,7 @@ val_value_t *
     if (!typ_has_children(parent->btyp)) {
         return NULL;
     }
-        
+
     for (val = (val_value_t *)dlq_nextEntry(curchild);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
@@ -6195,11 +6196,11 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_first_child_string
-* 
+*
 * find first name value pair
 * Get the first corresponding child node instance, by name
 * and by string value.
-* Child node must be a base type of 
+* Child node must be a base type of
 *   NCX_BT_STRING
 *   NCX_BT_INSTANCE_ID
 *   NCX_BT_LEAFREF
@@ -6207,7 +6208,7 @@ val_value_t *
 * INPUTS:
 *    parent == parent complex type to check
 *    name == child name to find
-*    strval == string value to find 
+*    strval == string value to find
 * RETURNS:
 *   pointer to the FIRST match if found, or NULL if not found
 *********************************************************************/
@@ -6228,7 +6229,7 @@ val_value_t *
     if (!typ_has_children(parent->btyp)) {
         return NULL;
     }
-        
+
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
@@ -6257,10 +6258,10 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_child_cnt
-* 
+*
 * Get the number of child nodes present
 * get number of child nodes present -- for choice checking
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *
@@ -6283,7 +6284,7 @@ uint32
     if (!typ_has_children(parent->btyp)) {
         return 0;
     }
-        
+
     cnt = 0;
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
@@ -6302,10 +6303,10 @@ uint32
 
 /********************************************************************
 * FUNCTION val_child_inst_cnt
-* 
+*
 * Get the corresponding child instance count by name
 * get instance count -- for instance qualifer checking
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *    modname == module name defining the child (may be NULL)
@@ -6332,7 +6333,7 @@ uint32
     if (!typ_has_children(parent->btyp)) {
         return 0;
     }
-        
+
     cnt = 0;
     for (val = (const val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
@@ -6350,7 +6351,7 @@ uint32
         /* check the node if the name matches */
         if (!xml_strcmp(val->name, name)) {
             cnt++;
-        } 
+        }
     }
 
     return cnt;
@@ -6360,12 +6361,12 @@ uint32
 
 /********************************************************************
 * FUNCTION val_find_all_children
-* 
-* Find all occurances of the specified node(s)
-* within the children of the current node. 
-* The walker fn will be called for each match.  
 *
-* If the walker function returns TRUE, then the 
+* Find all occurances of the specified node(s)
+* within the children of the current node.
+* The walker fn will be called for each match.
+*
+* If the walker function returns TRUE, then the
 * walk will continue; If FALSE it will terminate right away
 *
 * INPUTS:
@@ -6373,7 +6374,7 @@ uint32
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
 *    startnode == node to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6438,7 +6439,7 @@ boolean
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
                                          cookie2,
-                                         val, 
+                                         val,
                                          modname,
                                          name,
                                          configonly,
@@ -6455,7 +6456,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_find_all_ancestors
-* 
+*
 * Find all the ancestor instances of the specified node
 * within the path to root from the current node;
 * use the filter criteria provided
@@ -6466,7 +6467,7 @@ boolean
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
 *    startnode == node to start search at
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6518,7 +6519,7 @@ boolean
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
                                          cookie2,
-                                         val, 
+                                         val,
                                          modname,
                                          name,
                                          configonly,
@@ -6536,12 +6537,12 @@ boolean
 
 /********************************************************************
 * FUNCTION val_find_all_descendants
-* 
+*
 * Find all occurances of the specified node
 * within the current subtree. The walker fn will
-* be called for each match.  
+* be called for each match.
 *
-* If the walker function returns TRUE, then the 
+* If the walker function returns TRUE, then the
 * walk will continue; If FALSE it will terminate right away
 *
 * INPUTS:
@@ -6549,7 +6550,7 @@ boolean
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
 *    startnode == startnode complex type to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6611,7 +6612,7 @@ boolean
                                          cookie1,
                                          cookie2,
                                          useval,
-                                         modname, 
+                                         modname,
                                          name,
                                          configonly,
                                          textmode,
@@ -6637,7 +6638,7 @@ boolean
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
                                          cookie2,
-                                         val, 
+                                         val,
                                          modname,
                                          name,
                                          configonly,
@@ -6652,7 +6653,7 @@ boolean
                                                 cookie2,
                                                 val,
                                                 modname,
-                                                name, 
+                                                name,
                                                 configonly,
                                                 textmode,
                                                 FALSE,
@@ -6669,7 +6670,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_find_all_pfaxis
-* 
+*
 * Find all occurances of the specified node
 * for the specified preceding or following axis
 *
@@ -6679,9 +6680,9 @@ boolean
 * within the current subtree. The walker fn will
 * be called for each match.  Because the callbacks
 * will be done in sequential order, starting from
-* the 
+* the
 *
-* If the walker function returns TRUE, then the 
+* If the walker function returns TRUE, then the
 * walk will continue; If FALSE it will terminate right away
 *
 * INPUTS:
@@ -6690,7 +6691,7 @@ boolean
 *    cookie2 == cookie2 value to pass to walker fn
 *    topnode == topnode used as the relative root for
 *               calculating node position
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6755,8 +6756,8 @@ boolean
         return FALSE;
     }
 
-    /* for virtual nodes, it is assumed that the set of 
-     * siblings represents real values, but each 
+    /* for virtual nodes, it is assumed that the set of
+     * siblings represents real values, but each
      * value node checked and expanded if a virtual node
      */
     while (val) {
@@ -6785,7 +6786,7 @@ boolean
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
                                          cookie2,
-                                         useval, 
+                                         useval,
                                          modname,
                                          name,
                                          configonly,
@@ -6796,7 +6797,7 @@ boolean
         }
 
         if (!fncalled && dblslash) {
-            /* if /foo did not get added, than 
+            /* if /foo did not get added, than
              * try /foo/bar, /foo/baz, etc.
              * check all the child nodes even if
              * one of them matches, because all
@@ -6806,13 +6807,13 @@ boolean
                  child != NULL;
                  child = val_get_next_child(child)) {
 
-                fnresult = 
-                    val_find_all_pfaxis(walkerfn, 
-                                        cookie1, 
+                fnresult =
+                    val_find_all_pfaxis(walkerfn,
+                                        cookie1,
                                         cookie2,
-                                        child, 
-                                        modname, 
-                                        name, 
+                                        child,
+                                        modname,
+                                        name,
                                         configonly,
                                         dblslash,
                                         textmode,
@@ -6836,7 +6837,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_find_all_pfsibling_axis
-* 
+*
 * Find all occurances of the specified node
 * for the specified axis
 *
@@ -6846,9 +6847,9 @@ boolean
 * within the current subtree. The walker fn will
 * be called for each match.  Because the callbacks
 * will be done in sequential order, starting from
-* the 
+* the
 *
-* If the walker function returns TRUE, then the 
+* If the walker function returns TRUE, then the
 * walk will continue; If FALSE it will terminate right away
 *
 * INPUTS:
@@ -6856,7 +6857,7 @@ boolean
 *    cookie1 == cookie1 value to pass to walker fn
 *    cookie2 == cookie2 value to pass to walker fn
 *    startnode == starting sibling node to check
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -6869,7 +6870,7 @@ boolean
 *                  Only used if decname == NULL
 *    dblslash == TRUE if all decendents of the preceding
 *                 or following nodes should be checked
-*                FALSE only 
+*                FALSE only
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
@@ -6908,7 +6909,7 @@ boolean
     switch (axis) {
     case XP_AX_PRECEDING_SIBLING:
         /* execute the callback for all preceding nodes
-         * that match the filter criteria 
+         * that match the filter criteria
          */
         val = (val_value_t *)dlq_prevEntry(startnode);
         forward = FALSE;
@@ -6948,7 +6949,7 @@ boolean
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
                                          cookie2,
-                                         useval, 
+                                         useval,
                                          modname,
                                          name,
                                          configonly,
@@ -6959,7 +6960,7 @@ boolean
         }
 
         if (!fncalled && dblslash) {
-            /* if /foo did not get added, than 
+            /* if /foo did not get added, than
              * try /foo/bar, /foo/baz, etc.
              * check all the child nodes even if
              * one of them matches, because all
@@ -6969,13 +6970,13 @@ boolean
                  child != NULL;
                  child = val_get_next_child(child)) {
 
-                fnresult = 
-                    val_find_all_pfsibling_axis(walkerfn, 
-                                                cookie1, 
+                fnresult =
+                    val_find_all_pfsibling_axis(walkerfn,
+                                                cookie1,
                                                 cookie2,
-                                                child, 
-                                                modname, 
-                                                name, 
+                                                child,
+                                                modname,
+                                                name,
                                                 configonly,
                                                 dblslash,
                                                 textmode,
@@ -6999,7 +7000,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_axisnode
-* 
+*
 * Find the specified node based on the context node,
 * a context position and an axis
 *
@@ -7016,7 +7017,7 @@ boolean
 *
 * INPUTS:
 *    startnode == context node to run tests from
-*    modname == module name; 
+*    modname == module name;
 *                the first match in this module namespace
 *                will be returned
 *            == NULL:
@@ -7029,7 +7030,7 @@ boolean
 *                  Only used if decname == NULL
 *    dblslash == TRUE if all decendents of the preceding
 *                 or following nodes should be checked
-*                FALSE only 
+*                FALSE only
 *    textmode == TRUE if just testing for text() nodes
 *                name and modname will be ignored in this mode
 *                FALSE if using name and modname to filter
@@ -7195,9 +7196,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_child_inst_id
-* 
+*
 * Get the instance ID for this child node within the parent context
-* 
+*
 * INPUTS:
 *    parent == parent complex type to check
 *    child == child node to find ID for
@@ -7255,9 +7256,9 @@ uint32
 
 /********************************************************************
 * FUNCTION val_liststr_count
-* 
+*
 * Get the number of strings in the list type
-* 
+*
 * INPUTS:
 *    val == value to check
 *
@@ -7293,14 +7294,14 @@ uint32
 
 /********************************************************************
 * FUNCTION val_index_match
-* 
+*
 * Check 2 val_value structs for the same instance ID
-* 
+*
 * The node data types must match, and must be
 *    NCX_BT_LIST
 *
 * All index components must exactly match.
-* 
+*
 * INPUTS:
 *    val1 == first value to index match
 *    val2 == second value to index match
@@ -7323,9 +7324,9 @@ boolean
 
 /********************************************************************
 * FUNCTION val_index_compare
-* 
+*
 * Check 2 val_value structs for the same instance ID
-* 
+*
 * The node data types must match, and must be
 *    NCX_BT_LIST
 *
@@ -7351,7 +7352,7 @@ int
 
 /********************************************************************
 * FUNCTION val_compare_max
-* 
+*
 * Compare 2 val_value_t struct value contents
 * Check all or config only
 * Check just child nodes or all descendant nodes
@@ -7362,7 +7363,7 @@ int
 * and then checking all the child nodes recursively
 *
 * !!!! Meta-value contents are ignored for this test !!!!
-* 
+*
 * INPUTS:
 *    val1 == first value to check
 *    val2 == second value to check
@@ -7377,7 +7378,7 @@ int
 * RETURNS:
 *   compare result
 *     -1: val1 is less than val2 (if complex just different or error)
-*      0: val1 is the same as val2 
+*      0: val1 is the same as val2
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
@@ -7514,8 +7515,8 @@ int32
         ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
         ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
         for (;;) {
-            if ((ch1 && VAL_IS_DELETED(ch1)) || 
-                (ch2 && VAL_IS_DELETED(ch2)) || 
+            if ((ch1 && VAL_IS_DELETED(ch1)) ||
+                (ch2 && VAL_IS_DELETED(ch2)) ||
                 configonly) {
                 while (ch1 && (VAL_IS_DELETED(ch1) ||
                                !obj_get_config_flag(ch1->obj))) {
@@ -7584,7 +7585,7 @@ int32
 
 /********************************************************************
 * FUNCTION val_compare_ex
-* 
+*
 * Compare 2 val_value_t struct value contents
 * Check all or config only
 *
@@ -7595,7 +7596,7 @@ int32
 * and then checking all the child nodes recursively
 *
 * !!!! Meta-value contents are ignored for this test !!!!
-* 
+*
 * INPUTS:
 *    val1 == first value to check
 *    val2 == second value to check
@@ -7605,7 +7606,7 @@ int32
 * RETURNS:
 *   compare result
 *     -1: val1 is less than val2 (if complex just different or error)
-*      0: val1 is the same as val2 
+*      0: val1 is the same as val2
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
@@ -7619,7 +7620,7 @@ int32
 
 /********************************************************************
 * FUNCTION val_compare
-* 
+*
 * Compare 2 val_value_t struct value contents
 *
 * Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
@@ -7629,7 +7630,7 @@ int32
 * and then checking all the child nodes recursively
 *
 * !!!! Meta-value contents are ignored for this test !!!!
-* 
+*
 * INPUTS:
 *    val1 == first value to check
 *    val2 == second value to check
@@ -7637,7 +7638,7 @@ int32
 * RETURNS:
 *   compare result
 *     -1: val1 is less than val2 (if complex just different or error)
-*      0: val1 is the same as val2 
+*      0: val1 is the same as val2
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
@@ -7650,17 +7651,17 @@ int32
 
 /********************************************************************
 * FUNCTION val_compare_to_string
-* 
+*
 * Compare a val_value_t struct value contents to a string
-* 
+*
 * Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
 * by comparing the simple value.
 *
 * !!!! Meta-value contents are ignored for this test !!!!
-* 
+*
 * INPUTS:
 *    val1 == first value to check
-*    strval2 == second value to check 
+*    strval2 == second value to check
 *    res == address of return status
 *
 * OUTPUTS:
@@ -7669,7 +7670,7 @@ int32
 * RETURNS:
 *   compare result
 *     -1: val1 is less than val2 (if complex just different or error)
-*      0: val1 is the same as val2 
+*      0: val1 is the same as val2
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
@@ -7725,14 +7726,14 @@ int32
 
 /********************************************************************
 * FUNCTION val_compare_for_replace
-* 
+*
 * Compare 2 val_value_t struct value contents
 * for the nc:operation=replace procedures
 * Only check the child nodes to see if the
 * config nodes are the same
 *
 * !!!! Meta-value contents are ignored for this test !!!!
-* 
+*
 * INPUTS:
 *    val1 == new value to print
 *    val2 == current value to check
@@ -7740,7 +7741,7 @@ int32
 * RETURNS:
 *   compare result
 *     -1: val1 is less than val2 (if complex just different or error)
-*      0: val1 is the same as val2 
+*      0: val1 is the same as val2
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
@@ -7830,11 +7831,11 @@ int32
 
 /********************************************************************
 * FUNCTION val_sprintf_simval_nc
-* 
+*
 * Sprintf the xmlChar string NETCONF representation of a simple value
 *
 * buff is allowed to be NULL; if so, then this fn will
-* just return the length of the string (w/o EOS ch) 
+* just return the length of the string (w/o EOS ch)
 *
 * USAGE:
 *  call 1st time with a NULL buffer to get the length
@@ -7957,7 +7958,7 @@ status_t
             }
         }
         break;
-    case NCX_BT_STRING: 
+    case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:
         if (val->obj && obj_is_password(val->obj)) {
@@ -7990,7 +7991,7 @@ status_t
                 *len = 0;
             }
         } else if (s) {
-            *len = b64_get_encoded_str_len( val->v.binary.ustrlen, 
+            *len = b64_get_encoded_str_len( val->v.binary.ustrlen,
                                             0/*no newline split*/ );
         } else {
             *len = 0;
@@ -8008,7 +8009,7 @@ status_t
             if (buff) {
                 /* hardwire double quotes to wrapper list strings */
                 icnt = sprintf((char *)buff,
-                               "%s", 
+                               "%s",
                                (s) ? (const char *)s : "");
                 if (icnt < 0) {
                     return SET_ERROR(ERR_INTERNAL_VAL);
@@ -8037,9 +8038,9 @@ status_t
             if (typ_is_string(val->v.list.btyp)) {
                 s = lmem->val.str;
             } else if (typ_is_number(val->v.list.btyp)) {
-                res = ncx_sprintf_num((xmlChar *)numbuff, 
-                                      &lmem->val.num, 
-                                      val->v.list.btyp, 
+                res = ncx_sprintf_num((xmlChar *)numbuff,
+                                      &lmem->val.num,
+                                      val->v.list.btyp,
                                       len);
                 if (res != NO_ERR) {
                     return SET_ERROR(res);
@@ -8064,7 +8065,7 @@ status_t
             }
 
             if (buff) {
-                icnt = sprintf((char *)buff, "%s ", 
+                icnt = sprintf((char *)buff, "%s ",
                                (s) ? (const char *)s : "");
                 if (icnt < 0) {
                     return SET_ERROR(ERR_INTERNAL_VAL);
@@ -8128,7 +8129,7 @@ status_t
 /********************************************************************
 * FUNCTION val_make_sprintf_string
 *
-* Malloc a buffer and then sprintf the xmlChar string 
+* Malloc a buffer and then sprintf the xmlChar string
 * NETCONF representation of a simple value
 *
 * INPUTS:
@@ -8145,7 +8146,7 @@ xmlChar *
     xmlChar   *buff;
     uint32     len;
     status_t   res;
-    
+
     len = 0;
     res = val_sprintf_simval_nc(NULL, val, &len);
     if (res != NO_ERR) {
@@ -8168,9 +8169,9 @@ xmlChar *
 
 /********************************************************************
 * FUNCTION val_resolve_scoped_name
-* 
+*
 * Find the scoped identifier in the specified complex value
-* 
+*
 * E.g.: foo.bar.baz
 *
 * INPUTS:
@@ -8179,13 +8180,13 @@ xmlChar *
 *    chval == address of return child val
 *
 * OUTPUTS:
-*    *chval is set to the value of the found local scoped 
+*    *chval is set to the value of the found local scoped
 *      child member, if NO_ERR
 *
 * RETURNS:
 *   status
 *********************************************************************/
-status_t 
+status_t
     val_resolve_scoped_name (val_value_t *val,
                              const xmlChar *name,
                              val_value_t **chval)
@@ -8232,7 +8233,7 @@ status_t
 
         nextch = NULL;
         if (typ_has_children(ch->btyp)) {
-            next = ncx_get_name_segment(++next, buff, BUFFLEN);     
+            next = ncx_get_name_segment(++next, buff, BUFFLEN);
             nextch = val_first_child_name(ch, buff);
         }
         if (!nextch) {
@@ -8251,16 +8252,16 @@ status_t
 
 /********************************************************************
 * FUNCTION val_get_iqualval
-* 
+*
 * Get the effective instance qualifier value for this value
-* 
+*
 * INPUTS:
 *    val == value construct to check
 *
 * RETURNS:
 *   iqual value
 *********************************************************************/
-ncx_iqual_t 
+ncx_iqual_t
     val_get_iqualval (const val_value_t *val)
 {
 #ifdef DEBUG
@@ -8277,7 +8278,7 @@ ncx_iqual_t
 
 /********************************************************************
 * FUNCTION val_duplicates_allowed
-* 
+*
 * Determine if duplicates are allowed for the given val type
 * The entire definition chain is checked to see if a 'no-duplicates'
 *
@@ -8313,8 +8314,8 @@ boolean
 
     /* check for no-duplicates in the type appinfo */
     if (val->typdef) {
-        if (typ_find_appinfo(val->typdef, 
-                             NCX_PREFIX, 
+        if (typ_find_appinfo(val->typdef,
+                             NCX_PREFIX,
                              NCX_EL_NODUPLICATES)) {
             val->flags |= VAL_FL_DUPDONE;
             return FALSE;
@@ -8333,7 +8334,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_has_content
-* 
+*
 * Determine if there is a value or any child nodes for this val
 *
 * INPUTS:
@@ -8379,7 +8380,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_has_index
-* 
+*
 * Determine if this value has an index
 *
 * INPUTS:
@@ -8406,7 +8407,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_first_index
-* 
+*
 * Get the first index entry, if any for this value node
 *
 * INPUTS:
@@ -8432,7 +8433,7 @@ val_index_t *
 
 /********************************************************************
 * FUNCTION val_get_next_index
-* 
+*
 * Get the next index entry, if any for this value node
 *
 * INPUTS:
@@ -8458,7 +8459,7 @@ val_index_t *
 
 /********************************************************************
 * FUNCTION val_parse_meta
-* 
+*
 * Parse the metadata descriptor against the typdef
 * Check only that the value is ok, not instance count
 *
@@ -8510,13 +8511,13 @@ status_t
     case NCX_BT_BOOLEAN:
         if (attrval && !xml_strcmp(attrval, NCX_EL_TRUE)) {
             retval->v.boo = TRUE;
-        } else if (attrval && 
+        } else if (attrval &&
                    !xml_strcmp(attrval,
                                (const xmlChar *)"1")) {
             retval->v.boo = TRUE;
         } else if (attrval && !xml_strcmp(attrval, NCX_EL_FALSE)) {
             retval->v.boo = FALSE;
-        } else if (attrval && 
+        } else if (attrval &&
                    !xml_strcmp(attrval,
                                (const xmlChar *)"0")) {
             retval->v.boo = FALSE;
@@ -8546,7 +8547,7 @@ status_t
         }
         break;
     case NCX_BT_DECIMAL64:
-        res = ncx_decode_dec64(attrval, 
+        res = ncx_decode_dec64(attrval,
                                typ_get_fraction_digits(typdef),
                                &retval->v.num);
         if (res == NO_ERR) {
@@ -8575,7 +8576,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_extern
-* 
+*
 * Setup an NCX_BT_EXTERN value
 *
 * INPUTS:
@@ -8601,7 +8602,7 @@ void
 
 /********************************************************************
 * FUNCTION val_set_intern
-* 
+*
 * Setup an NCX_BT_INTERN value
 *
 * INPUTS:
@@ -8627,13 +8628,13 @@ void
 
 /********************************************************************
 * FUNCTION val_fit_oneline
-* 
+*
 * Check if the XML encoding for the specified val_value_t
 * should take one line or more than one line
 *
 * Simple types should not use more than one line or introduce
 * any extra whitespace in any simple content element
-* 
+*
 * !!!The calculation includes the XML start and end tags!!!
 *
 *  totalsize: <foo:node>value</foo:node>  == 26
@@ -8641,7 +8642,7 @@ void
 * INPUTS:
 *   val == value to check
 *   linelen == length of line to check against
-*   
+*
 * RETURNS:
 *   TRUE if the val is a type that should or must fit on one line
 *   FALSE otherwise
@@ -8701,7 +8702,7 @@ boolean
         valsize = 21;
         break;
     case NCX_BT_FLOAT64:
-        /* guess an average amount, since most numbers are 
+        /* guess an average amount, since most numbers are
          * never going to be this many digits
          */
         valsize = 32;
@@ -8734,7 +8735,7 @@ boolean
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
         /* these are printed 1 per line right now */
-        return TRUE; 
+        return TRUE;
     case NCX_BT_ANYDATA:
     case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
@@ -8760,7 +8761,7 @@ boolean
     nsid = val_get_nsid(val);
     if (val->nsid) {
         /* account for 'foo:' */
-        valnamesize += 
+        valnamesize +=
             (xml_strlen(xmlns_get_ns_prefix(nsid)) + 1);
     }
 
@@ -8774,13 +8775,13 @@ boolean
 
 /********************************************************************
 * FUNCTION val_create_allowed
-* 
+*
 * Check if the specified value is allowed to have a
 * create edit-config operation attribute
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the val is allowed to have the edit-op
 *   FALSE otherwise
@@ -8803,13 +8804,13 @@ boolean
 
 /********************************************************************
 * FUNCTION val_delete_allowed
-* 
+*
 * Check if the specified value is allowed to have a
 * delete edit-config operation attribute
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the val is allowed to have the edit-op
 *   FALSE otherwise
@@ -8832,12 +8833,12 @@ boolean
 
 /********************************************************************
 * FUNCTION val_is_config_data
-* 
+*
 * Check if the specified value is a config DB object instance
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the val is a config DB object instance
 *   FALSE otherwise
@@ -8854,7 +8855,7 @@ boolean
 
     if (obj_is_root(val->obj)) {
         return TRUE;
-    } else if (obj_is_data_db(val->obj) && 
+    } else if (obj_is_data_db(val->obj) &&
         obj_get_config_flag(val->obj)) {
         return TRUE;
     } else if ((val->obj==ncx_get_gen_container() || val->obj==ncx_get_gen_string() || val->obj==ncx_get_gen_empty()) && val->parent!=NULL) {
@@ -8869,14 +8870,14 @@ boolean
 
 /********************************************************************
 * FUNCTION val_is_virtual
-* 
+*
 * Check if the specified value is a virtual value
 * such that a 'get' callback function is required
 * to access the real value contents
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the val is a virtual value
 *   FALSE otherwise
@@ -8898,12 +8899,12 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_virtual_value
-* 
+*
 * Get the value of a value node
 * The top-level value is provided by the caller
 * and must be malloced with val_new_value
 * before calling this function
-* 
+*
 * must free the return val; not cached
 *
 * If the val->getcb is NULL, then an error will be returned
@@ -8912,7 +8913,7 @@ boolean
 * This will be returned if virtual value has no
 * instance at this time.
 *
-*  !!! DO NOT SAVE THE RETURN VALUE LONGER THAN THE 
+*  !!! DO NOT SAVE THE RETURN VALUE LONGER THAN THE
 *  !!! VIRTUAL VALUE CACHE TIMEOUT VALUE
 *
 * INPUTS:
@@ -8959,16 +8960,16 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_is_default
-* 
+*
 * Check if the specified value is set to the YANG default value
-* 
+*
 * INPUTS:
 *   val == value to check
 *
 * SIDE EFFECTS:
 *   val->flags may be adjusted
 *         VAL_FL_DEFVALSET will be set if not set already
-*         VAL_FL_DEFVAL will be set or cleared if 
+*         VAL_FL_DEFVAL will be set or cleared if
 *            VAL_FL_DEFSETVAL is not already set,
 *            after determining if the value == its default
 *
@@ -9077,7 +9078,7 @@ boolean
     case NCX_BT_FLOAT64:
         ncx_init_num(&num);
         res = ncx_decode_num(def, btyp, &num);
-        if (res == NO_ERR && 
+        if (res == NO_ERR &&
             !ncx_compare_nums(&num, &val->v.num, btyp)) {
             ret = TRUE;
         }
@@ -9088,7 +9089,7 @@ boolean
         res = ncx_decode_dec64(def,
                                typ_get_fraction_digits(val->typdef),
                                &num);
-        if (res == NO_ERR && 
+        if (res == NO_ERR &&
             !ncx_compare_nums(&num, &val->v.num, btyp)) {
             ret = TRUE;
         }
@@ -9102,10 +9103,10 @@ boolean
             if (!binbuff) {
                 SET_ERROR(ERR_INTERNAL_MEM);
                 return FALSE;
-            } 
+            }
             res = b64_decode(def, deflen, binbuff, len, &len);
             if (res == NO_ERR) {
-                ret = memcmp(binbuff, val->v.binary.ustr, len) 
+                ret = memcmp(binbuff, val->v.binary.ustr, len)
                     ? FALSE : TRUE;
             }
             m__free(binbuff);
@@ -9151,20 +9152,20 @@ boolean
     }
 
     return ret;
-    
+
 }  /* val_is_default */
 
 
 /********************************************************************
 * FUNCTION val_is_real
-* 
+*
 * Check if the specified value is a real value
 *
 *  return TRUE if not virtual or NCX_BT_EXTERN or NCX_BT_INTERN)
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   TRUE if the val is a real value
 *   FALSE otherwise
@@ -9187,12 +9188,12 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_parent_nsid
-* 
+*
 *    Try to get the parent namespace ID
-* 
+*
 * INPUTS:
 *   val == value to check
-*   
+*
 * RETURNS:
 *   namespace ID of parent, or 0 if not found or not a value parent
 *********************************************************************/
@@ -9220,7 +9221,7 @@ xmlns_id_t
 
 /********************************************************************
 * FUNCTION val_instance_count
-* 
+*
 * Count the number of instances of the specified object name
 * in the parent value struct.  This only checks the first
 * level under the parent, not the entire subtree
@@ -9256,7 +9257,7 @@ uint32
          chval != NULL;
          chval = val_get_next_child(chval)) {
 
-        if (modname && 
+        if (modname &&
             xml_strcmp(modname,
                        val_get_mod_name(chval))) {
             continue;
@@ -9267,18 +9268,18 @@ uint32
         }
     }
     return cnt;
-    
+
 }  /* val_instance_count */
 
 
 /********************************************************************
 * FUNCTION val_set_extra_instance_errors
-* 
+*
 * mark ERR_NCX_EXTRA_VAL_INST errors for nodes > 'maxelems'
 * Count the number of instances of the specified object name
 * in the parent value struct.  This only checks the first
 * level under the parent, not the entire subtree
-* Set the val-res status for all instances beyond the 
+* Set the val-res status for all instances beyond the
 * specified 'maxelems' count to ERR_NCX_EXTRA_VAL_INST
 *
 * INPUTS:
@@ -9315,7 +9316,7 @@ void
          chval != NULL;
          chval = val_get_next_child(chval)) {
 
-        if (modname && 
+        if (modname &&
             xml_strcmp(modname,
                        val_get_mod_name(chval))) {
             continue;
@@ -9327,13 +9328,13 @@ void
             }
         }
     }
-    
+
 }  /* val_set_extra_instance_errors */
 
 
 /********************************************************************
 * FUNCTION val_need_quotes
-* 
+*
 * Check if a string needs to be quoted to be output
 * within a conf file or ncxcli stdout output
 *
@@ -9368,7 +9369,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_all_whitespace
-* 
+*
 * Check if a string is all whitespace
 *
 * INPUTS:
@@ -9402,7 +9403,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_match_metaval
-* 
+*
 * Match the specific attribute value and namespace ID
 *
 * INPUTS:
@@ -9439,7 +9440,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_dirty_flag
-* 
+*
 * Get the dirty flag for this value node
 *
 * INPUTS:
@@ -9465,7 +9466,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_get_subtree_dirty_flag
-* 
+*
 * Get the subtree dirty flag for this value node
 *
 * INPUTS:
@@ -9491,7 +9492,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_set_dirty_flag
-* 
+*
 * Set the dirty flag for this value node
 *
 * INPUTS:
@@ -9520,7 +9521,7 @@ void
 
 /********************************************************************
 * FUNCTION val_clear_dirty_flag
-* 
+*
 * Clear the dirty flag for this value node
 *
 * INPUTS:
@@ -9549,7 +9550,7 @@ void
 
 /********************************************************************
 * FUNCTION val_dirty_subtree
-* 
+*
 * Check the dirty or subtree_dirty flag
 *
 * INPUTS:
@@ -9576,7 +9577,7 @@ boolean
 
 /********************************************************************
  * FUNCTION val_clean_tree
- * 
+ *
  * Clear the dirty flag and the operation for all
  * nodes within a value struct
  *
@@ -9617,7 +9618,7 @@ void
 
 /********************************************************************
 * FUNCTION val_get_nest_level
-* 
+*
 * Get the next level of the value
 *
 * INPUTS:
@@ -9650,8 +9651,8 @@ uint32
 
 /********************************************************************
 * FUNCTION val_get_first_leaf
-* 
-* Get the first leaf or leaflist node in the 
+*
+* Get the first leaf or leaflist node in the
 * specified value tree
 *
 * INPUTS:
@@ -9695,7 +9696,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_mod_name
-* 
+*
 * Get the module name associated with this value node
 *
 * INPUTS:
@@ -9727,7 +9728,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION val_get_mod_prefix
-* 
+*
 * Get the module prefix associated with this value node
 *
 * INPUTS:
@@ -9759,7 +9760,7 @@ const xmlChar *
 
 /********************************************************************
 * FUNCTION val_get_nsid
-* 
+*
 * Get the namespace ID for the specified value node
 *
 * INPUTS:
@@ -9792,7 +9793,7 @@ xmlns_id_t
 
 /********************************************************************
 * FUNCTION val_change_nsid
-* 
+*
 * Change the namespace ID fora value node and all its descendants
 *
 * INPUTS:
@@ -9826,14 +9827,14 @@ void
 
 /********************************************************************
 * FUNCTION val_make_from_insertxpcb
-* 
+*
 * Make a val_value_t for a list, with the
 * child nodes for key leafs, specified in the
 * key attribute string given to the insert operation
 *
 * INPUTS:
 *   sourceval == list val_value_t from the PDU with the insertxpcb
-*               to process 
+*               to process
 *   status == address of return status (may be NULL, ignored)
 *
 * OUTPUTS:
@@ -9915,7 +9916,7 @@ val_value_t *
         if (myres != NO_ERR) {
             continue;
         }
-        
+
         myres = TK_ADV(xpcb->tkc);
         if (myres != NO_ERR) {
             continue;
@@ -9926,14 +9927,14 @@ val_value_t *
         if (myres != NO_ERR) {
             continue;
         }
-        
+
         if (!keyname || !keystring) {
             myres = SET_ERROR(ERR_INTERNAL_VAL);
             continue;
         }
 
         keyval = val_make_string(val_get_nsid(sourceval),
-                                 keyname, 
+                                 keyname,
                                  keystring);
         if (!keyval) {
             myres = ERR_INTERNAL_MEM;
@@ -9954,26 +9955,26 @@ val_value_t *
     if (res) {
         *res = myres;
     }
-                                    
+
     if (myres != NO_ERR) {
         val_free_value(listval);
         listval = NULL;
     }
-        
+
     return listval;
-        
+
 }  /* val_make_from_insertxpcb */
 
 
 /********************************************************************
 * FUNCTION val_new_unique
-* 
+*
 * Malloc and initialize the fields in a val_unique_t
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-val_unique_t * 
+val_unique_t *
     val_new_unique (void)
 {
     val_unique_t  *valuni;
@@ -9991,7 +9992,7 @@ val_unique_t *
 
 /********************************************************************
 * FUNCTION val_free_unique
-* 
+*
 * CLean and free a val_unique_t struct
 *
 * INPUTS:
@@ -10013,7 +10014,7 @@ void
 
 /********************************************************************
 * FUNCTION val_get_typdef
-* 
+*
 * Get the typdef field for a value struct
 *
 * INPUTS:
@@ -10039,7 +10040,7 @@ const typ_def_t *
 
 /********************************************************************
 * FUNCTION val_set_by_default
-* 
+*
 * Check if the value was set by val_add_defaults
 *
 * INPUTS:
@@ -10067,7 +10068,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_has_withdef_default
-* 
+*
 * Check if the value contained the wd:default attribute
 *
 * INPUTS:
@@ -10094,7 +10095,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_set_withdef_default
-* 
+*
 * Set the value flags as having the wd:default attribute
 *
 * INPUTS:
@@ -10118,7 +10119,7 @@ void
 
 /********************************************************************
 * FUNCTION val_is_metaval
-* 
+*
 * Check if the value is a meta-val (XML attribute)
 *
 * INPUTS:
@@ -10145,7 +10146,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_move_chidren
-* 
+*
 * Move all the child nodes from src to dest
 * Source and dest must both be containers!
 *
@@ -10187,7 +10188,7 @@ void
 
 /********************************************************************
 * FUNCTION val_cvt_generic
-* 
+*
 * Convert all the database object pointers to
 * generic object pointers to decouple a user
 * variable in yangcli from the server-specific
@@ -10195,7 +10196,7 @@ void
 * session is terminated)
 *
 * !!! Need to assume the val->obj pointer is already
-* !!! invalid.  This can happen to yangcli when a 
+* !!! invalid.  This can happen to yangcli when a
 * !!! session is dropped and there are vars that
 * !!! reference YANG objects from the session
 *
@@ -10301,7 +10302,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_pcookie
-* 
+*
 * Set the SIL pointer cookie in the editvars for
 * the specified value node
 *
@@ -10337,7 +10338,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_icookie
-* 
+*
 * Set the SIL integer cookie in the editvars for
 * the specified value node
 *
@@ -10373,7 +10374,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_get_pcookie
-* 
+*
 * Get the SIL pointer cookie in the editvars for
 * the specified value node
 *
@@ -10404,7 +10405,7 @@ void *
 
 /********************************************************************
 * FUNCTION val_get_icookie
-* 
+*
 * Get the SIL integer cookie in the editvars for
 * the specified value node
 *
@@ -10435,7 +10436,7 @@ int
 
 /********************************************************************
 * FUNCTION val_delete_default_leaf
-* 
+*
 * Do the internal work to convert a leaf to its YANG default value
 *
 * INPUTS:
@@ -10471,7 +10472,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_force_empty
-* 
+*
 * Convert a simple node to an empty type
 *
 * INPUTS:
@@ -10502,7 +10503,7 @@ void
 
 /********************************************************************
 * FUNCTION val_move_fields_for_xml
-* 
+*
 * Move or copy the internal fields from one val to another
 * for xml_wr purposes
 *
@@ -10534,7 +10535,7 @@ void
 
 /********************************************************************
 * FUNCTION val_get_first_key
-* 
+*
 * Get the first key record if this is a list with a key-stmt
 *
 * INPUTS:
@@ -10561,7 +10562,7 @@ val_index_t *
 
 /********************************************************************
 * FUNCTION val_get_next_key
-* 
+*
 * Get the next key record if this is a list with a key-stmt
 *
 * INPUTS:
@@ -10585,7 +10586,7 @@ val_index_t *
 
 /********************************************************************
 * FUNCTION val_remove_key
-* 
+*
 * Remove a key pointer because the key is invalid
 * Free the key pointer
 *
@@ -10615,14 +10616,14 @@ void
 
 /********************************************************************
 * FUNCTION val_new_deleted_value
-* 
+*
 * Malloc and initialize the fields in a val_value_t to be used
 * as a deleted node marker
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-val_value_t * 
+val_value_t *
     val_new_deleted_value (void)
 {
     val_value_t  *val;
@@ -10643,7 +10644,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_new_editvars
-* 
+*
 * Malloc and initialize the val->editvars field
 *
 * INPUTS:
@@ -10651,7 +10652,7 @@ val_value_t *
 *
 * OUTPUTS:
 *    val->editvars is malloced and initialized
-* 
+*
 * RETURNS:
 *   status
 *********************************************************************/
@@ -10685,7 +10686,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_free_editvars
-* 
+*
 * Free the editing variables for the value node
 *
 * INPUTS:

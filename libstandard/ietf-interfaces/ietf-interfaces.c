@@ -102,6 +102,106 @@
 static val_value_t* with_nmda_param_val;
 
 static status_t
+    ietf_interfaces_interface_name_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    if (LOGDEBUG) {
+        log_debug("\n >>>>> walter: func = ietf_interfaces_interface_name_edit ");
+        log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\n newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        if (newval!=NULL) {
+            log_debug("\n newval11 ");
+            log_debug("\n newval.name is %s", newval->name);
+            log_debug("\n newval22 ");
+            log_debug("\n newval = %s",VAL_STRING(newval));
+            log_debug("\n newval33 ");
+        }
+        if (curval!=NULL) {
+            log_debug("\n curval11 ");
+            log_debug("\n curval = %s",curval->name);
+            log_debug("\n curval22 ");
+            log_debug("\n curval = %s",VAL_STRING(curval));
+            log_debug("\n curval44 ");
+
+        }
+        val_dump_value(newval, 0);
+        val_dump_value(curval, 0);
+    }
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            if(newval!=NULL) {
+                log_debug("\nSetting newval %s\n", VAL_STRING(newval));
+                // res = set_api_string_router(private_api_set_time_timezone, VAL_STRING(newval));
+                // struct timepb_Config *time_config = malloc(sizeof(*time_config));
+                // struct emptypb_Empty *epty = malloc(sizeof(*epty));
+                // log_debug("\n whay1 ");
+                // time_Time_GetConfig(epty, time_config);
+                // log_debug("\n whay2 ");
+                // time_config->TimeZone = VAL_STRING(newval);
+                // log_debug("\n whay3 ");
+                // time_Time_SetConfig(time_config, epty);
+            }
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\n walter: b4 ietf_interfaces_interface_name_edit return");
+    return res;
+}
+
+
+
+
+static status_t
     add_interface_entry(val_value_t *parentval,
         struct portpb_ConfigEntry *entry,
         struct networkpb_Config *network_cfg,
@@ -161,19 +261,18 @@ static status_t
         return SET_ERROR(res);
     }
 
-    // [FIXME] open this will get Error 258 invalid value, check it later
-    // /* interface/type */
-    // int32_t *if_type = 6; // ethernetCsmacd(6)
-    // childval = agt_make_int_leaf(
-    //     parentval->obj,
-    //     ietf_interfaces_interfaces_type,
-    //     if_type,
-    //     &res);
-    // if (childval != NULL) {
-    //     val_add_child_sorted(childval, parentval);
-    // } else if (res != NO_ERR) {
-    //     return SET_ERROR(res);
-    // }
+    /* interface/type */
+    xmlChar * if_type= "ethernetCsmacd"; // ethernetCsmacd(6)
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_type,
+        if_type,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
     /* interface/enabled */
     const xmlChar * enabled = "false";
@@ -998,7 +1097,7 @@ ietf_interfaces_state_list_get(
     status_t res = NO_ERR;
 
     if (LOGDEBUG) {
-        log_debug("\nEnter intri_device_intri_device_port_list_get");
+        log_debug("\nEnter ietf_interfaces_state_list_get");
     }
 
     struct emptypb_Empty *in = malloc(sizeof(*(in)));
@@ -1035,7 +1134,7 @@ ietf_interfaces_state_list_get(
     in4->List = malloc(in4->List_Len * sizeof(*(in4->List)));
     in5->List = malloc(in5->List_Len * sizeof(*(in5->List)));
 
-    log_debug("\nEnter intri_device_intri_device_port_list_get4\n");
+    log_debug("\nEnter ietf_interfaces_state_list_get4\n");
 
     for (int i = 0; i<=29 ;i++) {
         in4->List[i] = malloc(sizeof(*(in4->List[i])));
@@ -1048,15 +1147,15 @@ ietf_interfaces_state_list_get(
         in5->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
         in5->List[i]->DeviceID = 0;
     }
-    log_debug("\nEnter intri_device_intri_device_port_list_get5\n");
+    log_debug("\nEnter ietf_interfaces_state_list_get5\n");
 
     rmon_RMON_GetIngress(in4, ingress_out);
     rmon_RMON_GetEgress(in5, egress_out);
-    log_debug("\nEnter intri_device_intri_device_port_list_get6\n");
+    log_debug("\nEnter ietf_interfaces_state_list_get6\n");
 
     for (int i =0; i < out->List_Len; i++) {
         val_value_t *entry_val = NULL;
-        log_debug("\nEnter intri_device_intri_device_port_list_get6.1, index is %d", i);
+        log_debug("\nEnter ietf_interfaces_state_list_get6.1, index is %d", i);
         entry_val = agt_make_list(
             dstval->obj,
             ietf_interfaces_interface,
@@ -1066,8 +1165,8 @@ ietf_interfaces_state_list_get(
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
-        log_debug("\nEnter intri_device_intri_device_port_list_get6.5, entry_val is %s", entry_val->name);
-        log_debug("\nEnter intri_device_intri_device_port_list_get6.5, out->List[i] is %d", out->List[i]->IdentifyNo->PortNo);
+        log_debug("\nEnter ietf_interfaces_state_list_get6.5, entry_val is %s", entry_val->name);
+        log_debug("\nEnter ietf_interfaces_state_list_get6.5, out->List[i] is %d", out->List[i]->IdentifyNo->PortNo);
         res = add_interface_state_entry(
             entry_val,
             out->List[i],
@@ -1083,7 +1182,7 @@ ietf_interfaces_state_list_get(
             return SET_ERROR(res);
         }
     }
-    log_debug("\nEnter intri_device_intri_device_port_list_get7\n");
+    log_debug("\nEnter ietf_interfaces_state_list_get7\n");
 
     free(out);
     free(status_out);
@@ -1181,6 +1280,16 @@ status_t
         NULL,
         &agt_profile->agt_savedevQ,
         &mod);
+
+    res = agt_cb_register_callback(
+        "ietf-interfaces",
+        (const xmlChar *)"/interfaces/interface/name",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_interfaces_interface_name_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
     assert(res == NO_ERR);
 
     return res;

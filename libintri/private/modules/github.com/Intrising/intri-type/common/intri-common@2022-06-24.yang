@@ -32,40 +32,49 @@ module intri-common {
   }
   grouping Path {
     leaf Path {
+      mandatory "true";
       type string;
     }
   }
   grouping ExportPathRequest {
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf FTPSEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping ImportPathRequest {
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf FTPSEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf RebootAfterAction {
+      mandatory "true";
       type boolean;
     }
   }
   grouping Enabled {
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping MACAddress {
     leaf MACAddr {
+      mandatory "true";
       type string;
     }
   }
   grouping IPAddress {
     leaf IPAddr {
+      mandatory "true";
       type string;
     }
   }
@@ -78,9 +87,11 @@ module intri-common {
   }
   grouping IPv6Entry {
     leaf Type {
+      mandatory "true";
       type IPv6ScopeTypeOptions;
     }
     leaf IPAddr {
+      mandatory "true";
       type string;
     }
   }
@@ -93,6 +104,7 @@ module intri-common {
   }
   grouping Name {
     leaf Name {
+      mandatory "true";
       type string;
     }
   }
@@ -105,31 +117,37 @@ module intri-common {
   }
   grouping Reply {
     leaf Reply {
+      mandatory "true";
       type string;
     }
   }
   grouping Confirm {
     leaf Confirm {
+      mandatory "true";
       type string;
     }
   }
   grouping DateTime {
     leaf Ts {
+      mandatory "true";
       type string;
     }
   }
   grouping AllStatus {
     leaf Status {
+      mandatory "true";
       type string;
     }
   }
   grouping State {
     leaf State {
+      mandatory "true";
       type boolean;
     }
   }
   grouping Index {
     leaf Index {
+      mandatory "true";
       type int32;
     }
   }

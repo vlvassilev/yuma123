@@ -15,37 +15,47 @@ module intri-system {
   }
   grouping Status {
     leaf LastBootTime {
+      mandatory "true";
       type string;
     }
     leaf Uptime {
+      mandatory "true";
       type int64;
     }
   }
   grouping Config {
     leaf SysName {
+      mandatory "true";
       type string;
     }
     leaf SysLocation {
+      mandatory "true";
       type string;
     }
     leaf SysGroup {
+      mandatory "true";
       type string;
     }
     leaf SysContact {
+      mandatory "true";
       type string;
     }
   }
   grouping IdentificationConfig {
     leaf SysName {
+      mandatory "true";
       type string;
     }
     leaf SysLocation {
+      mandatory "true";
       type string;
     }
     leaf SysGroup {
+      mandatory "true";
       type string;
     }
     leaf SysContact {
+      mandatory "true";
       type string;
     }
   }

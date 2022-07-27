@@ -47,6 +47,7 @@ module intri-log {
   }
   grouping BasicConfig {
     leaf StorageOption {
+      mandatory "true";
       type StorageTypeOptions;
     }
   }
@@ -59,27 +60,35 @@ module intri-log {
   }
   grouping TargetConfigEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf HostAddress {
+      mandatory "true";
       type string;
     }
     leaf TargetLogType {
+      mandatory "true";
       type intri-event:TargetLogTypeOptions;
     }
     leaf LoggingSeverityType {
+      mandatory "true";
       type intri-event:LoggingSeverityTypeOptions;
     }
     leaf LogConfigChanges {
+      mandatory "true";
       type boolean;
     }
     leaf LogDebugEventOnly {
+      mandatory "true";
       type boolean;
     }
     leaf SnmpV3Username {
+      mandatory "true";
       type string;
     }
     leaf SnmpTrapCommunity {
+      mandatory "true";
       type string;
     }
   }
@@ -92,43 +101,54 @@ module intri-log {
   }
   grouping ActionConfigEntry {
     leaf LoggingType {
+      mandatory "true";
       type intri-event:LoggingTypeOptions;
     }
     leaf LoggingSeverityType {
+      mandatory "true";
       type intri-event:LoggingSeverityTypeOptions;
     }
   }
   grouping Statistics {
     leaf NumberOfTargets {
+      mandatory "true";
       type uint64;
     }
     leaf SyslogCounter {
+      mandatory "true";
       type int32;
     }
     leaf SnmpTrapCounter {
+      mandatory "true";
       type int32;
     }
     leaf SnmpInfoCounter {
+      mandatory "true";
       type int32;
     }
     leaf DisplayInCliCounter {
+      mandatory "true";
       type int32;
     }
   }
   grouping LogFileEntry {
     leaf LogID {
+      mandatory "true";
       type uint64;
     }
     container Ts {
       uses intri-timestamp:Timestamp;
     }
     leaf LoggingType {
+      mandatory "true";
       type intri-event:LoggingTypeOptions;
     }
     leaf LoggingSeverityType {
+      mandatory "true";
       type intri-event:LoggingSeverityTypeOptions;
     }
     leaf Message {
+      mandatory "true";
       type string;
     }
   }

@@ -102,12 +102,15 @@ module intri-udld {
   }
   grouping BasicConfig {
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf ModeOption {
+      mandatory "true";
       type ModeTypeOptions;
     }
     leaf MessageIntervalSeconds {
+      mandatory "true";
       type int32;
     }
   }
@@ -123,9 +126,11 @@ module intri-udld {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf ModeOption {
+      mandatory "true";
       type ModeTypeOptions;
     }
   }
@@ -149,18 +154,23 @@ module intri-udld {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf PortLinkUp {
+      mandatory "true";
       type boolean;
     }
     leaf FaultOption {
+      mandatory "true";
       type PortFaultTypeOptions;
     }
     leaf StateOption {
+      mandatory "true";
       type PortStateTypeOptions;
     }
     leaf ModeOption {
+      mandatory "true";
       type ModeTypeOptions;
     }
   }
@@ -176,24 +186,31 @@ module intri-udld {
       uses intri-device:InterfaceIdentify;
     }
     leaf DeviceID {
+      mandatory "true";
       type string;
     }
     leaf PortID {
+      mandatory "true";
       type string;
     }
     leaf MacAddress {
+      mandatory "true";
       type string;
     }
     leaf DeviceName {
+      mandatory "true";
       type string;
     }
     leaf StateOption {
+      mandatory "true";
       type PortStateTypeOptions;
     }
     leaf ExpirationTimeSeconds {
+      mandatory "true";
       type int32;
     }
     leaf MessageTimeSeconds {
+      mandatory "true";
       type int32;
     }
   }
@@ -229,9 +246,11 @@ module intri-udld {
   }
   grouping PacketStatisticsEntry {
     leaf OpcodeOption {
+      mandatory "true";
       type PacketOpcodeTypeOptions;
     }
     leaf Count {
+      mandatory "true";
       type uint64;
     }
   }

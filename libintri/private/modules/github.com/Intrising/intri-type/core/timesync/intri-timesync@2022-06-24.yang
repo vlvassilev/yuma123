@@ -132,11 +132,13 @@ module intri-timesync {
   }
   grouping GNSSConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping SyncEConfig {
     leaf Mode {
+      mandatory "true";
       type SyncEModeTypeOptions;
     }
     container ReferenceIdentifyNo {
@@ -145,6 +147,7 @@ module intri-timesync {
   }
   grouping SyncSourceConfig {
     leaf Source {
+      mandatory "true";
       type SyncSourceTypeOptions;
     }
   }
@@ -155,23 +158,29 @@ module intri-timesync {
   }
   grouping ToDConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf MessageType {
+      mandatory "true";
       type ToDMessageTypeOptions;
     }
   }
   grouping GNSStatus {
     leaf State {
+      mandatory "true";
       type GNSSStateTypeOptions;
     }
     leaf Longitude {
+      mandatory "true";
       type string;
     }
     leaf Latitude {
+      mandatory "true";
       type string;
     }
     leaf DateTime {
+      mandatory "true";
       type string;
     }
   }
@@ -180,14 +189,17 @@ module intri-timesync {
       uses intri-device:InterfaceIdentify;
     }
     leaf Signal {
+      mandatory "true";
       type SignalTypeOptions;
     }
     leaf LockStatus {
+      mandatory "true";
       type LockStatusTypeOptions;
     }
   }
   grouping SyncSourceStatus {
     leaf LockStatus {
+      mandatory "true";
       type LockStatusTypeOptions;
     }
     container List {
@@ -198,9 +210,11 @@ module intri-timesync {
   }
   grouping SyncSourceInputStatusEntry {
     leaf Source {
+      mandatory "true";
       type SyncSourceTypeOptions;
     }
     leaf Signal {
+      mandatory "true";
       type SignalTypeOptions;
     }
   }

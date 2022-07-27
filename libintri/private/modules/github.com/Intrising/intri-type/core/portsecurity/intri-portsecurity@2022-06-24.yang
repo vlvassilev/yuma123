@@ -88,12 +88,15 @@ module intri-portsecurity {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Mode {
+      mandatory "true";
       type PortSecurityModeTypeOptions;
     }
     leaf MaxMACCount {
+      mandatory "true";
       type int32;
     }
     container SecureAddressList {
@@ -102,14 +105,17 @@ module intri-portsecurity {
       }
     }
     leaf ViolationMode {
+      mandatory "true";
       type PortSecurityViolationTypeOptions;
     }
   }
   grouping SecureEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
   }
@@ -133,32 +139,41 @@ module intri-portsecurity {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Status {
+      mandatory "true";
       type PortSecurityStatusTypeOptions;
     }
     leaf ViolationMode {
+      mandatory "true";
       type PortSecurityViolationTypeOptions;
     }
     leaf MaxMACCount {
+      mandatory "true";
       type int32;
     }
     leaf SecureMACCount {
+      mandatory "true";
       type int32;
     }
     leaf LastSourceMACaddressVlan {
+      mandatory "true";
       type string;
     }
   }
   grouping PortSecurityAge {
     leaf StaticAging {
+      mandatory "true";
       type boolean;
     }
     leaf Type {
+      mandatory "true";
       type PortSecurityAgeModeTypeOptions;
     }
     leaf Time {
+      mandatory "true";
       type int32;
     }
   }

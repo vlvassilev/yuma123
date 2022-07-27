@@ -12,15 +12,19 @@ module intri-timeofday {
 
   grouping TimeOfDay {
     leaf Hours {
+      mandatory "true";
       type int32;
     }
     leaf Minutes {
+      mandatory "true";
       type int32;
     }
     leaf Seconds {
+      mandatory "true";
       type int32;
     }
     leaf Nanos {
+      mandatory "true";
       type int32;
     }
   }

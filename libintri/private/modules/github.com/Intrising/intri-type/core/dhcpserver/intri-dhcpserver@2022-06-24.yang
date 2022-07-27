@@ -59,6 +59,7 @@ module intri-dhcpserver {
   }
   grouping System {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -71,12 +72,14 @@ module intri-dhcpserver {
   }
   grouping PoolEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container Interface {
       uses intri-device:InterfaceIdentify;
     }
     leaf EntryType {
+      mandatory "true";
       type PoolTypeOptions;
     }
     container Basic {
@@ -89,68 +92,86 @@ module intri-dhcpserver {
       uses PortBased;
     }
     leaf ID {
+      mandatory "true";
       type string;
     }
   }
   grouping Basic {
     leaf RangeLow {
+      mandatory "true";
       type string;
     }
     leaf RangeHigh {
+      mandatory "true";
       type string;
     }
     leaf Netmask {
+      mandatory "true";
       type string;
     }
     leaf Gateway {
+      mandatory "true";
       type string;
     }
     leaf PrimaryDNS {
+      mandatory "true";
       type string;
     }
     leaf SecondaryDNS {
+      mandatory "true";
       type string;
     }
     leaf LeaseTime {
+      mandatory "true";
       type int32;
     }
   }
   grouping MACBased {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf DesiredIP {
+      mandatory "true";
       type string;
     }
   }
   grouping PortBased {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Ignore {
+      mandatory "true";
       type boolean;
     }
     leaf DesiredIP {
+      mandatory "true";
       type string;
     }
   }
   grouping StatusEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container Interface {
       uses intri-device:InterfaceIdentify;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf AvailableLeaseTime {
+      mandatory "true";
       type int32;
     }
   }

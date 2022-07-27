@@ -87,6 +87,7 @@ module intri-fdb {
   }
   grouping AgingTime {
     leaf GlobalAgingTime {
+      mandatory "true";
       type int32;
     }
   }
@@ -99,9 +100,11 @@ module intri-fdb {
   }
   grouping ForwardConfigEntry {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     container IdentifyNo {
@@ -117,9 +120,11 @@ module intri-fdb {
   }
   grouping DropConfigEntry {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     container IdentifyNo {
@@ -138,35 +143,45 @@ module intri-fdb {
       uses intri-device:InterfaceIdentify;
     }
     leaf Limit {
+      mandatory "true";
       type int32;
     }
   }
   grouping Info {
     leaf UsedAgingTime {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfFreeEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfUsedEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfMacUnicastDynamicEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfMacUnicastStaticEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfMacMulticastDynamicEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfMacMulticastStaticEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfIpv4MulticastEntries {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfIpv6MulticastEntries {
+      mandatory "true";
       type int32;
     }
   }
@@ -179,25 +194,30 @@ module intri-fdb {
   }
   grouping StatusEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf State {
+      mandatory "true";
       type MACTableStateTypeOptions;
     }
   }
   grouping SpecificMac {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
   }
   grouping FlushOption {
     leaf DynamicAll {
+      mandatory "true";
       type boolean;
     }
     container Identify {
@@ -209,6 +229,7 @@ module intri-fdb {
       uses intri-device:InterfaceIdentify;
     }
     leaf Type {
+      mandatory "true";
       type PortOccupiedTypeOptions;
     }
   }

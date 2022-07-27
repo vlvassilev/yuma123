@@ -21,9 +21,11 @@ module intri-snmp {
   }
   grouping EngineInfo {
     leaf Boots {
+      mandatory "true";
       type int32;
     }
     leaf RunTime {
+      mandatory "true";
       type int64;
     }
   }

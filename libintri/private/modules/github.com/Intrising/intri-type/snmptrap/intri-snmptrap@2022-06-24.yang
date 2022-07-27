@@ -12,9 +12,11 @@ module intri-snmptrap {
 
   grouping SNMPTrapCounter {
     leaf ErrorCounts {
+      mandatory "true";
       type int32;
     }
     leaf TrapCounts {
+      mandatory "true";
       type int32;
     }
   }

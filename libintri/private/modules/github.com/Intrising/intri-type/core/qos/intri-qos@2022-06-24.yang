@@ -62,28 +62,35 @@ module intri-qos {
   }
   grouping WeightedFairTrafficRatioQueueEntry {
     leaf QueueNo {
+      mandatory "true";
       type int32;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf Scheme {
+      mandatory "true";
       type PrioritySchemeTypeOptions;
     }
   }
   grouping MappingCoSDot1PToQueueEntry {
     leaf CosNo {
+      mandatory "true";
       type int32;
     }
     leaf QueueNo {
+      mandatory "true";
       type int32;
     }
   }
   grouping MappingDSCPToQueueEntry {
     leaf DSCPNo {
+      mandatory "true";
       type int32;
     }
     leaf QueueNo {
+      mandatory "true";
       type int32;
     }
   }
@@ -92,29 +99,37 @@ module intri-qos {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf EgressBandwidth {
+      mandatory "true";
       type int32;
     }
     leaf IngressBandwidth {
+      mandatory "true";
       type int32;
     }
     leaf IngressUnicastEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf IngressMulticastEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf IngressBroadcastEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping Config {
     leaf ModeOption {
+      mandatory "true";
       type ModeTypeOptions;
     }
     leaf TrustModeOption {
+      mandatory "true";
       type TrustModeTypeOptions;
     }
     container QueueList {
@@ -140,16 +155,19 @@ module intri-qos {
   }
   grouping Mode {
     leaf Option {
+      mandatory "true";
       type ModeTypeOptions;
     }
   }
   grouping TrustMode {
     leaf Option {
+      mandatory "true";
       type TrustModeTypeOptions;
     }
   }
   grouping PriorityScheme {
     leaf Option {
+      mandatory "true";
       type PrioritySchemeTypeOptions;
     }
   }

@@ -18,23 +18,29 @@ module intri-maintenance {
   }
   grouping FirmwareInfo {
     leaf Version {
+      mandatory "true";
       type string;
     }
     leaf BuildDate {
+      mandatory "true";
       type string;
     }
     leaf BuildNumber {
+      mandatory "true";
       type string;
     }
   }
   grouping UpgradePathRequest {
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf FTPSEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf RebootAfterAction {
+      mandatory "true";
       type boolean;
     }
   }

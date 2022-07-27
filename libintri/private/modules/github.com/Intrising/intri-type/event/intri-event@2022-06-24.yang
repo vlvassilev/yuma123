@@ -1166,17 +1166,21 @@ module intri-event {
   }
   grouping ACLParameter {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Index {
+      mandatory "true";
       type int32;
     }
     leaf Type {
+      mandatory "true";
       type ACLActionTypeOptions;
     }
   }
   grouping LgportUsed {
     leaf Action {
+      mandatory "true";
       type AggrTypeOptions;
     }
     container OriginalMembers {
@@ -1209,12 +1213,15 @@ module intri-event {
   }
   grouping AggrParameter {
     leaf Type {
+      mandatory "true";
       type AggrSourceTypeOptions;
     }
     leaf TrunkID {
+      mandatory "true";
       type int32;
     }
     choice Used {
+    mandatory "true";
       container Lgport {
         uses LgportUsed;
       }
@@ -1225,6 +1232,7 @@ module intri-event {
   }
   grouping AUParameter {
     leaf Type {
+      mandatory "true";
       type AUParameterTypeOptions;
     }
     container Entry {
@@ -1236,71 +1244,89 @@ module intri-event {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsStatic {
+      mandatory "true";
       type boolean;
     }
     leaf IsForward {
+      mandatory "true";
       type boolean;
     }
     leaf Address {
+      mandatory "true";
       type string;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf IsAgeout {
+      mandatory "true";
       type boolean;
     }
     leaf Action {
+      mandatory "true";
       type FDBEntryActionTypeOptions;
     }
   }
   grouping ButtonParameter {
     leaf Type {
+      mandatory "true";
       type ButtonTypeOptions;
     }
     leaf Action {
+      mandatory "true";
       type ButtonActionTypeOptions;
     }
     leaf Trigger {
+      mandatory "true";
       type ButtonTriggerActionTypeOptions;
     }
   }
   grouping CryptoRequest {
     leaf Value {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type CryptoTypeOptions;
     }
   }
   grouping CryptoResponse {
     leaf Value {
+      mandatory "true";
       type string;
     }
   }
   grouping CryptoBase64Request {
     leaf Value {
+      mandatory "true";
       type uint8;
     }
   }
   grouping CryptoBase64Response {
     leaf Value {
+      mandatory "true";
       type uint8;
     }
   }
   grouping DHCPParameter {
     leaf TFTPServer {
+      mandatory "true";
       type string;
     }
     leaf BootFile {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type DHCPClientTypeOptions;
     }
   }
   grouping FDBParameter {
     leaf Type {
+      mandatory "true";
       type FDBParameterTypeOptions;
     }
     container Port {
@@ -1309,95 +1335,123 @@ module intri-event {
   }
   grouping ServiceInitialized {
     leaf ServiceType {
+      mandatory "true";
       type string;
     }
     leaf Action {
+      mandatory "true";
       type ServiceActionTypeOptions;
     }
   }
   grouping EthernetLayer {
     leaf DstMACAddr {
+      mandatory "true";
       type uint8;
     }
     leaf DstMACAddrEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SrcMACAddr {
+      mandatory "true";
       type uint8;
     }
     leaf SrcMACAddrEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf EtherType {
+      mandatory "true";
       type EthernetTypeOptions;
     }
     leaf EtherTypeEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping LLCLayer {
     leaf DSAP {
+      mandatory "true";
       type uint32;
     }
     leaf DSAPEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf IG {
+      mandatory "true";
       type boolean;
     }
     leaf IGEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SSAP {
+      mandatory "true";
       type uint32;
     }
     leaf SSAPEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf CR {
+      mandatory "true";
       type boolean;
     }
     leaf CREnabled {
+      mandatory "true";
       type boolean;
     }
     leaf Control {
+      mandatory "true";
       type uint32;
     }
     leaf ControlEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping IPLayer {
     leaf IPProtocol {
+      mandatory "true";
       type IPProtocolTypeOptions;
     }
     leaf IPProtocolEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SrcIPAddr {
+      mandatory "true";
       type uint8;
     }
     leaf SrcIPAddrEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf DstIPAddr {
+      mandatory "true";
       type uint8;
     }
     leaf DstIPAddrEnabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping Layer4Port {
     leaf L4SrcPort {
+      mandatory "true";
       type uint32;
     }
     leaf L4SrcPortEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf L4DstPort {
+      mandatory "true";
       type uint32;
     }
     leaf L4DstPortEnabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -1406,51 +1460,65 @@ module intri-event {
       uses intri-device:InterfaceIdentify;
     }
     leaf Type {
+      mandatory "true";
       type LinkTypeOptions;
     }
   }
   grouping LoginParameter {
     leaf Type {
+      mandatory "true";
       type LoginTypeOptions;
     }
     leaf Result {
+      mandatory "true";
       type LoginResultTypeOptions;
     }
     leaf InterfaceName {
+      mandatory "true";
       type LoginInterfaceNameTypeOptions;
     }
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Privilege {
+      mandatory "true";
       type int32;
     }
     leaf Token {
+      mandatory "true";
       type string;
     }
     leaf AccessToken {
+      mandatory "true";
       type string;
     }
     leaf ErrCode {
+      mandatory "true";
       type string;
     }
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
   }
   grouping MaintenanceParameter {
     leaf Action {
+      mandatory "true";
       type MaintenanceActionTypeOptions;
     }
   }
   grouping MulticastParameter {
     leaf Type {
+      mandatory "true";
       type MulticastActionTypeOptions;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Addr {
+      mandatory "true";
       type string;
     }
   }
@@ -1461,6 +1529,7 @@ module intri-event {
       }
     }
     leaf IsPhysicalPort {
+      mandatory "true";
       type boolean;
     }
   }
@@ -1469,24 +1538,28 @@ module intri-event {
       uses EthernetLayer;
     }
     leaf EthernetEnabled {
+      mandatory "true";
       type boolean;
     }
     container LLC {
       uses LLCLayer;
     }
     leaf LLCEnabled {
+      mandatory "true";
       type boolean;
     }
     container IP {
       uses IPLayer;
     }
     leaf IPEnabled {
+      mandatory "true";
       type boolean;
     }
     container L4 {
       uses Layer4Port;
     }
     leaf L4Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -1495,12 +1568,15 @@ module intri-event {
       uses intri-device:InterfaceIdentify;
     }
     leaf Forward {
+      mandatory "true";
       type boolean;
     }
     leaf VlanTagged {
+      mandatory "true";
       type boolean;
     }
     leaf EgressFilter {
+      mandatory "true";
       type boolean;
     }
     container ExcludeIdentify {
@@ -1512,25 +1588,31 @@ module intri-event {
       uses PacketInfo;
     }
     leaf Buf {
+      mandatory "true";
       type uint8;
     }
   }
   grouping PoEParameter {
     leaf Type {
+      mandatory "true";
       type PoEParameterTypeOptions;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
   }
   grouping PortParameter {
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -1539,20 +1621,25 @@ module intri-event {
       uses intri-device:InterfaceIdentify;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
   }
   grouping SFPInfo {
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Location {
+      mandatory "true";
       type string;
     }
     container Status {
@@ -1561,63 +1648,83 @@ module intri-event {
       }
     }
     leaf Type {
+      mandatory "true";
       type SFPTypeOptions;
     }
     leaf Connector {
+      mandatory "true";
       type SFPConnectorTypeOptions;
     }
     leaf Wavelength {
+      mandatory "true";
       type string;
     }
     leaf TxTechnology {
+      mandatory "true";
       type string;
     }
     leaf RxTechnology {
+      mandatory "true";
       type string;
     }
     leaf NominalBitrate {
+      mandatory "true";
       type string;
     }
     leaf Manufacturer {
+      mandatory "true";
       type string;
     }
     leaf PartNumber {
+      mandatory "true";
       type string;
     }
     leaf Revision {
+      mandatory "true";
       type string;
     }
     leaf SerialNumber {
+      mandatory "true";
       type string;
     }
     leaf MfgDateCode {
+      mandatory "true";
       type string;
     }
     leaf TxPower {
+      mandatory "true";
       type string;
     }
     leaf RxPower {
+      mandatory "true";
       type string;
     }
     leaf Temperature {
+      mandatory "true";
       type string;
     }
     leaf MaxLength_9Um {
+      mandatory "true";
       type string;
     }
     leaf MaxLength_50Um {
+      mandatory "true";
       type string;
     }
     leaf MaxLength_62Um {
+      mandatory "true";
       type string;
     }
     leaf MaxLengthCopper {
+      mandatory "true";
       type string;
     }
     leaf TuningRange {
+      mandatory "true";
       type string;
     }
     leaf PowerConsumption {
+      mandatory "true";
       type string;
     }
     container AdditionalInformation {
@@ -1626,17 +1733,21 @@ module intri-event {
       }
     }
     leaf Speed {
+      mandatory "true";
       type PortSpeedDuplexTypeOptions;
     }
   }
   grouping SFPParameter {
     leaf Type {
+      mandatory "true";
       type SFPActionTypeOptions;
     }
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     container Info {
@@ -1645,6 +1756,7 @@ module intri-event {
   }
   grouping StormcontrolParameter {
     leaf ActionOption {
+      mandatory "true";
       type StormcontrolActionTypeOptions;
     }
     container IdentifyNo {
@@ -1653,9 +1765,11 @@ module intri-event {
   }
   grouping BootParameter {
     leaf Type {
+      mandatory "true";
       type BootActionTypeOptions;
     }
     leaf Version {
+      mandatory "true";
       type string;
     }
   }
@@ -1664,28 +1778,35 @@ module intri-event {
       uses intri-device:InterfaceIdentify;
     }
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf SubnetMask {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type NetworkIPv6TypeOptions;
     }
   }
   grouping TimeRangeParameter {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf IsActive {
+      mandatory "true";
       type boolean;
     }
   }
   grouping UdldParameter {
     leaf ActionOption {
+      mandatory "true";
       type UdldActionTypeOptions;
     }
     choice ActionOptionParam {
+    mandatory "true";
       container PortShutdown {
         uses UdldActionPortShutdown;
       }
@@ -1698,12 +1819,15 @@ module intri-event {
   }
   grouping VLANParameter {
     leaf Type {
+      mandatory "true";
       type VLANParameterTypeOptions;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     container IdentifyNo {
@@ -1712,6 +1836,7 @@ module intri-event {
   }
   grouping ManagmentVLANPriority {
     leaf Priority {
+      mandatory "true";
       type int32;
     }
   }
@@ -1724,18 +1849,22 @@ module intri-event {
   }
   grouping Internal {
     leaf Type {
+      mandatory "true";
       type InternalTypeOptions;
     }
     leaf Message {
+      mandatory "true";
       type string;
     }
     container Ts {
       uses intri-timestamp:Timestamp;
     }
     leaf LoggingType {
+      mandatory "true";
       type LoggingTypeOptions;
     }
     choice Parameter {
+    mandatory "true";
       container Init {
         uses ServiceInitialized;
       }
@@ -1755,6 +1884,7 @@ module intri-event {
         uses AggrParameter;
       }
       leaf NTP {
+        mandatory "true";
         type NTPActionTypeOptions;
       }
       container Boot {
@@ -1813,12 +1943,15 @@ module intri-event {
   }
   grouping TargetSNMP {
     leaf HostAddress {
+      mandatory "true";
       type string;
     }
     leaf SnmpCommunity {
+      mandatory "true";
       type string;
     }
     leaf SnmpV3Username {
+      mandatory "true";
       type string;
     }
   }
@@ -1826,14 +1959,17 @@ module intri-event {
   }
   grouping TargetSysLog {
     leaf HostAddress {
+      mandatory "true";
       type string;
     }
   }
   grouping TargetLogOptionalParameter {
     leaf Option {
+      mandatory "true";
       type TargetLogTypeOptions;
     }
     choice OptionParam {
+    mandatory "true";
       container Snmp {
         uses TargetSNMP;
       }
@@ -1847,18 +1983,22 @@ module intri-event {
   }
   grouping TargetLog {
     leaf LogID {
+      mandatory "true";
       type uint64;
     }
     container Ts {
       uses intri-timestamp:Timestamp;
     }
     leaf LoggingType {
+      mandatory "true";
       type LoggingTypeOptions;
     }
     leaf LoggingSeverityType {
+      mandatory "true";
       type LoggingSeverityTypeOptions;
     }
     leaf Message {
+      mandatory "true";
       type string;
     }
     container Param {

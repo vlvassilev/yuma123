@@ -61,21 +61,27 @@ module intri-stormcontrol {
   }
   grouping SuppressionConfigEntry {
     leaf SuppressionOption {
+      mandatory "true";
       type StormControlSuppressionTypeOptions;
     }
     leaf IsEnable {
+      mandatory "true";
       type boolean;
     }
     leaf ActionOption {
+      mandatory "true";
       type StormControlActionTypeOptions;
     }
     leaf UnitOption {
+      mandatory "true";
       type StormControlSuppressionUnitTypeOptions;
     }
     leaf BpsUpperThreshold {
+      mandatory "true";
       type uint64;
     }
     leaf PpsUpperThreshold {
+      mandatory "true";
       type uint64;
     }
   }
@@ -84,6 +90,7 @@ module intri-stormcontrol {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnable {
+      mandatory "true";
       type boolean;
     }
     container SuppressionList {
@@ -101,6 +108,7 @@ module intri-stormcontrol {
   }
   grouping Config {
     leaf IsEnable {
+      mandatory "true";
       type boolean;
     }
     container PortConfig {

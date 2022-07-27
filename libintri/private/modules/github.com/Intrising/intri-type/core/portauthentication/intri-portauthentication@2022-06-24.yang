@@ -164,9 +164,11 @@ module intri-portauthentication {
   }
   grouping AuthorizedMACsEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     container PermittedPortList {
@@ -175,6 +177,7 @@ module intri-portauthentication {
       }
     }
     leaf TreatAsVendorMAC {
+      mandatory "true";
       type boolean;
     }
   }
@@ -187,39 +190,51 @@ module intri-portauthentication {
   }
   grouping SystemConfig {
     leaf PortAccessControlEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf ReauthenticationPeriod {
+      mandatory "true";
       type int32;
     }
     leaf NASIdentifier {
+      mandatory "true";
       type string;
     }
     leaf MACSeparatorChar {
+      mandatory "true";
       type string;
     }
     leaf MACSpelling {
+      mandatory "true";
       type MACSpellingTypeOptions;
     }
     leaf MACPasswordSource {
+      mandatory "true";
       type MACPasswordSourceTypeOptions;
     }
     leaf MACPasswordString {
+      mandatory "true";
       type string;
     }
     leaf PrimaryAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf PrimaryAcctServerName {
+      mandatory "true";
       type string;
     }
     leaf FallbackAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf FallbackAcctServerName {
+      mandatory "true";
       type string;
     }
     leaf ServerDownTimeout {
+      mandatory "true";
       type int32;
     }
   }
@@ -235,18 +250,23 @@ module intri-portauthentication {
       uses intri-device:InterfaceIdentify;
     }
     leaf AuthorizedMode {
+      mandatory "true";
       type AuthorizationModeTypeOptions;
     }
     leaf UnAuthorizedMode {
+      mandatory "true";
       type UnAuthorizationModeTypeOptions;
     }
     leaf AuthFailRetryInterval {
+      mandatory "true";
       type int32;
     }
     leaf LimitedNumberOfMACs {
+      mandatory "true";
       type int32;
     }
     leaf MACTimeout {
+      mandatory "true";
       type MACTimeoutTypeOptions;
     }
   }
@@ -262,18 +282,23 @@ module intri-portauthentication {
       uses intri-device:InterfaceIdentify;
     }
     leaf AuthorizationState {
+      mandatory "true";
       type AuthorizationStateTypeOptions;
     }
     leaf AuthorizationMode {
+      mandatory "true";
       type AuthorizationModeTypeOptions;
     }
     leaf LastStateChange {
+      mandatory "true";
       type string;
     }
     leaf NumberOfMACsToLearn {
+      mandatory "true";
       type int32;
     }
     leaf NumberOfLearnedMACs {
+      mandatory "true";
       type int32;
     }
   }
@@ -289,21 +314,27 @@ module intri-portauthentication {
       uses intri-device:InterfaceIdentify;
     }
     leaf AuthorizationState {
+      mandatory "true";
       type AuthorizationStateTypeOptions;
     }
     leaf UserMAC {
+      mandatory "true";
       type string;
     }
     leaf UserName {
+      mandatory "true";
       type string;
     }
     leaf IdleTimeout {
+      mandatory "true";
       type int32;
     }
     leaf SessionTimeout {
+      mandatory "true";
       type int32;
     }
     leaf LastStateChange {
+      mandatory "true";
       type string;
     }
   }
@@ -316,33 +347,42 @@ module intri-portauthentication {
   }
   grouping UserStatusEntry {
     leaf EntryState {
+      mandatory "true";
       type EntryStateTypeOptions;
     }
     leaf AuthorizationState {
+      mandatory "true";
       type AuthorizationStateTypeOptions;
     }
     leaf AuthorizationMode {
+      mandatory "true";
       type AuthorizationModeTypeOptions;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf UserMAC {
+      mandatory "true";
       type string;
     }
     leaf UserName {
+      mandatory "true";
       type string;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf IdleTimeout {
+      mandatory "true";
       type int32;
     }
     leaf SessionTimeout {
+      mandatory "true";
       type int32;
     }
     leaf LoginTimeStamp {
+      mandatory "true";
       type string;
     }
   }
@@ -351,6 +391,7 @@ module intri-portauthentication {
       uses intri-device:InterfaceIdentify;
     }
     leaf Amount {
+      mandatory "true";
       type int32;
     }
   }
@@ -359,6 +400,7 @@ module intri-portauthentication {
       uses intri-device:InterfaceIdentify;
     }
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
   }

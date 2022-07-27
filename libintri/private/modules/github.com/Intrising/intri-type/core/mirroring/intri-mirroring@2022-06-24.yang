@@ -80,9 +80,11 @@ module intri-mirroring {
   }
   grouping DestinationSessionEntry {
     leaf Index {
+      mandatory "true";
       type int32;
     }
     leaf Type {
+      mandatory "true";
       type DestinationTypeOptions;
     }
     container IdentifyNo {
@@ -98,15 +100,18 @@ module intri-mirroring {
   }
   grouping SourceSessionEntry {
     leaf DestinationIndex {
+      mandatory "true";
       type int32;
     }
     leaf SourceInterface {
+      mandatory "true";
       type SourceInterfaceTypeOptions;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf DirectionType {
+      mandatory "true";
       type DirectionTypeOptions;
     }
   }
@@ -119,9 +124,11 @@ module intri-mirroring {
   }
   grouping RSPANConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
   }

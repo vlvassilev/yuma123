@@ -181,39 +181,49 @@ module intri-config {
   }
   grouping ImportAction {
     leaf FileURL {
+      mandatory "true";
       type string;
     }
     leaf RebootAfterAction {
+      mandatory "true";
       type boolean;
     }
   }
   grouping ExportAction {
     leaf FileURL {
+      mandatory "true";
       type string;
     }
     leaf IsFTPS {
+      mandatory "true";
       type boolean;
     }
     leaf ForceTFTP {
+      mandatory "true";
       type boolean;
     }
   }
   grouping SaveModeStatus {
     leaf SaveStorageOption {
+      mandatory "true";
       type StorageTypeOptions;
     }
     leaf SaveModeOption {
+      mandatory "true";
       type SaveModeTypeOptions;
     }
     leaf ConfigStateOption {
+      mandatory "true";
       type ConfigStateTypeOptions;
     }
     leaf ConfigLastUpdated {
+      mandatory "true";
       type string;
     }
   }
   grouping RestoreDefaultType {
     leaf Type {
+      mandatory "true";
       type FactoryDefaultModeTypeOptions;
     }
   }

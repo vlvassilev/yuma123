@@ -81,30 +81,39 @@ module intri-time {
   }
   grouping Config {
     leaf Mode {
+      mandatory "true";
       type ModeTypeOptions;
     }
     leaf MainNTPServer {
+      mandatory "true";
       type string;
     }
     leaf BackupNTPServer {
+      mandatory "true";
       type string;
     }
     leaf TrustedServerEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SyncInterval {
+      mandatory "true";
       type int32;
     }
     leaf TimeZone {
+      mandatory "true";
       type string;
     }
     leaf TimeFormat {
+      mandatory "true";
       type string;
     }
     leaf DateFormat {
+      mandatory "true";
       type string;
     }
     leaf Manual {
+      mandatory "true";
       type string;
     }
   }
@@ -117,15 +126,19 @@ module intri-time {
   }
   grouping Status {
     leaf Status {
+      mandatory "true";
       type StatusTypeOptions;
     }
     leaf LocalTime {
+      mandatory "true";
       type string;
     }
     leaf LocalDate {
+      mandatory "true";
       type string;
     }
     leaf UsedNTPServer {
+      mandatory "true";
       type string;
     }
   }
@@ -136,11 +149,13 @@ module intri-time {
   }
   grouping RequestWithInt64 {
     leaf Ts {
+      mandatory "true";
       type int64;
     }
   }
   grouping Response {
     leaf Ts {
+      mandatory "true";
       type string;
     }
   }

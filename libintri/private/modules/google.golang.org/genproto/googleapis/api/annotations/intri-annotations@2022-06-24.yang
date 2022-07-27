@@ -17,27 +17,35 @@ module intri-annotations {
       }
     }
     leaf FullyDecodeReservedExpansion {
+      mandatory "true";
       type boolean;
     }
   }
   grouping HttpRule {
     leaf Selector {
+      mandatory "true";
       type string;
     }
     choice Pattern {
+    mandatory "true";
       leaf Get {
+        mandatory "true";
         type string;
       }
       leaf Put {
+        mandatory "true";
         type string;
       }
       leaf Post {
+        mandatory "true";
         type string;
       }
       leaf Delete {
+        mandatory "true";
         type string;
       }
       leaf Patch {
+        mandatory "true";
         type string;
       }
       container Custom {
@@ -45,9 +53,11 @@ module intri-annotations {
       }
     }
     leaf Body {
+      mandatory "true";
       type string;
     }
     leaf ResponseBody {
+      mandatory "true";
       type string;
     }
     container AdditionalBindings {
@@ -58,9 +68,11 @@ module intri-annotations {
   }
   grouping CustomHttpPattern {
     leaf Kind {
+      mandatory "true";
       type string;
     }
     leaf Path {
+      mandatory "true";
       type string;
     }
   }

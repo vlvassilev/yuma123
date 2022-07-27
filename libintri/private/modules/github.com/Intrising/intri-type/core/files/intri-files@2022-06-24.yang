@@ -30,6 +30,7 @@ module intri-files {
   }
   grouping Config {
     leaf FTPEnabled {
+      mandatory "true";
       type boolean;
     }
     container Certificate {
@@ -49,6 +50,7 @@ module intri-files {
   }
   grouping CertificateID {
     leaf ID {
+      mandatory "true";
       type string;
     }
   }
@@ -61,26 +63,33 @@ module intri-files {
   }
   grouping CertificateData {
     leaf ID {
+      mandatory "true";
       type string;
     }
     leaf CrtPath {
+      mandatory "true";
       type string;
     }
     leaf KeyPath {
+      mandatory "true";
       type string;
     }
     leaf FTPSEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf AuthCrtPath {
+      mandatory "true";
       type string;
     }
   }
   grouping CertificateUserID {
     leaf ID {
+      mandatory "true";
       type string;
     }
     leaf Username {
+      mandatory "true";
       type string;
     }
   }
@@ -93,20 +102,25 @@ module intri-files {
   }
   grouping CertificateType {
     leaf Type {
+      mandatory "true";
       type CertificateTypeOptions;
     }
   }
   grouping CertificateInfo {
     leaf CrtPath {
+      mandatory "true";
       type string;
     }
     leaf KeyPath {
+      mandatory "true";
       type string;
     }
     leaf Passphrase {
+      mandatory "true";
       type string;
     }
     leaf AuthCrtPath {
+      mandatory "true";
       type string;
     }
   }

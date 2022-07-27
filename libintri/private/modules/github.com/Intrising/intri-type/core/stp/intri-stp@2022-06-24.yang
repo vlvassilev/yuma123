@@ -134,27 +134,35 @@ module intri-stp {
   }
   grouping MSTPConfig {
     leaf Mode {
+      mandatory "true";
       type BridgeConfigModeTypeOptions;
     }
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Revision {
+      mandatory "true";
       type int32;
     }
     leaf MaxAge {
+      mandatory "true";
       type int32;
     }
     leaf HelloTime {
+      mandatory "true";
       type int32;
     }
     leaf ForwardDelay {
+      mandatory "true";
       type int32;
     }
     leaf MaxHops {
+      mandatory "true";
       type int32;
     }
     leaf TxHoldCount {
+      mandatory "true";
       type int32;
     }
     container Cist {
@@ -168,9 +176,11 @@ module intri-stp {
   }
   grouping CISTEntry {
     leaf No {
+      mandatory "true";
       type int32;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     container Ports {
@@ -181,6 +191,7 @@ module intri-stp {
   }
   grouping MSTIEntry {
     leaf No {
+      mandatory "true";
       type int32;
     }
     container Vlans {
@@ -189,9 +200,11 @@ module intri-stp {
       }
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     container Ports {
@@ -209,51 +222,65 @@ module intri-stp {
   }
   grouping MSTPCistPort {
     leaf No {
+      mandatory "true";
       type int32;
     }
     leaf PathCost {
+      mandatory "true";
       type int32;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf STPEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf P2PMode {
+      mandatory "true";
       type PortConfigAdminP2PPortTypeOptions;
     }
     leaf EdgeMode {
+      mandatory "true";
       type boolean;
     }
     leaf BPDUGuard {
+      mandatory "true";
       type PortConfigBPDUGuardTypeOptions;
     }
     leaf RestrictRoot {
+      mandatory "true";
       type boolean;
     }
   }
   grouping MSTPMstiPort {
     leaf No {
+      mandatory "true";
       type int32;
     }
     leaf PathCost {
+      mandatory "true";
       type int32;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
   }
   grouping MSTPID {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
   }
   grouping CISTStatus {
     leaf No {
+      mandatory "true";
       type int32;
     }
     container BridgeID {
@@ -263,24 +290,30 @@ module intri-stp {
       uses MSTPID;
     }
     leaf RootPort {
+      mandatory "true";
       type int32;
     }
     leaf RootCost {
+      mandatory "true";
       type int32;
     }
     container RegionalRoot {
       uses MSTPID;
     }
     leaf InternalRootCost {
+      mandatory "true";
       type int32;
     }
     leaf TopologyChange {
+      mandatory "true";
       type boolean;
     }
     leaf TopologyChangeCount {
+      mandatory "true";
       type int32;
     }
     leaf TimeSinceTopologyChange {
+      mandatory "true";
       type int32;
     }
     container Ports {
@@ -291,30 +324,39 @@ module intri-stp {
   }
   grouping CISTPortEntryStatus {
     leaf No {
+      mandatory "true";
       type int32;
     }
     leaf Role {
+      mandatory "true";
       type string;
     }
     leaf State {
+      mandatory "true";
       type string;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf PathCost {
+      mandatory "true";
       type int32;
     }
     leaf EdgeMode {
+      mandatory "true";
       type boolean;
     }
     leaf P2PMode {
+      mandatory "true";
       type boolean;
     }
     leaf Uptime {
+      mandatory "true";
       type int32;
     }
     leaf BPDUGuard {
+      mandatory "true";
       type string;
     }
   }
@@ -327,6 +369,7 @@ module intri-stp {
   }
   grouping MSTIStatusEntry {
     leaf No {
+      mandatory "true";
       type int32;
     }
     container BridgeID {
@@ -336,18 +379,23 @@ module intri-stp {
       uses MSTPID;
     }
     leaf RootPort {
+      mandatory "true";
       type int32;
     }
     leaf RootCost {
+      mandatory "true";
       type int32;
     }
     leaf TopologyChange {
+      mandatory "true";
       type boolean;
     }
     leaf TopologyChangeCount {
+      mandatory "true";
       type int32;
     }
     leaf TimeSinceTopologyChange {
+      mandatory "true";
       type int32;
     }
     container Ports {
@@ -358,34 +406,43 @@ module intri-stp {
   }
   grouping MSTIPortStatusEntry {
     leaf No {
+      mandatory "true";
       type int32;
     }
     leaf Role {
+      mandatory "true";
       type string;
     }
     leaf State {
+      mandatory "true";
       type string;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf PathCost {
+      mandatory "true";
       type int32;
     }
     leaf Uptime {
+      mandatory "true";
       type int32;
     }
   }
   grouping MSTPVLANGroupPortEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Tagged {
+      mandatory "true";
       type boolean;
     }
   }
   grouping MSTPVLANGroupEntry {
     leaf VLANID {
+      mandatory "true";
       type int32;
     }
     container Ports {
@@ -396,53 +453,69 @@ module intri-stp {
   }
   grouping STPConfigBridge {
     leaf Mode {
+      mandatory "true";
       type BridgeConfigModeTypeOptions;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf HelloTime {
+      mandatory "true";
       type int32;
     }
     leaf MaxAge {
+      mandatory "true";
       type int32;
     }
     leaf ForwardDelay {
+      mandatory "true";
       type int32;
     }
     leaf TxHoldCount {
+      mandatory "true";
       type int32;
     }
     leaf MSTPRegionName {
+      mandatory "true";
       type string;
     }
     leaf MSTPRevisionLevel {
+      mandatory "true";
       type int32;
     }
     leaf MSTPMaxHops {
+      mandatory "true";
       type int32;
     }
   }
   grouping STPConfigPortEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf AdminP2PPort {
+      mandatory "true";
       type PortConfigAdminP2PPortTypeOptions;
     }
     leaf AdminEdgePort {
+      mandatory "true";
       type boolean;
     }
     leaf AdminPathCost {
+      mandatory "true";
       type int32;
     }
     leaf MSTPDefaultPriority {
+      mandatory "true";
       type int32;
     }
     container MSTPPortPriority {
@@ -451,6 +524,7 @@ module intri-stp {
       }
     }
     leaf MSTPDefaultAdminPathCost {
+      mandatory "true";
       type int32;
     }
     container MSTPPortAdminPathCost {
@@ -459,14 +533,17 @@ module intri-stp {
       }
     }
     leaf BPDUGuard {
+      mandatory "true";
       type PortConfigBPDUGuardTypeOptions;
     }
   }
   grouping STPConfigMSTPGroupEntry {
     leaf MSTPID {
+      mandatory "true";
       type int32;
     }
     leaf BridgePriority {
+      mandatory "true";
       type int32;
     }
     container VIDs {
@@ -492,54 +569,65 @@ module intri-stp {
   }
   grouping BridgeConfigMode {
     leaf Mode {
+      mandatory "true";
       type BridgeConfigModeTypeOptions;
     }
   }
   grouping BridgeConfigPriority {
     leaf Priority {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigHelloTime {
     leaf HelloTime {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigMaxAge {
     leaf MaxAge {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigForwardDelay {
     leaf ForwardDelay {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigTxHoldCount {
     leaf TxHoldCount {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigMSTPRegionName {
     leaf MSTPRegionName {
+      mandatory "true";
       type string;
     }
   }
   grouping BridgeConfigMSTPRevisionLevel {
     leaf MSTPRevisionLevel {
+      mandatory "true";
       type int32;
     }
   }
   grouping BridgeConfigMSTPMaxHops {
     leaf MSTPMaxHops {
+      mandatory "true";
       type int32;
     }
   }
   grouping STPPortConfigEnabledEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -552,9 +640,11 @@ module intri-stp {
   }
   grouping STPPortConfigPriorityEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
   }
@@ -567,9 +657,11 @@ module intri-stp {
   }
   grouping STPPortConfigAdminP2PPortEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf AdminP2PPort {
+      mandatory "true";
       type PortConfigAdminP2PPortTypeOptions;
     }
   }
@@ -582,9 +674,11 @@ module intri-stp {
   }
   grouping STPPortConfigAdminEdgePortEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf AdminEdgePort {
+      mandatory "true";
       type boolean;
     }
   }
@@ -597,9 +691,11 @@ module intri-stp {
   }
   grouping STPPortConfigAdminPathCostEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf AdminPathCost {
+      mandatory "true";
       type int32;
     }
   }
@@ -612,9 +708,11 @@ module intri-stp {
   }
   grouping STPPortConfigMSTPDefaultPriorityEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf MSTPDefaultPriority {
+      mandatory "true";
       type int32;
     }
   }
@@ -627,6 +725,7 @@ module intri-stp {
   }
   grouping STPPortConfigMSTPPortPriorityEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     container MSTPPortPriority {
@@ -644,9 +743,11 @@ module intri-stp {
   }
   grouping STPPortConfigMSTPDefaultAdminPathCostEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf MSTPDefaultAdminPathCost {
+      mandatory "true";
       type int32;
     }
   }
@@ -659,6 +760,7 @@ module intri-stp {
   }
   grouping STPPortConfigMSTPPortAdminPathCostEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     container MSTPPortAdminPathCost {
@@ -676,9 +778,11 @@ module intri-stp {
   }
   grouping STPPortConfigBPDUGuardEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf BPDUGuard {
+      mandatory "true";
       type PortConfigBPDUGuardTypeOptions;
     }
   }
@@ -691,9 +795,11 @@ module intri-stp {
   }
   grouping STPPortConfigBPDUReceiveOnlyEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf BPDUReceiveOnly {
+      mandatory "true";
       type boolean;
     }
   }
@@ -706,9 +812,11 @@ module intri-stp {
   }
   grouping STPPortConfigRestrictTcnEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf RestrictTcn {
+      mandatory "true";
       type boolean;
     }
   }
@@ -721,9 +829,11 @@ module intri-stp {
   }
   grouping STPPortConfigRestrictRootEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf RestrictRoot {
+      mandatory "true";
       type boolean;
     }
   }
@@ -743,9 +853,11 @@ module intri-stp {
   }
   grouping STPMSTPGroupEntry {
     leaf MSTPID {
+      mandatory "true";
       type int32;
     }
     leaf BridgePriority {
+      mandatory "true";
       type int32;
     }
     container VIDs {

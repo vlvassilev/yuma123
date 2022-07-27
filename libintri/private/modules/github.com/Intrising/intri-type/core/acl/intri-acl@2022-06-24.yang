@@ -96,9 +96,11 @@ module intri-acl {
       uses intri-device:InterfaceIdentify;
     }
     leaf IngressAclName {
+      mandatory "true";
       type string;
     }
     leaf EgressAclName {
+      mandatory "true";
       type string;
     }
   }
@@ -111,6 +113,7 @@ module intri-acl {
   }
   grouping ACLEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container RuleList {
@@ -128,21 +131,27 @@ module intri-acl {
   }
   grouping ACEEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Action {
+      mandatory "true";
       type RuleActionTypeOptions;
     }
     leaf Priority {
+      mandatory "true";
       type int32;
     }
     leaf TimeRangeName {
+      mandatory "true";
       type string;
     }
     leaf ParamType {
+      mandatory "true";
       type RuleParamTypeOptions;
     }
     choice Param {
+    mandatory "true";
       container Mac {
         uses RuleMAC;
       }
@@ -162,9 +171,11 @@ module intri-acl {
   }
   grouping RuleVlan {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf VlanIDMask {
+      mandatory "true";
       type int32;
     }
   }
@@ -195,30 +206,37 @@ module intri-acl {
       uses MACConfig;
     }
     leaf VlanId {
+      mandatory "true";
       type int32;
     }
   }
   grouping MACConfig {
     leaf Address {
+      mandatory "true";
       type string;
     }
     leaf AddressMask {
+      mandatory "true";
       type string;
     }
   }
   grouping EtherTypeConfig {
     leaf Type {
+      mandatory "true";
       type string;
     }
     leaf EtherTypeMask {
+      mandatory "true";
       type string;
     }
   }
   grouping IPProtocolConfig {
     leaf Protocol {
+      mandatory "true";
       type string;
     }
     leaf ProtocolMask {
+      mandatory "true";
       type string;
     }
   }
@@ -238,9 +256,11 @@ module intri-acl {
   }
   grouping IPv4Config {
     leaf Address {
+      mandatory "true";
       type string;
     }
     leaf AddressMask {
+      mandatory "true";
       type string;
     }
   }
@@ -260,9 +280,11 @@ module intri-acl {
   }
   grouping IPv6Config {
     leaf Address {
+      mandatory "true";
       type string;
     }
     leaf AddressMask {
+      mandatory "true";
       type string;
     }
   }
@@ -276,9 +298,11 @@ module intri-acl {
   }
   grouping IPWithLayer4PortConfig {
     leaf PortNumber {
+      mandatory "true";
       type int32;
     }
     leaf PortNumberMask {
+      mandatory "true";
       type int32;
     }
   }
@@ -291,28 +315,35 @@ module intri-acl {
   }
   grouping BindingEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf Mac {
+      mandatory "true";
       type string;
     }
     leaf ParamType {
+      mandatory "true";
       type RuleParamTypeOptions;
     }
     choice Param {
+    mandatory "true";
       leaf IPv4 {
+        mandatory "true";
         type string;
       }
       leaf IPv6 {
+        mandatory "true";
         type string;
       }
     }
   }
   grouping FlowMirroringEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container ACLNameList {

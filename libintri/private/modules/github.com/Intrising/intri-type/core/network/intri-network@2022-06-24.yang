@@ -54,12 +54,15 @@ module intri-network {
   }
   grouping BasicConfig {
     leaf HostName {
+      mandatory "true";
       type string;
     }
     leaf DomainName {
+      mandatory "true";
       type string;
     }
     leaf LocalMTU {
+      mandatory "true";
       type int32;
     }
   }
@@ -73,6 +76,7 @@ module intri-network {
   }
   grouping IPv4Config {
     leaf DHCPMode {
+      mandatory "true";
       type IPv4DhcpModeTypeOptions;
     }
     container Static {
@@ -81,35 +85,45 @@ module intri-network {
   }
   grouping IPv4Static {
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf SubnetMask {
+      mandatory "true";
       type string;
     }
     leaf Gateway {
+      mandatory "true";
       type string;
     }
     leaf DNSServer {
+      mandatory "true";
       type string;
     }
     leaf SecondaryDeviceIP {
+      mandatory "true";
       type string;
     }
     leaf SecondarySubnetMask {
+      mandatory "true";
       type string;
     }
     leaf DefaultAddressSelection {
+      mandatory "true";
       type IPV4ConfigDefaultAddressSelectionTypeOptions;
     }
   }
   grouping IPv6Config {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf IcmpAutoAddressEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf AutoConfigurationEnabled {
+      mandatory "true";
       type boolean;
     }
     container Static {
@@ -118,43 +132,55 @@ module intri-network {
   }
   grouping IPv6Static {
     leaf DNSServer {
+      mandatory "true";
       type string;
     }
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
   }
   grouping IPv4Status {
     leaf DynamicDeviceIP {
+      mandatory "true";
       type string;
     }
     leaf DynamicSubnetMask {
+      mandatory "true";
       type string;
     }
     leaf DynamicGateway {
+      mandatory "true";
       type string;
     }
     leaf DynamicDNSServer1 {
+      mandatory "true";
       type string;
     }
     leaf DynamicDNSServer2 {
+      mandatory "true";
       type string;
     }
     leaf DynamicDNSServer3 {
+      mandatory "true";
       type string;
     }
     leaf DynamicDNSServer4 {
+      mandatory "true";
       type string;
     }
     leaf OutgoingDeviceIP {
+      mandatory "true";
       type string;
     }
   }
   grouping IPv6StatusEntry {
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf Scope {
+      mandatory "true";
       type intri-common:IPv6ScopeTypeOptions;
     }
   }

@@ -236,6 +236,7 @@ module intri-timecontrol {
   }
   grouping InputClockManageEntry {
     leaf InputCLK {
+      mandatory "true";
       type intri-device:InputClockTypeOptions;
     }
   }
@@ -248,6 +249,7 @@ module intri-timecontrol {
   }
   grouping MonitorStatusEntry {
     leaf InputCLK {
+      mandatory "true";
       type intri-device:InputClockTypeOptions;
     }
     container StatusList {
@@ -256,14 +258,17 @@ module intri-timecontrol {
       }
     }
     leaf Valid {
+      mandatory "true";
       type boolean;
     }
   }
   grouping StatusInputBit {
     leaf Type {
+      mandatory "true";
       type StatusInputBitTypeOptions;
     }
     leaf Valid {
+      mandatory "true";
       type boolean;
     }
   }
@@ -276,6 +281,7 @@ module intri-timecontrol {
   }
   grouping DPLLManageEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
   }
@@ -288,12 +294,15 @@ module intri-timecontrol {
   }
   grouping DPLLStatusEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     leaf StatusType {
+      mandatory "true";
       type DPLLStatusBitTypeOptions;
     }
     leaf InputCLK {
+      mandatory "true";
       type intri-device:InputClockTypeOptions;
     }
   }
@@ -306,6 +315,7 @@ module intri-timecontrol {
   }
   grouping DPLLRefPriorityManageEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     container PriorityList {
@@ -323,6 +333,7 @@ module intri-timecontrol {
   }
   grouping DPLLRefPriorityEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     container PrioritList {
@@ -333,9 +344,11 @@ module intri-timecontrol {
   }
   grouping PriorityList {
     leaf Priority {
+      mandatory "true";
       type DPLLRefPriorityBitTypeOptions;
     }
     leaf InputCLK {
+      mandatory "true";
       type intri-device:InputClockTypeOptions;
     }
   }
@@ -348,17 +361,21 @@ module intri-timecontrol {
   }
   grouping SyncEInputClockSpeedEntry {
     leaf InputCLK {
+      mandatory "true";
       type intri-device:InputClockTypeOptions;
     }
     leaf Speed {
+      mandatory "true";
       type intri-device:PortPropertyTypeOptions;
     }
   }
   grouping ToDSource {
     leaf Enable {
+      mandatory "true";
       type boolean;
     }
     leaf Source {
+      mandatory "true";
       type ToDSourceTypeOptions;
     }
   }
@@ -371,6 +388,7 @@ module intri-timecontrol {
   }
   grouping DPLLToDManageEntry {
     leaf Index {
+      mandatory "true";
       type DPLLToDTypeOptions;
     }
   }
@@ -383,6 +401,7 @@ module intri-timecontrol {
   }
   grouping ToDTimeEntry {
     leaf Index {
+      mandatory "true";
       type DPLLToDTypeOptions;
     }
     container DateTime {
@@ -398,9 +417,11 @@ module intri-timecontrol {
   }
   grouping DPLLFrequencyControlEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     leaf FreqOffset {
+      mandatory "true";
       type int64;
     }
   }
@@ -413,9 +434,11 @@ module intri-timecontrol {
   }
   grouping DPLLPhaseControlEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     leaf PhOffset {
+      mandatory "true";
       type int32;
     }
   }
@@ -428,9 +451,11 @@ module intri-timecontrol {
   }
   grouping DPLLPhaseSlopeLimitEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     leaf Limit {
+      mandatory "true";
       type int32;
     }
   }
@@ -443,9 +468,11 @@ module intri-timecontrol {
   }
   grouping DPLLPhaseControlTimerEntry {
     leaf Index {
+      mandatory "true";
       type DPLLManageIndexTypeOptions;
     }
     leaf Timeout {
+      mandatory "true";
       type int32;
     }
   }

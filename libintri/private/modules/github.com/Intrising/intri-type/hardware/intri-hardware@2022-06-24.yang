@@ -465,9 +465,11 @@ module intri-hardware {
   }
   grouping IPv4Static {
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf SubnetMask {
+      mandatory "true";
       type string;
     }
   }
@@ -481,18 +483,23 @@ module intri-hardware {
   }
   grouping DLDPSystemConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf AdvertisementInterval {
+      mandatory "true";
       type int32;
     }
     leaf ShutDownMode {
+      mandatory "true";
       type ShutdownModeTypeOptions;
     }
     leaf AuthMode {
+      mandatory "true";
       type DLDPAuthCationModeTypeOptions;
     }
     leaf WorkMode {
+      mandatory "true";
       type DLDPWorkModeTypeOptions;
     }
   }
@@ -508,6 +515,7 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -521,26 +529,33 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf State {
+      mandatory "true";
       type DLDPProtocolStateTypeOptions;
     }
     leaf Link {
+      mandatory "true";
       type boolean;
     }
   }
   grouping DLDPNeighborEntry {
     leaf NeighborMACAddress {
+      mandatory "true";
       type string;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf NeighborAgetime {
+      mandatory "true";
       type int32;
     }
     leaf NeighborState {
+      mandatory "true";
       type DLDPNeighobrStateTypeOptions;
     }
   }
@@ -556,6 +571,7 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -571,23 +587,29 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf State {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
   }
   grouping BoardLED {
     leaf Power {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf System {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf PoEMax {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf Fan {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf GPS {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
   }
@@ -601,30 +623,37 @@ module intri-hardware {
   }
   grouping Coordinates {
     leaf Latitude {
+      mandatory "true";
       type string;
     }
     leaf Longitude {
+      mandatory "true";
       type string;
     }
   }
   grouping GNSSVerboseInfomation {
     leaf Mode {
+      mandatory "true";
       type string;
     }
     leaf NavigationalStatus {
+      mandatory "true";
       type string;
     }
     leaf Speed {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Course {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf MagneticVariation {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -632,14 +661,17 @@ module intri-hardware {
   }
   grouping GPSEnable {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping GPSStatus {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Status {
+      mandatory "true";
       type GPSStatusTypeOptions;
     }
     container VerboseInfo {
@@ -654,6 +686,7 @@ module intri-hardware {
   }
   grouping GPSCommand {
     leaf Request {
+      mandatory "true";
       type string;
     }
     container Respond {
@@ -664,12 +697,15 @@ module intri-hardware {
   }
   grouping USBStatus {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Connected {
+      mandatory "true";
       type boolean;
     }
     leaf ConnectedDevice {
+      mandatory "true";
       type string;
     }
   }
@@ -687,9 +723,11 @@ module intri-hardware {
   }
   grouping FanSpeedConfigEntry {
     leaf FanNo {
+      mandatory "true";
       type int32;
     }
     leaf RotatingSpeed {
+      mandatory "true";
       type int32;
     }
   }
@@ -702,9 +740,11 @@ module intri-hardware {
   }
   grouping FanStatusEntry {
     leaf FanNo {
+      mandatory "true";
       type int32;
     }
     leaf RotatingSpeedRPM {
+      mandatory "true";
       type int32;
     }
   }
@@ -717,12 +757,15 @@ module intri-hardware {
   }
   grouping TemperatureStatusEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf ID {
+      mandatory "true";
       type int32;
     }
     leaf Temperature {
+      mandatory "true";
       type int32;
     }
   }
@@ -735,33 +778,41 @@ module intri-hardware {
   }
   grouping PowerRedundantStateEntry {
     leaf PwOption {
+      mandatory "true";
       type PowerRedundantTypeOptions;
     }
     leaf PowerRedundantPlugIn {
+      mandatory "true";
       type boolean;
     }
     leaf PowerRedundantACOk {
+      mandatory "true";
       type boolean;
     }
     leaf PowerRedundantOk {
+      mandatory "true";
       type boolean;
     }
     leaf PowerRedundantVoltage {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf PowerRedundantCurrent {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf PowerRedundantPowerConsumption {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf PowerRedundantTemperature {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -769,17 +820,21 @@ module intri-hardware {
   }
   grouping PowerGeneralState {
     leaf Power_12V {
+      mandatory "true";
       type boolean;
     }
     leaf Power_54V {
+      mandatory "true";
       type boolean;
     }
   }
   grouping PowerState {
     leaf Type {
+      mandatory "true";
       type PowerTypeOptions;
     }
     choice PowerType {
+    mandatory "true";
       container PowerRedundantState {
         uses PowerRedundantState;
       }
@@ -790,12 +845,15 @@ module intri-hardware {
   }
   grouping TimeControlRegister {
     leaf RegBase {
+      mandatory "true";
       type int32;
     }
     leaf Offset {
+      mandatory "true";
       type int32;
     }
     leaf Data {
+      mandatory "true";
       type uint8;
     }
   }
@@ -822,12 +880,15 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf HardwarePortNo {
+      mandatory "true";
       type int32;
     }
     leaf SwitchPortNo {
+      mandatory "true";
       type int32;
     }
     leaf InterfaceType {
+      mandatory "true";
       type intri-device:PortInterfaceTypeOptions;
     }
     container Properies {
@@ -836,18 +897,23 @@ module intri-hardware {
       }
     }
     leaf SupportPoE {
+      mandatory "true";
       type boolean;
     }
     leaf SupportSFP {
+      mandatory "true";
       type boolean;
     }
     leaf LinkLED {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf PoELED {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
     leaf SpeedLED {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
   }
@@ -867,9 +933,11 @@ module intri-hardware {
   }
   grouping LEDConfig {
     leaf Mode {
+      mandatory "true";
       type LEDModeTypeOptions;
     }
     leaf ResetButton {
+      mandatory "true";
       type boolean;
     }
   }
@@ -882,14 +950,17 @@ module intri-hardware {
   }
   grouping FanPercentEntry {
     leaf FanNo {
+      mandatory "true";
       type int32;
     }
     leaf PercentRPM {
+      mandatory "true";
       type int32;
     }
   }
   grouping LEDType {
     leaf LED {
+      mandatory "true";
       type LEDBehaviorModeTypeOptions;
     }
   }
@@ -905,6 +976,7 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf State {
+      mandatory "true";
       type boolean;
     }
   }
@@ -930,6 +1002,7 @@ module intri-hardware {
       }
     }
     leaf Mux {
+      mandatory "true";
       type string;
     }
     container List {
@@ -940,6 +1013,7 @@ module intri-hardware {
   }
   grouping DeviceI2CAddressInfo {
     leaf Ch {
+      mandatory "true";
       type int32;
     }
     container Address {
@@ -957,14 +1031,17 @@ module intri-hardware {
   }
   grouping Enable {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping Network {
     leaf IP {
+      mandatory "true";
       type string;
     }
     leaf Mask {
+      mandatory "true";
       type string;
     }
   }
@@ -977,9 +1054,11 @@ module intri-hardware {
   }
   grouping MCUVersion {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Version {
+      mandatory "true";
       type string;
     }
   }
@@ -995,12 +1074,15 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enable {
+      mandatory "true";
       type boolean;
     }
     leaf Mode {
+      mandatory "true";
       type PoEPortModeTypeOptions;
     }
     leaf Priority {
+      mandatory "true";
       type PoEPriorityLevelTypeOptions;
     }
   }
@@ -1016,73 +1098,89 @@ module intri-hardware {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf IsLinkUp {
+      mandatory "true";
       type boolean;
     }
     leaf Class {
+      mandatory "true";
       type PoEDeterminedClassTypeOptions;
     }
     leaf PowerConsumption {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Current {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Voltage {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Temperature {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Condition {
+      mandatory "true";
       type PoEConditionTypeOptions;
     }
   }
   grouping PoESystemStatus {
     leaf MinShutDownVoltage {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf MaxShutDownVoltage {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf VMainVoltage {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf IMainCurrent {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf PowerConsumption {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Budget {
+      mandatory "true";
       type int32;
     }
     leaf Version {
+      mandatory "true";
       type string;
     }
   }
   grouping PoESystemBudgetEntry {
     leaf Budget {
+      mandatory "true";
       type int32;
     }
   }

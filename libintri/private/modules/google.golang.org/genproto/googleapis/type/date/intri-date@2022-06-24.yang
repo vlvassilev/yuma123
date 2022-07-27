@@ -12,12 +12,15 @@ module intri-date {
 
   grouping Date {
     leaf Year {
+      mandatory "true";
       type int32;
     }
     leaf Month {
+      mandatory "true";
       type int32;
     }
     leaf Day {
+      mandatory "true";
       type int32;
     }
   }

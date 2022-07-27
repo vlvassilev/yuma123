@@ -40,21 +40,27 @@ module intri-gvrp {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf Mode {
+      mandatory "true";
       type PortModeTypeOptions;
     }
     leaf LeaveAllTimerInterval {
+      mandatory "true";
       type int32;
     }
     leaf JoinTimerInterval {
+      mandatory "true";
       type int32;
     }
     leaf HoldTimerInterval {
+      mandatory "true";
       type int32;
     }
     leaf LeaveTimerInterval {
+      mandatory "true";
       type int32;
     }
   }
@@ -67,6 +73,7 @@ module intri-gvrp {
   }
   grouping Config {
     leaf IsEnabled {
+      mandatory "true";
       type boolean;
     }
     container PortsConfig {

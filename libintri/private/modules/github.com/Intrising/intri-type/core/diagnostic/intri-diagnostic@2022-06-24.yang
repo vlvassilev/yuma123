@@ -18,9 +18,11 @@ module intri-diagnostic {
   }
   grouping ARPEntry {
     leaf IPAddr {
+      mandatory "true";
       type string;
     }
     leaf MACAddr {
+      mandatory "true";
       type string;
     }
   }

@@ -37,48 +37,63 @@ module intri-rmon {
       uses intri-device:InterfaceIdentify;
     }
     leaf InGoodOctets {
+      mandatory "true";
       type uint64;
     }
     leaf InBadOctets {
+      mandatory "true";
       type uint64;
     }
     leaf InTotalPackets {
+      mandatory "true";
       type uint64;
     }
     leaf InUnicasts {
+      mandatory "true";
       type uint64;
     }
     leaf InNonUnicasts {
+      mandatory "true";
       type uint64;
     }
     leaf InBroadcasts {
+      mandatory "true";
       type uint64;
     }
     leaf InMulticasts {
+      mandatory "true";
       type uint64;
     }
     leaf InPause {
+      mandatory "true";
       type uint64;
     }
     leaf InTotalReceiveErrors {
+      mandatory "true";
       type uint64;
     }
     leaf InUndersize {
+      mandatory "true";
       type uint64;
     }
     leaf InOversize {
+      mandatory "true";
       type uint64;
     }
     leaf InFragments {
+      mandatory "true";
       type uint64;
     }
     leaf InJabber {
+      mandatory "true";
       type uint64;
     }
     leaf InFcsErrors {
+      mandatory "true";
       type uint64;
     }
     leaf InDiscarded {
+      mandatory "true";
       type uint64;
     }
   }
@@ -94,45 +109,59 @@ module intri-rmon {
       uses intri-device:InterfaceIdentify;
     }
     leaf OutGoodOctets {
+      mandatory "true";
       type uint64;
     }
     leaf OutUnicasts {
+      mandatory "true";
       type uint64;
     }
     leaf OutNonUnicasts {
+      mandatory "true";
       type uint64;
     }
     leaf OutBroadcasts {
+      mandatory "true";
       type uint64;
     }
     leaf OutMulticasts {
+      mandatory "true";
       type uint64;
     }
     leaf OutPause {
+      mandatory "true";
       type uint64;
     }
     leaf OutDeferred {
+      mandatory "true";
       type uint64;
     }
     leaf OutTotalCollisions {
+      mandatory "true";
       type uint64;
     }
     leaf OutTotalPackets {
+      mandatory "true";
       type uint64;
     }
     leaf OutExcessiveCollisions {
+      mandatory "true";
       type uint64;
     }
     leaf OutLateCollisions {
+      mandatory "true";
       type uint64;
     }
     leaf OutFcsErrors {
+      mandatory "true";
       type uint64;
     }
     leaf OutDroppedPackets {
+      mandatory "true";
       type uint64;
     }
     leaf OutMultipleCollisions {
+      mandatory "true";
       type uint64;
     }
   }
@@ -148,21 +177,27 @@ module intri-rmon {
       uses intri-device:InterfaceIdentify;
     }
     leaf In_64Octets {
+      mandatory "true";
       type uint64;
     }
     leaf In_65To_127Octets {
+      mandatory "true";
       type uint64;
     }
     leaf In_128To_255Octets {
+      mandatory "true";
       type uint64;
     }
     leaf In_256To_511Octets {
+      mandatory "true";
       type uint64;
     }
     leaf In_512To_1023Octets {
+      mandatory "true";
       type uint64;
     }
     leaf In_1024ToMaxOctets {
+      mandatory "true";
       type uint64;
     }
   }
@@ -175,9 +210,11 @@ module intri-rmon {
   }
   grouping UtilizationRate {
     leaf Type {
+      mandatory "true";
       type UtilizationIntervalTypeOptions;
     }
     leaf Rate {
+      mandatory "true";
       type int32;
     }
   }

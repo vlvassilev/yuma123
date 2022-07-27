@@ -189,15 +189,18 @@ module intri-monitor {
   }
   grouping DeviceLimitConfigEntry {
     leaf MonitorOption {
+      mandatory "true";
       type DeviceMonitorTypeOptions;
     }
     leaf LimitOption {
+      mandatory "true";
       type LimitBoundaryTypeOptions;
     }
     container Boundary {
       uses RangeValue;
     }
     leaf ValueOption {
+      mandatory "true";
       type ValueTypeOptions;
     }
     container Value {
@@ -213,15 +216,18 @@ module intri-monitor {
   }
   grouping SystemLimitConfigEntry {
     leaf MonitorOption {
+      mandatory "true";
       type SystemMonitorTypeOptions;
     }
     leaf LimitOption {
+      mandatory "true";
       type LimitBoundaryTypeOptions;
     }
     container Boundary {
       uses RangeValue;
     }
     leaf ValueOption {
+      mandatory "true";
       type ValueTypeOptions;
     }
     container Value {
@@ -237,33 +243,41 @@ module intri-monitor {
   }
   grouping RangeValue {
     leaf IntMin {
+      mandatory "true";
       type int32;
     }
     leaf IntMax {
+      mandatory "true";
       type int32;
     }
     leaf FloatMin {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf FloatMax {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Int64Min {
+      mandatory "true";
       type int64;
     }
     leaf Int64Max {
+      mandatory "true";
       type int64;
     }
     leaf Float64Min {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Float64Max {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -271,6 +285,7 @@ module intri-monitor {
   }
   grouping DeviceScorllBarValueEntry {
     leaf MonitorOption {
+      mandatory "true";
       type DeviceMonitorTypeOptions;
     }
     container Value {
@@ -286,6 +301,7 @@ module intri-monitor {
   }
   grouping SystemScorllBarValueEntry {
     leaf MonitorOption {
+      mandatory "true";
       type SystemMonitorTypeOptions;
     }
     container Value {
@@ -312,12 +328,14 @@ module intri-monitor {
   }
   grouping DeviceStatusEntry {
     leaf MonitorOption {
+      mandatory "true";
       type DeviceMonitorTypeOptions;
     }
     container Value {
       uses DisplayValue;
     }
     leaf LoggingOption {
+      mandatory "true";
       type intri-event:LoggingTypeOptions;
     }
   }
@@ -330,12 +348,14 @@ module intri-monitor {
   }
   grouping SystemStatusEntry {
     leaf MonitorOption {
+      mandatory "true";
       type SystemMonitorTypeOptions;
     }
     container Value {
       uses DisplayValue;
     }
     leaf LoggingOption {
+      mandatory "true";
       type intri-event:LoggingTypeOptions;
     }
   }
@@ -348,20 +368,25 @@ module intri-monitor {
   }
   grouping DisplayValue {
     leaf ValueUnit {
+      mandatory "true";
       type string;
     }
     leaf IntValue {
+      mandatory "true";
       type int32;
     }
     leaf FloatValue {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Int64Value {
+      mandatory "true";
       type int64;
     }
     leaf Float64Value {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -381,6 +406,7 @@ module intri-monitor {
   }
   grouping SystemLEDStatusEntry {
     leaf LedType {
+      mandatory "true";
       type HardwareLEDTypeOptions;
     }
     container LedState {
@@ -392,18 +418,21 @@ module intri-monitor {
       uses intri-device:InterfaceIdentify;
     }
     leaf IsSfp {
+      mandatory "true";
       type boolean;
     }
     container LinkLedState {
       uses LEDStateEntry;
     }
     leaf IsSupportPoELed {
+      mandatory "true";
       type boolean;
     }
     container PoELedState {
       uses LEDStateEntry;
     }
     leaf IsSupportSpeedLed {
+      mandatory "true";
       type boolean;
     }
     container SpeedLedState {
@@ -412,12 +441,15 @@ module intri-monitor {
   }
   grouping LEDStateEntry {
     leaf StateOption {
+      mandatory "true";
       type LEDStateTypeOptions;
     }
     leaf ColorOption {
+      mandatory "true";
       type LEDColorTypeOptions;
     }
     leaf BlinkingIntervalMs {
+      mandatory "true";
       type int32;
     }
   }

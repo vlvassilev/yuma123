@@ -162,6 +162,7 @@ module intri-dhcp {
   }
   grouping ARPInspectionConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     container Ports {
@@ -175,29 +176,36 @@ module intri-dhcp {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf RateLimiting {
+      mandatory "true";
       type int32;
     }
     leaf Database {
+      mandatory "true";
       type ARPInspectionDatabaseTypeOptions;
     }
     container ACL {
       uses ARPInspectionACLConfig;
     }
     leaf SrcMACValid {
+      mandatory "true";
       type boolean;
     }
     leaf DstMACValid {
+      mandatory "true";
       type boolean;
     }
     leaf IPRangeValid {
+      mandatory "true";
       type boolean;
     }
   }
   grouping ARPInspectionACLConfig {
     leaf ACLRuleUnmatchedAction {
+      mandatory "true";
       type ARPInspectionACLRuleUnmatchedActionTypeOptions;
     }
     container Rules {
@@ -208,18 +216,23 @@ module intri-dhcp {
   }
   grouping ARPInspectionACLRuleEntry {
     leaf VID {
+      mandatory "true";
       type int32;
     }
     leaf SrcMAC {
+      mandatory "true";
       type string;
     }
     leaf SrcIP {
+      mandatory "true";
       type string;
     }
     leaf SrcIPMask {
+      mandatory "true";
       type string;
     }
     leaf Mode {
+      mandatory "true";
       type ARPInspectionACLRuleModeTypeOptions;
     }
   }
@@ -233,6 +246,7 @@ module intri-dhcp {
   }
   grouping RelayConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     container RelayPorts {
@@ -241,15 +255,19 @@ module intri-dhcp {
       }
     }
     leaf DHCPServerAddress {
+      mandatory "true";
       type string;
     }
     leaf RemoteIDSource {
+      mandatory "true";
       type RemoteIDSourceTypeOptions;
     }
     leaf CustomRemoteID {
+      mandatory "true";
       type string;
     }
     leaf CircuitIDSource {
+      mandatory "true";
       type CircuitIDSourceTypeOptions;
     }
   }
@@ -258,14 +276,17 @@ module intri-dhcp {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Option82Enabled {
+      mandatory "true";
       type boolean;
     }
   }
   grouping SnoopingConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     container Ports {
@@ -279,21 +300,27 @@ module intri-dhcp {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf DHCPFiltering {
+      mandatory "true";
       type SnoopingPortDHCPFilteringTypeOptions;
     }
     leaf SnoopingTrust {
+      mandatory "true";
       type SnoopingPortSnoopingTrustTypeOptions;
     }
     leaf AcceptIngressOption82 {
+      mandatory "true";
       type boolean;
     }
     leaf MACAddressVerification {
+      mandatory "true";
       type boolean;
     }
     leaf DHCPRateLimiting {
+      mandatory "true";
       type int32;
     }
   }
@@ -302,15 +329,19 @@ module intri-dhcp {
       uses intri-device:InterfaceIdentify;
     }
     leaf TrustMode {
+      mandatory "true";
       type SnoopingPortSnoopingTrustTypeOptions;
     }
     leaf Processed {
+      mandatory "true";
       type int32;
     }
     leaf Dropped {
+      mandatory "true";
       type int32;
     }
     leaf LastDropReason {
+      mandatory "true";
       type SnoopingLastDropReasonTypeOptions;
     }
   }
@@ -323,24 +354,30 @@ module intri-dhcp {
   }
   grouping SnoopingBindingDatabaseEntry {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf IP {
+      mandatory "true";
       type string;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf VID {
+      mandatory "true";
       type int32;
     }
     leaf LastUpdated {
+      mandatory "true";
       type string;
     }
     leaf LastUpdatedEpoch {
+      mandatory "true";
       type string;
     }
     leaf LeaseTime {
+      mandatory "true";
       type int64;
     }
   }

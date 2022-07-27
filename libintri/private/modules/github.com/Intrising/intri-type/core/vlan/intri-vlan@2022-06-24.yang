@@ -130,20 +130,25 @@ module intri-vlan {
   }
   grouping MACBasedGroupEntry {
     leaf MACAddress {
+      mandatory "true";
       type string;
     }
     leaf MACAddressMask {
+      mandatory "true";
       type string;
     }
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
   }
   grouping MACBasedGroupMemberEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
     container IdentifyList {
@@ -166,20 +171,25 @@ module intri-vlan {
   }
   grouping ProtocolBasedGroupEntry {
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
     leaf Encapsulation {
+      mandatory "true";
       type ProtocolBasedEncapsulationTypeOptions;
     }
     leaf Protocol {
+      mandatory "true";
       type string;
     }
   }
   grouping ProtocolBasedGroupMemberEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
     container IdentifyList {
@@ -209,31 +219,39 @@ module intri-vlan {
   }
   grouping SelectiveQinQTranslatedEntry {
     leaf SourceVlanID {
+      mandatory "true";
       type int32;
     }
     leaf TranslatedVlanID {
+      mandatory "true";
       type int32;
     }
   }
   grouping SubnetBasedGroupEntry {
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
     leaf IPAddressMask {
+      mandatory "true";
       type string;
     }
     leaf IPVersion {
+      mandatory "true";
       type IPVersionTypeOptions;
     }
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
   }
   grouping SubnetBasedGroupMemberEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf GroupID {
+      mandatory "true";
       type int32;
     }
     container IdentifyList {
@@ -266,6 +284,7 @@ module intri-vlan {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -283,9 +302,11 @@ module intri-vlan {
   }
   grouping MappingEntry {
     leaf SourceVlanID {
+      mandatory "true";
       type int32;
     }
     leaf TranslatedVlanID {
+      mandatory "true";
       type int32;
     }
   }
@@ -320,23 +341,29 @@ module intri-vlan {
   }
   grouping ManagementConfig {
     leaf ManagementVlanID {
+      mandatory "true";
       type int32;
     }
   }
   grouping VoiceConfig {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Prio {
+      mandatory "true";
       type int32;
     }
     leaf SignalPrio {
+      mandatory "true";
       type int32;
     }
     leaf DSCP {
+      mandatory "true";
       type int32;
     }
     leaf SignalDSCP {
+      mandatory "true";
       type int32;
     }
   }
@@ -352,21 +379,27 @@ module intri-vlan {
       uses intri-device:InterfaceIdentify;
     }
     leaf Mode {
+      mandatory "true";
       type PortConfigVLANModeTypeOptions;
     }
     leaf DefaultVlanID {
+      mandatory "true";
       type int32;
     }
     leaf UnauthorizedVlanID {
+      mandatory "true";
       type int32;
     }
     leaf FallBackVlanID {
+      mandatory "true";
       type int32;
     }
     leaf QinQEthertype {
+      mandatory "true";
       type PortConfigQinQEtherTypeOptions;
     }
     leaf AcceptableFrametype {
+      mandatory "true";
       type AcceptFrameTypeOptions;
     }
     container TaggedList {
@@ -389,17 +422,21 @@ module intri-vlan {
   }
   grouping FilterEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Name {
+      mandatory "true";
       type string;
     }
   }
   grouping Used {
     leaf Used {
+      mandatory "true";
       type StatusUsedTypeOptions;
     }
   }
@@ -408,9 +445,11 @@ module intri-vlan {
       uses intri-device:InterfaceIdentify;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Used {
+      mandatory "true";
       type StatusUsedTypeOptions;
     }
   }
@@ -419,14 +458,17 @@ module intri-vlan {
       uses intri-device:InterfaceIdentify;
     }
     leaf DefaultVlanID {
+      mandatory "true";
       type int32;
     }
     leaf LastUpdateMethod {
+      mandatory "true";
       type StatusUsedTypeOptions;
     }
   }
   grouping StatusEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     container TaggedList {
@@ -446,6 +488,7 @@ module intri-vlan {
         key "Key";
         unique "Key";
         leaf Key {
+          mandatory "true";
           type int32;
         }
         container Value {

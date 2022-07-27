@@ -169,11 +169,13 @@ module intri-access {
   }
   grouping AuthenticationMode {
     leaf Mode {
+      mandatory "true";
       type AuthenticationModeTypeOptions;
     }
   }
   grouping AuthenticationConfig {
     leaf Mode {
+      mandatory "true";
       type AuthenticationModeTypeOptions;
     }
     container RADIUS {
@@ -185,52 +187,67 @@ module intri-access {
   }
   grouping AuthenticationTACACS {
     leaf PrimaryAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf FallbackAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf UserPrivilegeLevel0 {
+      mandatory "true";
       type string;
     }
     leaf UserPrivilegeLevel1 {
+      mandatory "true";
       type string;
     }
     leaf UserPrivilegeLevel15 {
+      mandatory "true";
       type string;
     }
   }
   grouping AuthenticationRADIUS {
     leaf PrimaryAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf FallbackAuthServerName {
+      mandatory "true";
       type string;
     }
     leaf UserPrivilegeLevel6 {
+      mandatory "true";
       type string;
     }
     leaf UserPrivilegeLevel7 {
+      mandatory "true";
       type string;
     }
   }
   grouping AuthenticationServerEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf ServerType {
+      mandatory "true";
       type AuthenticationServerTypeOptions;
     }
     leaf HostAddress {
+      mandatory "true";
       type string;
     }
     leaf PortNumber {
+      mandatory "true";
       type int32;
     }
     leaf SharedSecret {
+      mandatory "true";
       type string;
     }
     leaf InterimInterval {
+      mandatory "true";
       type int64;
     }
   }
@@ -243,20 +260,25 @@ module intri-access {
   }
   grouping LoginRequest {
     leaf Account {
+      mandatory "true";
       type string;
     }
     leaf Password {
+      mandatory "true";
       type string;
     }
   }
   grouping RestrictionEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Mode {
+      mandatory "true";
       type RestrictionModeTypeOptions;
     }
     leaf IPAddress {
+      mandatory "true";
       type string;
     }
   }
@@ -269,6 +291,7 @@ module intri-access {
   }
   grouping UserEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container AssociatedGroups {
@@ -277,44 +300,57 @@ module intri-access {
       }
     }
     leaf GeneralAccessRights {
+      mandatory "true";
       type RightsTypeOptions;
     }
     leaf TelnetAccessEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SSHAccessEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf WebAccessEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf SNMPAccessEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf EncryptedAuthPassword {
+      mandatory "true";
       type string;
     }
     leaf SNMPV3SecurityLevel {
+      mandatory "true";
       type UserEntrySNMPV3SecurityLevelTypeOptions;
     }
     leaf SNMPV3AuthAlgorithm {
+      mandatory "true";
       type UserEntrySNMPV3AuthAlgorithmTypeOptions;
     }
     leaf SNMPV3PrivacyAlgorithm {
+      mandatory "true";
       type UserEntrySNMPV3PrivacyAlgorithmTypeOptions;
     }
     leaf EncryptedSNMPAuthPassword {
+      mandatory "true";
       type string;
     }
     leaf EncryptedSNMPPrivacyPassword {
+      mandatory "true";
       type string;
     }
   }
   grouping PatternEntry {
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf AccessRight {
+      mandatory "true";
       type RightsTypeOptions;
     }
   }
@@ -327,6 +363,7 @@ module intri-access {
   }
   grouping GroupEntry {
     leaf Name {
+      mandatory "true";
       type string;
     }
     container Patterns {
@@ -361,22 +398,27 @@ module intri-access {
   }
   grouping Password {
     leaf Password {
+      mandatory "true";
       type string;
     }
     leaf Irreversable {
+      mandatory "true";
       type boolean;
     }
   }
   grouping EncryptedPassword {
     leaf EncryptedPassword {
+      mandatory "true";
       type string;
     }
   }
   grouping UserPasswordEntry {
     leaf Username {
+      mandatory "true";
       type string;
     }
     leaf Password {
+      mandatory "true";
       type string;
     }
   }
@@ -389,32 +431,41 @@ module intri-access {
   }
   grouping NumberOfLogins {
     leaf NumberOfLogins {
+      mandatory "true";
       type int32;
     }
   }
   grouping LoginStatusEntry {
     leaf State {
+      mandatory "true";
       type string;
     }
     leaf Username {
+      mandatory "true";
       type string;
     }
     leaf AuthName {
+      mandatory "true";
       type string;
     }
     leaf LoginID {
+      mandatory "true";
       type string;
     }
     leaf LoginTimeStamp {
+      mandatory "true";
       type string;
     }
     leaf LoginEpoch {
+      mandatory "true";
       type string;
     }
     leaf ConnectTime {
+      mandatory "true";
       type int64;
     }
     leaf Service {
+      mandatory "true";
       type intri-event:LoginInterfaceNameTypeOptions;
     }
   }
@@ -427,6 +478,7 @@ module intri-access {
   }
   grouping Token {
     leaf Token {
+      mandatory "true";
       type string;
     }
   }

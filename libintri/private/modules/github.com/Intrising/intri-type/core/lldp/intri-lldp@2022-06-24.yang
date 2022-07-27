@@ -514,18 +514,23 @@ module intri-lldp {
   }
   grouping SystemConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf TimeToLive {
+      mandatory "true";
       type int32;
     }
     leaf MsgTxInterval {
+      mandatory "true";
       type int32;
     }
     leaf VoiceDisableVlanTLV {
+      mandatory "true";
       type boolean;
     }
     leaf ForwardToLink {
+      mandatory "true";
       type boolean;
     }
   }
@@ -541,6 +546,7 @@ module intri-lldp {
       uses intri-device:InterfaceIdentify;
     }
     leaf Mode {
+      mandatory "true";
       type PortModeTypeOptions;
     }
   }
@@ -589,6 +595,7 @@ module intri-lldp {
       uses intri-device:InterfaceIdentify;
     }
     leaf TimeToLive {
+      mandatory "true";
       type int32;
     }
     container Chassis {
@@ -634,26 +641,33 @@ module intri-lldp {
   }
   grouping LinkAggregation {
     leaf Capabilities {
+      mandatory "true";
       type boolean;
     }
     leaf Status {
+      mandatory "true";
       type boolean;
     }
     leaf AggregationPortNo {
+      mandatory "true";
       type int32;
     }
   }
   grouping ExtendedPowerViaMDI {
     leaf Type {
+      mandatory "true";
       type PoeInfoTypeOptions;
     }
     leaf Source {
+      mandatory "true";
       type PoeInfoSourceTypeOptions;
     }
     leaf Priority {
+      mandatory "true";
       type PoeInfoPriorityTypeOptions;
     }
     leaf Value {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -661,9 +675,11 @@ module intri-lldp {
   }
   grouping MACPHYConfig {
     leaf AutoNegotiationConfig {
+      mandatory "true";
       type boolean;
     }
     leaf AutoNegotiationStatus {
+      mandatory "true";
       type boolean;
     }
     container AutoNegoAdvertisedCapability {
@@ -672,6 +688,7 @@ module intri-lldp {
       }
     }
     leaf OperationalMAUType {
+      mandatory "true";
       type MACPHYAdvertisedCapabilityTypeOptions;
     }
   }
@@ -682,14 +699,17 @@ module intri-lldp {
       }
     }
     leaf ClassType {
+      mandatory "true";
       type int32;
     }
   }
   grouping SystemManagementInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Description {
+      mandatory "true";
       type string;
     }
   }
@@ -700,46 +720,59 @@ module intri-lldp {
       }
     }
     leaf MACAddr {
+      mandatory "true";
       type string;
     }
     leaf Description {
+      mandatory "true";
       type string;
     }
   }
   grouping PowerViaMDI {
     leaf Type {
+      mandatory "true";
       type PoePortClassTypeOptions;
     }
     leaf PoePowerSupported {
+      mandatory "true";
       type boolean;
     }
     leaf PoePowerEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf PairControl {
+      mandatory "true";
       type boolean;
     }
     leaf PowerPairs {
+      mandatory "true";
       type PoeControlPowerPairsTypeOptions;
     }
     leaf PowerClass {
+      mandatory "true";
       type PoeControlPowerClassTypeOptions;
     }
     leaf DeviceType {
+      mandatory "true";
       type PoeInfoTypeOptions;
     }
     leaf Source {
+      mandatory "true";
       type PoeInfoSourceTypeOptions;
     }
     leaf Priority {
+      mandatory "true";
       type PoeInfoPriorityTypeOptions;
     }
     leaf PdRequestedPower {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf PseAllocatedPower {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -747,17 +780,21 @@ module intri-lldp {
   }
   grouping PortManagementAddressInfo {
     leaf Ip {
+      mandatory "true";
       type string;
     }
     leaf Subtype {
+      mandatory "true";
       type ManagementAddressIfSubTypeTypeOptions;
     }
     leaf ID {
+      mandatory "true";
       type string;
     }
   }
   grouping ManagementAddress {
     leaf MACAddr {
+      mandatory "true";
       type string;
     }
     container Ip {
@@ -766,25 +803,31 @@ module intri-lldp {
       }
     }
     leaf PortDsr {
+      mandatory "true";
       type string;
     }
   }
   grouping ChassisInfo {
     leaf Type {
+      mandatory "true";
       type ChassisIdSubtypeTypeOptions;
     }
     leaf ID {
+      mandatory "true";
       type string;
     }
   }
   grouping PortID {
     leaf Subtype {
+      mandatory "true";
       type PortIdSubtypeTypeOptions;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf ID {
+      mandatory "true";
       type string;
     }
   }
@@ -800,32 +843,41 @@ module intri-lldp {
       uses intri-device:InterfaceIdentify;
     }
     leaf FramesOut {
+      mandatory "true";
       type int32;
     }
     leaf FramesIn {
+      mandatory "true";
       type int32;
     }
     leaf FramesInErrors {
+      mandatory "true";
       type int32;
     }
   }
   grouping VoiceVlanEntry {
     leaf ApplicationType {
+      mandatory "true";
       type PoliciesApplicationTypeOptions;
     }
     leaf PolicyDefined {
+      mandatory "true";
       type boolean;
     }
     leaf TaggedVlan {
+      mandatory "true";
       type boolean;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Layer_2Priority {
+      mandatory "true";
       type PoliciesLayer2PriorityTypeOptions;
     }
     leaf DSCP {
+      mandatory "true";
       type int32;
     }
   }

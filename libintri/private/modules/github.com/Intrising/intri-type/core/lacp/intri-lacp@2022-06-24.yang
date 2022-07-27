@@ -62,12 +62,15 @@ module intri-lacp {
   }
   grouping SystemConfig {
     leaf SystemPriority {
+      mandatory "true";
       type int32;
     }
     leaf Mode {
+      mandatory "true";
       type ModeTypeOptions;
     }
     leaf TransmitInterval {
+      mandatory "true";
       type IntervalTypeOptions;
     }
   }
@@ -80,9 +83,11 @@ module intri-lacp {
   }
   grouping LAGConfigEntry {
     leaf TrunkID {
+      mandatory "true";
       type int32;
     }
     leaf LacpEnable {
+      mandatory "true";
       type ConfigLinkAggregationTypeOptions;
     }
     container Identify {
@@ -98,12 +103,14 @@ module intri-lacp {
   }
   grouping StatusEntry {
     leaf TrunkID {
+      mandatory "true";
       type int32;
     }
     container IdentifyNo {
       uses intri-device:InterfaceIdentify;
     }
     leaf LacpEnable {
+      mandatory "true";
       type ConfigLinkAggregationTypeOptions;
     }
     container Actor {
@@ -118,18 +125,23 @@ module intri-lacp {
       uses intri-device:InterfaceIdentify;
     }
     leaf PortPriority {
+      mandatory "true";
       type int32;
     }
     leaf SystemPriority {
+      mandatory "true";
       type int32;
     }
     leaf MACAddress {
+      mandatory "true";
       type uint8;
     }
     leaf AdminKey {
+      mandatory "true";
       type int32;
     }
     leaf OperKey {
+      mandatory "true";
       type int32;
     }
     container Status {
@@ -138,27 +150,35 @@ module intri-lacp {
   }
   grouping State {
     leaf Activity {
+      mandatory "true";
       type boolean;
     }
     leaf Timeout {
+      mandatory "true";
       type boolean;
     }
     leaf Aggr {
+      mandatory "true";
       type boolean;
     }
     leaf Sync {
+      mandatory "true";
       type boolean;
     }
     leaf Collect {
+      mandatory "true";
       type boolean;
     }
     leaf Distribute {
+      mandatory "true";
       type boolean;
     }
     leaf Defaulted {
+      mandatory "true";
       type boolean;
     }
     leaf Expired {
+      mandatory "true";
       type boolean;
     }
   }

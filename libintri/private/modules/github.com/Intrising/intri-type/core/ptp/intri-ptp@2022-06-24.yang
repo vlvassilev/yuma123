@@ -321,9 +321,11 @@ module intri-ptp {
       uses SystemClockConfig;
     }
     leaf Encapsulation {
+      mandatory "true";
       type EncapsulationTypeOptions;
     }
     leaf Transmission {
+      mandatory "true";
       type TransmissionTypeOptions;
     }
     container IPAddressList {
@@ -334,43 +336,55 @@ module intri-ptp {
   }
   grouping SystemModeConfig {
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf Profile {
+      mandatory "true";
       type ProfileTypeOptions;
     }
     leaf ClockType {
+      mandatory "true";
       type ClockTypeOptions;
     }
     leaf DomainNumber {
+      mandatory "true";
       type int32;
     }
     leaf DelayMechanism {
+      mandatory "true";
       type DelayMechanismTypeOptions;
     }
   }
   grouping SystemTimerConfig {
     leaf PdelayReq {
+      mandatory "true";
       type int32;
     }
     leaf Announce {
+      mandatory "true";
       type int32;
     }
     leaf AnnounceTimeOut {
+      mandatory "true";
       type int32;
     }
     leaf Sync {
+      mandatory "true";
       type int32;
     }
     leaf SyncLimit {
+      mandatory "true";
       type int32;
     }
   }
   grouping SystemClockConfig {
     leaf Priority1 {
+      mandatory "true";
       type int32;
     }
     leaf Priority2 {
+      mandatory "true";
       type int32;
     }
   }
@@ -386,9 +400,11 @@ module intri-ptp {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
     leaf MasterOnly {
+      mandatory "true";
       type boolean;
     }
   }
@@ -416,21 +432,27 @@ module intri-ptp {
   }
   grouping ClockInfo {
     leaf DomainNumber {
+      mandatory "true";
       type int32;
     }
     leaf ClockIdentity {
+      mandatory "true";
       type uint8;
     }
     leaf PortIdentity {
+      mandatory "true";
       type uint8;
     }
     leaf NumberOfPorts {
+      mandatory "true";
       type int32;
     }
     leaf Priority1 {
+      mandatory "true";
       type int32;
     }
     leaf Priority2 {
+      mandatory "true";
       type int32;
     }
   }
@@ -444,18 +466,23 @@ module intri-ptp {
   }
   grouping ClockQuality {
     leaf Class {
+      mandatory "true";
       type int32;
     }
     leaf Accuracy {
+      mandatory "true";
       type ClockAccuracyTypeOptions;
     }
     leaf TimeSource {
+      mandatory "true";
       type TimeSourceTypeOptions;
     }
     leaf OffsetScaledLogVariance {
+      mandatory "true";
       type int32;
     }
     leaf Offset {
+      mandatory "true";
       type int32;
     }
   }
@@ -464,15 +491,19 @@ module intri-ptp {
       uses intri-device:InterfaceIdentify;
     }
     leaf ClockIdentity {
+      mandatory "true";
       type uint8;
     }
     leaf PortIdentity {
+      mandatory "true";
       type uint8;
     }
     leaf State {
+      mandatory "true";
       type PortStateTypeOptions;
     }
     leaf PathDelay {
+      mandatory "true";
       type int32;
     }
   }
@@ -481,26 +512,33 @@ module intri-ptp {
       uses intri-device:InterfaceIdentify;
     }
     leaf RxPdelayReq {
+      mandatory "true";
       type uint64;
     }
     leaf RxPdelayResp {
+      mandatory "true";
       type uint64;
     }
     leaf RxPdelayRespFollow {
+      mandatory "true";
       type uint64;
     }
     leaf TxPdelayReq {
+      mandatory "true";
       type uint64;
     }
     leaf TxPdelayResp {
+      mandatory "true";
       type uint64;
     }
     leaf TxPdelayRespFollow {
+      mandatory "true";
       type uint64;
     }
   }
   grouping TimeStatus {
     leaf State {
+      mandatory "true";
       type TimeStatusTypeOptions;
     }
     container DateTime {

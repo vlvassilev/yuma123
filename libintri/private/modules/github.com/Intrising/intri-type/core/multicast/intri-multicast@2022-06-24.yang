@@ -109,9 +109,11 @@ module intri-multicast {
   }
   grouping Config {
     leaf IGMPSnoopingGlobalEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf MLDSnoopingGlobalEnabled {
+      mandatory "true";
       type boolean;
     }
     container IGMPConfig {
@@ -139,48 +141,63 @@ module intri-multicast {
   }
   grouping SnoopingConfigEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf SnoopingEnabled {
+      mandatory "true";
       type boolean;
     }
     leaf QuerierVersion {
+      mandatory "true";
       type VersionTypeOptions;
     }
     leaf MulticastRouterDetection {
+      mandatory "true";
       type RouterDetectionTypeOptions;
     }
     leaf EnableFastLeave {
+      mandatory "true";
       type boolean;
     }
     leaf EnableReportSuppression {
+      mandatory "true";
       type boolean;
     }
     leaf GroupLimit {
+      mandatory "true";
       type int32;
     }
     leaf GroupMembershipInterval {
+      mandatory "true";
       type int32;
     }
     leaf LastMemberQueryTime {
+      mandatory "true";
       type int32;
     }
     leaf MaxResponseTime {
+      mandatory "true";
       type int32;
     }
     leaf RouterAgingTime {
+      mandatory "true";
       type int32;
     }
     leaf StartQueryCount {
+      mandatory "true";
       type int32;
     }
     leaf StartQueryInterval {
+      mandatory "true";
       type int32;
     }
     leaf QueryInterval {
+      mandatory "true";
       type int32;
     }
     leaf Robustness {
+      mandatory "true";
       type int32;
     }
     container IdentifyiesConfig {
@@ -198,9 +215,11 @@ module intri-multicast {
   }
   grouping UnregisterFloodVlan {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -213,6 +232,7 @@ module intri-multicast {
   }
   grouping RouterPortVlanEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     container PortList {
@@ -226,6 +246,7 @@ module intri-multicast {
       uses intri-device:InterfaceIdentify;
     }
     leaf Enabled {
+      mandatory "true";
       type boolean;
     }
   }
@@ -238,12 +259,15 @@ module intri-multicast {
   }
   grouping StaticGroupsConfigEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf MulticastAddress {
+      mandatory "true";
       type string;
     }
     container ForwardingPort {
@@ -259,24 +283,31 @@ module intri-multicast {
   }
   grouping IGMPStatisticEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf RxGeneralQueries {
+      mandatory "true";
       type int32;
     }
     leaf RxV3Reports {
+      mandatory "true";
       type int32;
     }
     leaf RxV2Reports {
+      mandatory "true";
       type int32;
     }
     leaf RxV2Leaves {
+      mandatory "true";
       type int32;
     }
     leaf RxV1Reports {
+      mandatory "true";
       type int32;
     }
     leaf Querier {
+      mandatory "true";
       type boolean;
     }
   }
@@ -289,6 +320,7 @@ module intri-multicast {
   }
   grouping RouterStatusEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     container List {
@@ -299,9 +331,11 @@ module intri-multicast {
   }
   grouping RouterPortStatusEntry {
     leaf Type {
+      mandatory "true";
       type ProtocolTypeOptions;
     }
     leaf Status {
+      mandatory "true";
       type RouterStatusTypeOptions;
     }
     container IdentifyNo {
@@ -317,12 +351,15 @@ module intri-multicast {
   }
   grouping DynamicGroupEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf Address {
+      mandatory "true";
       type string;
     }
     leaf TTL {
+      mandatory "true";
       type int32;
     }
     container IdentifyList {
@@ -340,21 +377,27 @@ module intri-multicast {
   }
   grouping MLDStatisticEntry {
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
     leaf RxGeneralQueries {
+      mandatory "true";
       type int32;
     }
     leaf RxV2Reports {
+      mandatory "true";
       type int32;
     }
     leaf RxV1Reports {
+      mandatory "true";
       type int32;
     }
     leaf RxV1Leaves {
+      mandatory "true";
       type int32;
     }
     leaf Querier {
+      mandatory "true";
       type boolean;
     }
   }

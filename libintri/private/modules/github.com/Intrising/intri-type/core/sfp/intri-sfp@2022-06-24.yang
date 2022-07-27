@@ -18,6 +18,7 @@ module intri-sfp {
   }
   grouping Config {
     leaf LossOfSignalEvent {
+      mandatory "true";
       type boolean;
     }
   }

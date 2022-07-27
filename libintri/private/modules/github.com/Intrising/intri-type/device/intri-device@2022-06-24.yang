@@ -486,18 +486,23 @@ module intri-device {
   }
   grouping LedInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf Type {
+      mandatory "true";
       type DeviceTypeOptions;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     choice Device {
+    mandatory "true";
       container LEDDevice {
         uses MCULedDevice;
       }
@@ -511,15 +516,19 @@ module intri-device {
   }
   grouping MonitorInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type DeviceTypeOptions;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     choice Device {
+    mandatory "true";
       container MonitorDevice {
         uses MCUMonitorDevice;
       }
@@ -533,15 +542,19 @@ module intri-device {
   }
   grouping PSUInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type DeviceTypeOptions;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     choice Device {
+    mandatory "true";
       container PSUDevice {
         uses MCUPSUDevice;
       }
@@ -555,93 +568,119 @@ module intri-device {
   }
   grouping MCULedDevice {
     leaf I2CAddr {
+      mandatory "true";
       type int32;
     }
     leaf AddrRegister {
+      mandatory "true";
       type int32;
     }
     leaf LedAction {
+      mandatory "true";
       type LedTypeOptions;
     }
     leaf ActiveBit {
+      mandatory "true";
       type int32;
     }
   }
   grouping MCUMonitorDevice {
     leaf I2CAddr {
+      mandatory "true";
       type int32;
     }
     leaf AddrRegister {
+      mandatory "true";
       type int32;
     }
     leaf MonitorAction {
+      mandatory "true";
       type MonitorTypeOptions;
     }
     leaf ActiveBit {
+      mandatory "true";
       type int32;
     }
   }
   grouping MCUPSUDevice {
     leaf I2CAddr {
+      mandatory "true";
       type int32;
     }
     leaf AddrRegister {
+      mandatory "true";
       type int32;
     }
     leaf PSUAction {
+      mandatory "true";
       type PSUTypeOptions;
     }
     leaf ActiveBit {
+      mandatory "true";
       type int32;
     }
   }
   grouping MCUFanDevice {
     leaf I2CAddr {
+      mandatory "true";
       type int32;
     }
     leaf AddrRegister {
+      mandatory "true";
       type int32;
     }
     leaf FANAction {
+      mandatory "true";
       type FanTypeOptions;
     }
     leaf ActiveBit {
+      mandatory "true";
       type int32;
     }
   }
   grouping I2CDevice {
     leaf I2CAddr {
+      mandatory "true";
       type int32;
     }
     leaf AddrRegister {
+      mandatory "true";
       type int32;
     }
     leaf Action {
+      mandatory "true";
       type int32;
     }
     leaf ActiveBit {
+      mandatory "true";
       type int32;
     }
   }
   grouping GPIODevice {
     leaf Register {
+      mandatory "true";
       type int32;
     }
     leaf Pin {
+      mandatory "true";
       type int32;
     }
     leaf Action {
+      mandatory "true";
       type boolean;
     }
     leaf Enable {
+      mandatory "true";
       type boolean;
     }
   }
   grouping I2Cinfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     container Device {
@@ -650,9 +689,11 @@ module intri-device {
   }
   grouping GPIOInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     container Device {
@@ -661,9 +702,11 @@ module intri-device {
   }
   grouping PTPClockSynchronizerInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     container Device {
@@ -672,51 +715,65 @@ module intri-device {
   }
   grouping GPSInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
   }
   grouping ToDInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
   }
   grouping UARTDevice {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Path {
+      mandatory "true";
       type string;
     }
     leaf Direction {
+      mandatory "true";
       type string;
     }
     leaf Bandwidth {
+      mandatory "true";
       type int32;
     }
   }
   grouping FanInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type FanDeviceTypeOptions;
     }
     leaf FanNumber {
+      mandatory "true";
       type int32;
     }
     choice Device {
+    mandatory "true";
       container FANDevice {
         uses MCUFanDevice;
       }
@@ -730,12 +787,15 @@ module intri-device {
   }
   grouping PoEInfo {
     leaf Name {
+      mandatory "true";
       type string;
     }
     leaf Type {
+      mandatory "true";
       type PoEDeviceTypeOptions;
     }
     choice Device {
+    mandatory "true";
       container I2CDevice {
         uses I2CDevice;
       }
@@ -798,79 +858,102 @@ module intri-device {
   }
   grouping HardwareTableSize {
     leaf TcamSize {
+      mandatory "true";
       type int32;
     }
     leaf BridgeFDBEntries {
+      mandatory "true";
       type int32;
     }
     leaf VirtualPorts {
+      mandatory "true";
       type int32;
     }
     leaf VirtualBridgeDomains {
+      mandatory "true";
       type int32;
     }
     leaf ARPTableEntries {
+      mandatory "true";
       type int32;
     }
     leaf RouterIPv4HostEntries {
+      mandatory "true";
       type int32;
     }
     leaf RouterIPv6HostEntries {
+      mandatory "true";
       type int32;
     }
     leaf RouterNextHopEntries {
+      mandatory "true";
       type int32;
     }
     leaf MulticastPhysicalPortGroups {
+      mandatory "true";
       type int32;
     }
     leaf MulticastLinkedListEntries {
+      mandatory "true";
       type int32;
     }
     leaf CentralizedCounters {
+      mandatory "true";
       type int32;
     }
     leaf SpanningTreeGroups {
+      mandatory "true";
       type int32;
     }
     leaf QoSProfiles {
+      mandatory "true";
       type int32;
     }
     leaf L2L3PortIsolation {
+      mandatory "true";
       type int32;
     }
   }
   grouping PhyInterface {
     leaf Interface {
+      mandatory "true";
       type int32;
     }
     leaf Type {
+      mandatory "true";
       type PhyInterfaceTypeOptions;
     }
   }
   grouping PortInfo {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf MACChip {
+      mandatory "true";
       type int32;
     }
     leaf MACNo {
+      mandatory "true";
       type int32;
     }
     leaf PortGroup {
+      mandatory "true";
       type int32;
     }
     leaf PhyID1 {
+      mandatory "true";
       type int32;
     }
     leaf PhyID2 {
+      mandatory "true";
       type int32;
     }
     container PhyInterface {
       uses PhyInterface;
     }
     leaf PoENo {
+      mandatory "true";
       type int32;
     }
     container PoEChannel {
@@ -879,12 +962,15 @@ module intri-device {
       }
     }
     leaf PoEChipNo {
+      mandatory "true";
       type int32;
     }
     leaf MacsecEncLen {
+      mandatory "true";
       type int32;
     }
     leaf InterfaceType {
+      mandatory "true";
       type PortInterfaceTypeOptions;
     }
     container Properties {
@@ -893,6 +979,7 @@ module intri-device {
       }
     }
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     container SpeedProperties {
@@ -903,6 +990,7 @@ module intri-device {
   }
   grouping BoardInfo {
     leaf SystemDescription {
+      mandatory "true";
       type string;
     }
     container PortLists {
@@ -919,6 +1007,7 @@ module intri-device {
       uses HardwareTableSize;
     }
     leaf CPUPort {
+      mandatory "true";
       type int32;
     }
     container BoardDevice {
@@ -928,37 +1017,47 @@ module intri-device {
       uses TimeControlInfo;
     }
     leaf EnterpriseOID {
+      mandatory "true";
       type string;
     }
   }
   grouping TimeControlSpeedFrequencyEntry {
     leaf Speed {
+      mandatory "true";
       type PortPropertyTypeOptions;
     }
     leaf Frequency {
+      mandatory "true";
       type int64;
     }
     leaf M {
+      mandatory "true";
       type int64;
     }
     leaf N {
+      mandatory "true";
       type int64;
     }
     leaf Div {
+      mandatory "true";
       type int64;
     }
   }
   grouping TimeControlPortInfoEntry {
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf RCLKPin {
+      mandatory "true";
       type RCLKTypeOptions;
     }
     leaf Frequency {
+      mandatory "true";
       type int64;
     }
     leaf InputClock {
+      mandatory "true";
       type InputClockIndexTypeOptions;
     }
   }
@@ -968,9 +1067,11 @@ module intri-device {
         key "Key";
         unique "Key";
         leaf Key {
+          mandatory "true";
           type string;
         }
         leaf Value {
+          mandatory "true";
           type InputClockIndexTypeOptions;
         }
       }
@@ -988,20 +1089,25 @@ module intri-device {
   }
   grouping Boundary {
     leaf Type {
+      mandatory "true";
       type BoundaryTypeOptions;
     }
     leaf Max {
+      mandatory "true";
       type int32;
     }
     leaf Min {
+      mandatory "true";
       type int32;
     }
     leaf Lower {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
     }
     leaf Upper {
+      mandatory "true";
       type decimal64 {
         fraction-digits 2;
       }
@@ -1274,213 +1380,279 @@ module intri-device {
   }
   grouping FunctionControlVLAN {
     leaf Voice {
+      mandatory "true";
       type boolean;
     }
     leaf SelectiveQinq {
+      mandatory "true";
       type boolean;
     }
     leaf MACBased {
+      mandatory "true";
       type boolean;
     }
     leaf SubnetBased {
+      mandatory "true";
       type boolean;
     }
     leaf ProtocolBased {
+      mandatory "true";
       type boolean;
     }
     leaf Translation {
+      mandatory "true";
       type boolean;
     }
   }
   grouping FunctionControlACL {
     leaf TimeRange {
+      mandatory "true";
       type boolean;
     }
     leaf Binding {
+      mandatory "true";
       type boolean;
     }
     leaf FlowMirroring {
+      mandatory "true";
       type boolean;
     }
   }
   grouping FunctionControlMirroring {
     leaf RSPAN {
+      mandatory "true";
       type boolean;
     }
   }
   grouping FunctionControlFDB {
     leaf PortSecurity {
+      mandatory "true";
       type boolean;
     }
     leaf LearningLimit {
+      mandatory "true";
       type boolean;
     }
     leaf Forward {
+      mandatory "true";
       type boolean;
     }
     leaf Drop {
+      mandatory "true";
       type boolean;
     }
   }
   grouping PathAll {
     leaf LogRamDisk {
+      mandatory "true";
       type string;
     }
     leaf LogFlash {
+      mandatory "true";
       type string;
     }
     leaf ConfigDefault {
+      mandatory "true";
       type string;
     }
     leaf ConfigSaved {
+      mandatory "true";
       type string;
     }
     leaf User {
+      mandatory "true";
       type string;
     }
     leaf IPTables {
+      mandatory "true";
       type string;
     }
     leaf CoreReboot {
+      mandatory "true";
       type string;
     }
     leaf WarmStart {
+      mandatory "true";
       type string;
     }
     leaf VlanMgmt {
+      mandatory "true";
       type string;
     }
     leaf TimeCfg {
+      mandatory "true";
       type string;
     }
     leaf BootReady {
+      mandatory "true";
       type string;
     }
     leaf IPv6LinkLocal {
+      mandatory "true";
       type string;
     }
     leaf TimeZone {
+      mandatory "true";
       type string;
     }
     leaf Resolv {
+      mandatory "true";
       type string;
     }
     leaf DropbearProc {
+      mandatory "true";
       type string;
     }
     leaf TelnetProc {
+      mandatory "true";
       type string;
     }
     leaf FTPProc {
+      mandatory "true";
       type string;
     }
     leaf LocalUser {
+      mandatory "true";
       type string;
     }
     leaf Certificates {
+      mandatory "true";
       type string;
     }
     leaf OpenSSLCertificates {
+      mandatory "true";
       type string;
     }
     leaf SNMPdCertificates {
+      mandatory "true";
       type string;
     }
     leaf SNMPdCertificatesKey {
+      mandatory "true";
       type string;
     }
     leaf NetCfg {
+      mandatory "true";
       type string;
     }
     leaf IPv4Script {
+      mandatory "true";
       type string;
     }
     leaf IPv6Script {
+      mandatory "true";
       type string;
     }
     leaf LastSaveTime {
+      mandatory "true";
       type string;
     }
     leaf Image {
+      mandatory "true";
       type string;
     }
     leaf AltVersion {
+      mandatory "true";
       type string;
     }
     leaf AltBuildDateTime {
+      mandatory "true";
       type string;
     }
     leaf Version {
+      mandatory "true";
       type string;
     }
     leaf BuildDateTime {
+      mandatory "true";
       type string;
     }
     leaf DhcpServerDnsmasqLeasePath {
+      mandatory "true";
       type string;
     }
     leaf DhcpServerDnsmasqCfgPath {
+      mandatory "true";
       type string;
     }
     leaf DhcpServerPortBasedInfo {
+      mandatory "true";
       type string;
     }
   }
   grouping InterfaceIdentify {
     leaf Type {
+      mandatory "true";
       type InterfaceTypeOptions;
     }
     leaf DeviceID {
+      mandatory "true";
       type int32;
     }
     leaf PortNo {
+      mandatory "true";
       type int32;
     }
     leaf LAGNo {
+      mandatory "true";
       type int32;
     }
     leaf VlanID {
+      mandatory "true";
       type int32;
     }
   }
   grouping Info {
     leaf Model {
+      mandatory "true";
       type string;
     }
     leaf MACAddr {
+      mandatory "true";
       type string;
     }
     leaf MACAddrFactory {
+      mandatory "true";
       type string;
     }
     leaf SerialNo {
+      mandatory "true";
       type string;
     }
     leaf Vendor {
+      mandatory "true";
       type string;
     }
     leaf AltBuildDateTime {
+      mandatory "true";
       type string;
     }
     leaf CurrentBuildDateTime {
+      mandatory "true";
       type string;
     }
     leaf AltSwVersion {
+      mandatory "true";
       type string;
     }
     leaf CurrentSwVersion {
+      mandatory "true";
       type string;
     }
     leaf HwVersion {
+      mandatory "true";
       type string;
     }
     leaf CurrentImage {
+      mandatory "true";
       type string;
     }
     leaf Board {
+      mandatory "true";
       type string;
     }
     leaf Layer {
+      mandatory "true";
       type LayerTypeOptions;
     }
   }

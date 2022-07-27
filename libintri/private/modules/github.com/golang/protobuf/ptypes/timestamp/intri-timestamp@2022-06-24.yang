@@ -12,9 +12,11 @@ module intri-timestamp {
 
   grouping Timestamp {
     leaf Seconds {
+      mandatory "true";
       type int64;
     }
     leaf Nanos {
+      mandatory "true";
       type int32;
     }
   }

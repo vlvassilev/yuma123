@@ -116,10 +116,7 @@ static void
      * these may be overridden from the command line;
      */
 
-    /* Our Switch doesn't have candidate config, so
-     * make it support running config only
-    */
-    agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
+    agt_profile.agt_targ = NCX_AGT_TARG_CANDIDATE;
     agt_profile.agt_start = NCX_AGT_START_MIRROR;
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_log_acm_reads = FALSE;
@@ -128,7 +125,7 @@ static void
     /* T: <validate> op on candidate will call all SILs
      * F: only SILs for nodes changed in the candidate will
      * be called; only affects <validate> command   */
-    agt_profile.agt_validate_all = TRUE;
+    agt_profile.agt_validate_all = FALSE; // default = TRUE
 
     agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_usestartup = TRUE;
@@ -584,6 +581,9 @@ status_t
     if (*showver || (*showhelpmode != HELP_MODE_NONE)) {
         return NO_ERR;
     }
+    /* our switch does not support candidate config, */
+    /* so set it to running only after all           */
+    agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
 
     /* loglevel and log file already set */
     return res;

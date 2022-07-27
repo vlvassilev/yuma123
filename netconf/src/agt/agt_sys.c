@@ -172,6 +172,7 @@ date         init     comment
 #define system_N_set_log_level (const xmlChar *)"set-log-level"
 #define system_N_log_level (const xmlChar *)"log-level"
 
+#define ietf_netconf (const xmlChar *)"ietf-netconf"
 /** ietf-system system-state related CONST **/
 #define ietf_system (const xmlChar *)"ietf-system"
 #define ietf_system_clock (const xmlChar *)"clock"
@@ -316,24 +317,17 @@ status_t get_api_string_router (int api_indicator, xmlChar *ret)
     status_t res = NO_ERR;
     printf("\n@@@@@@@@@@@@@@@@@@@@@@ get_api_string_router %d\n", api_indicator);
     buff=malloc(sizeof(buff)*512);
-    printf("\n@@@@@@@@@@@@@@@@@@@@@@ reset buff1 \n");
     memset(buff, 0, 512);
-    printf("\n@@@@@@@@@@@@@@@@@@@@@@ reset buff \n");
 
     switch (api_indicator) {
     case private_api_get_time_current_datetime:
         time_status_out = malloc(sizeof(*(time_status_out)));
         time_Time_GetStatus(epty, time_status_out);
         memcpy(buff, time_status_out->LocalDate, strlen(time_status_out->LocalDate));
-        printf("\n walter: buf1 is %s", buff);
         strcat(buff, strT);
-        printf("\n walter: buf2 is %s", buff);
         strcat(buff, time_status_out->LocalTime);
-        printf("\n walter: buf3 is %s", buff);
         strcat(buff, strZ);
-        printf("\n walter: buf4 is %s", buff);
         free(time_status_out);
-        printf("\n walter: buf5 after free is %s", buff);
         break;
     case private_api_get_system_last_boot_time:
         //     required pattern is
@@ -342,7 +336,6 @@ status_t get_api_string_router (int api_indicator, xmlChar *ret)
         // // "2022-07-07 08:57:44" => "2022-07-07T08:57:43Z"
         sys_status_out = malloc(sizeof(*(sys_status_out)));
         system_System_GetStatus(epty, sys_status_out);
-        printf("\n walter: buf5 lastBootTime is  %s", sys_status_out->LastBootTime);
         char *tmp = sys_status_out->LastBootTime;
         char *timebuf = strchr(tmp, ' ');
         if (timebuf != NULL) {
@@ -352,7 +345,6 @@ status_t get_api_string_router (int api_indicator, xmlChar *ret)
         strcat(buff, strT);
         strcat(buff, timebuf);
         strcat(buff, strZ);
-        printf("\n walter: buf5 after free is %s", buff);
         free(sys_status_out);
         break;
     case private_api_get_network_hostname:
@@ -404,7 +396,6 @@ status_t get_api_string_router (int api_indicator, xmlChar *ret)
         break;
     }
     free(epty);
-    // printf("\n done get_api_string_router, buff s is %s", buff);
     memcpy(ret, buff, strlen(buff));
     return res;
 } /* get_api_string_router */
@@ -1055,6 +1046,8 @@ ietf_system_clock_timezone_get (
     status_t res = NO_ERR;
     if (LOGDEBUG) {
         log_debug("\nEnter ietf_system_clock_timezone_get");
+        log_debug("\nwalter: virval name is %s", virval->name);
+        log_debug("\nwalter: dstval name is %s", dstval->name);
     }
 
     val_value_t *childval;
@@ -1072,15 +1065,8 @@ ietf_system_clock_timezone_get (
         &res);
     if (childval != NULL) {
         val_add_child(childval, dstval);
-        res = val_instance_check(childval, dstval->obj);
-        log_debug("\n instance_check result %s ", get_error_string(res));
-        boolean is_set = val_choice_is_set(dstval, dstval->obj);
-        log_debug("\n choice_is_set result %s ", is_set ? "yes" : "false");
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
-    } else {
-        log_debug("\n wwwwwwwwwwwwwwwwwww");
-
     }
     return res;
 }
@@ -1088,7 +1074,6 @@ ietf_system_clock_timezone_get (
 
 status_t ietf_system_clock_timezone_mro(val_value_t *parentval) {
     status_t res = NO_ERR;
-    val_value_t *childval = NULL;
     val_init_virtual(
         parentval,
         ietf_system_clock_timezone_get,
@@ -1131,7 +1116,6 @@ status_t ietf_system_get(
     xmlChar *location;
     location = malloc(sizeof(location)*512);
     memset(location, 0, sizeof(location)*512);
-    // res = get_api_string_router(private_api_get_system_location, location);
     res = get_system_location(location);
     if (res != NO_ERR) {
         return SET_ERROR(res);
@@ -1152,7 +1136,6 @@ status_t ietf_system_get(
     xmlChar *contact;
     contact = malloc(sizeof(contact)*512);
     memset(contact, 0, sizeof(contact)*512);
-    // res = get_api_string_router(private_api_get_system_contact, contact);
     res = get_system_contact(contact);
     if (res != NO_ERR) {
         return SET_ERROR(res);
@@ -1170,14 +1153,12 @@ status_t ietf_system_get(
     }
 
     /* Add /system/clock */
-    printf("\n@@@@ add /system/clock\n");
+    log_debug("\n@@@@ add /system/clock\n");
     res = agt_add_container(
         ietf_system,
         ietf_system_clock,
         dstval,
         &clockval);
-
-    printf("\n@@@@ add /system/clock/timezone-name\n");
     res = ietf_system_clock_timezone_mro(clockval);
     if (res != NO_ERR) {
         return SET_ERROR(res);
@@ -1260,13 +1241,16 @@ static status_t
     if (LOGDEBUG) {
         log_debug("\n >>>>> walter: func = api_indicator %d", api_indicator);
         log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
-        log_debug("\n newval = %d, curval = %d", newval == NULL, curval == NULL);
         if (newval!=NULL) {
-            log_debug("\n newval = %s, curval = %s", VAL_STRING(newval), VAL_STRING(curval));
-            log_debug("\n newval.name is %s, curval.name is = %s", newval->name, curval->name);
+            log_debug("\n newval = %s", VAL_STRING(newval));
+            log_debug("\n newval.name is %s", newval->name);
+            val_dump_value(newval, 0);
         }
-        // val_dump_value(newval, 0);
-        // val_dump_value(curval, 0);
+        if (curval!=NULL) {
+            log_debug("\n curval = %s", VAL_STRING(curval));
+            log_debug("\n curval.name is %s", curval->name);
+            val_dump_value(curval, 0);
+        }
     }
 
     switch (cbtyp) {
@@ -1274,9 +1258,6 @@ static status_t
         break;
     case AGT_CB_APPLY:
         /* database manipulation done here */
-        break;
-    case AGT_CB_COMMIT:
-        /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
             break;
@@ -1295,6 +1276,8 @@ static status_t
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
     case AGT_CB_ROLLBACK:
         break;
     default:
@@ -1319,6 +1302,87 @@ static status_t
 }
 
 static status_t
+    ietf_system_clock_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    if (LOGDEBUG) {
+        log_debug("\nwalter: func = ietf_system_clock_edit ");
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        if (newval!=NULL) {
+            log_debug("\nwalter: newval11 ");
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            log_debug("\nwalter: newval22 ");
+            val_dump_value(newval, 0);
+        }
+        if (curval!=NULL) {
+            log_debug("\nwalter: curval11 ");
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            log_debug("\nwalter: curval22 ");
+            val_dump_value(curval, 0);
+        }
+    }
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+            break;
+        case OP_EDITOP_REPLACE:
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    log_debug("\nwalter: res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_system_clock_edit return");
+    return res;
+}
+
+static status_t
     ietf_system_clock_timzone_name_edit(
         ses_cb_t *scb,
         rpc_msg_t *msg,
@@ -1336,20 +1400,25 @@ static status_t
     errorstr = NULL;
 
     if (LOGDEBUG) {
-        log_debug("\n >>>>> walter: func = ietf_system_clock_timzone_name_edit ");
-        log_debug("\n cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
-        log_debug("\n newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        log_debug("\nwalter: func = ietf_system_clock_timezone_name_edit ");
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
         if (newval!=NULL) {
-            log_debug("\n newval11 ");
-            log_debug("\n newval.name is %s, curval.name is = %s", newval->name, curval->name);
-            log_debug("\n newval22 ");
-            log_debug("\n newval = %s",VAL_STRING(newval));
-            log_debug("\n newval33 ");
-            log_debug("\n curval = %s",VAL_STRING(curval));
-            log_debug("\n newval44 ");
+            log_debug("\nwalter: newval11 ");
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            log_debug("\nwalter: newval22 ");
+            log_debug("\nwalter: newval = %s",VAL_STRING(newval));
+            log_debug("\nwalter: newval33 ");
+            val_dump_value(newval, 0);
         }
-        val_dump_value(newval, 0);
-        val_dump_value(curval, 0);
+        if (curval!=NULL) {
+            log_debug("\nwalter: curval11 ");
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            log_debug("\nwalter: curval22 ");
+            log_debug("\nwalter: curval = %s",VAL_STRING(curval));
+            log_debug("\nwalter: curval33 ");
+            val_dump_value(curval, 0);
+        }
     }
 
     switch (cbtyp) {
@@ -1357,24 +1426,21 @@ static status_t
         break;
     case AGT_CB_APPLY:
         /* database manipulation done here */
-        break;
-    case AGT_CB_COMMIT:
-        /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
             break;
         case OP_EDITOP_MERGE:
         case OP_EDITOP_REPLACE:
             if(newval!=NULL) {
-                log_debug("\nSetting newval %s\n", VAL_STRING(newval));
+                log_debug("\nwalter: Setting newval %s\n", VAL_STRING(newval));
                 // res = set_api_string_router(private_api_set_time_timezone, VAL_STRING(newval));
                 struct timepb_Config *time_config = malloc(sizeof(*time_config));
                 struct emptypb_Empty *epty = malloc(sizeof(*epty));
-                log_debug("\n whay1 ");
+                log_debug("\nwalter: whay1 ");
                 time_Time_GetConfig(epty, time_config);
-                log_debug("\n whay2 ");
+                log_debug("\nwalter: whay2 ");
                 time_config->TimeZone = VAL_STRING(newval);
-                log_debug("\n whay3 ");
+                log_debug("\nwalter: whay3 ");
                 time_Time_SetConfig(time_config, epty);
             }
             break;
@@ -1386,12 +1452,15 @@ static status_t
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        break;
     case AGT_CB_ROLLBACK:
         break;
     default:
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
-    log_debug("\n res is %s", get_error_string(res));
+    log_debug("\nwalter: res is %s", get_error_string(res));
     /* if error: set the res, errorstr, and errorval parms */
     if (res != NO_ERR) {
         agt_record_error(
@@ -1405,7 +1474,7 @@ static status_t
             NCX_NT_VAL,
             errorval);
     }
-    log_debug("\n walter: b4 ietf_system_callback_router return");
+    log_debug("\nwalter: b4 ietf_system_clock_timzone_name_edit return");
     return res;
 }
 
@@ -1466,25 +1535,6 @@ static status_t
         curval);
 } /* ietf_system_location_edit */
 
-// static status_t
-//     ietf_system_clock_timzone_name_edit (
-//         ses_cb_t *scb,
-//         rpc_msg_t *msg,
-//         agt_cbtyp_t cbtyp,
-//         op_editop_t editop,
-//         val_value_t *newval,
-//         val_value_t *curval)
-// {
-//    return ietf_system_callback_router(
-//         private_api_set_time_timezone,
-//         scb,
-//         msg,
-//         cbtyp,
-//         editop,
-//         newval,
-//         curval);
-// } /* ietf_system_location_edit */
-
 
 /********************************************************************
 * FUNCTION payload_error
@@ -1505,83 +1555,6 @@ static void
 }  /* payload_error */
 
 
-/********************************************************************
-* FUNCTION get_currentDateTime
-*
-* <get> operation handler for the sysCurrentDateTime leaf
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    get_currentDateTime (ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         const val_value_t *virval,
-                         val_value_t  *dstval)
-{
-    xmlChar      *buff;
-
-    (void)scb;
-    (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-        buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
-        if (!buff) {
-            return ERR_INTERNAL_MEM;
-        }
-
-        tstamp_datetime(buff);
-        VAL_STRING(dstval) = buff;
-        return NO_ERR;
-    } else {
-        return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_currentDateTime */
-
-/********************************************************************
-* FUNCTION get_currentLogLevel
-*
-* <get> operation handler for the sysCurrentDateTime leaf
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    get_currentLogLevel (ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         const val_value_t *virval,
-                         val_value_t  *dstval)
-{
-    const xmlChar  *loglevelstr;
-    log_debug_t     loglevel;
-    status_t        res;
-
-    (void)scb;
-    (void)virval;
-    res = NO_ERR;
-
-    if (cbmode == GETCB_GET_VALUE) {
-        loglevel = log_get_debug_level();
-        loglevelstr = log_get_debug_level_string(loglevel);
-        if (loglevelstr == NULL) {
-            res = ERR_NCX_OPERATION_FAILED;
-        } else {
-            res = ncx_set_enum(loglevelstr, VAL_ENU(dstval));
-        }
-    } else {
-        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-    return res;
-
-} /* get_currentLogLevel */
 
 
 /********************************************************************
@@ -1791,44 +1764,6 @@ static void
 } /* netconf_notifications_add_common_session_parms */
 
 
-/********************************************************************
-* FUNCTION add_child_mro
-*
-* Add the node under the selected dir
-*
-* INPUTS:
-*   dir == the dir that will be added node
-*   modname == module name
-*   nodename == the node name that will be added
-*   cb == the callback that in charge of the real value of this node
-* RETURNS:
-*   none
-*********************************************************************/
-status_t
-    add_child_mro(
-        val_value_t *parentval,
-        const xmlChar *leafname,
-        const xmlChar *leafval)
-{
-    status_t res = NO_ERR;
-    val_value_t *childval = NULL;
-
-    childval = agt_make_leaf(
-        parentval->obj,
-        leafname,
-        leafval,
-        &res);
-    if (childval != NULL) {
-        val_add_child(childval, parentval);
-    } else if (res != NO_ERR) {
-        return SET_ERROR(res);
-    }
-    return res;
-}
-
-
-
-
 
 /********************************************************************
 * FUNCTION agt_sys_init
@@ -1846,7 +1781,7 @@ status_t
 {
     agt_profile_t  *agt_profile;
     status_t        res;
-    printf("\n@@@@@ agt_sys_init @@@\n");
+    printf("\nwalter: @@@@@ agt_sys_init @@@\n");
     if (agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
@@ -1902,7 +1837,10 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    /* disable not supported features */
     agt_disable_feature(ietf_system, "dns-resolver");
+    agt_disable_feature(ietf_system, "dns-udp-tcp-port");
+    agt_disable_feature(ietf_system, "ntp-udp-port");
 
     res = agt_cb_register_callback(
         "ietf-system",
@@ -1931,15 +1869,29 @@ status_t
         return SET_ERROR(res);
     }
 
+
+    /*
+        The callback for the container is still required, even the
+        registered callback would do nothing, otherwise it would
+        take two times of command to apply the changes to the device
+    */
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/clock",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_clock_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
     // [FIXME] after all other callback is done
-    // res = agt_cb_register_callback(
-    //     "ietf-system",
-    //     (const xmlChar *)"/system/clock/timezone-name",
-    //     (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
-    //     ietf_system_clock_timzone_name_edit);
-    // if (res != NO_ERR) {
-    //     return SET_ERROR(res);
-    // }
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/clock/timezone-name",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_clock_timzone_name_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
     yuma_system_obj =
         obj_find_child(ietf_system_state_obj,

@@ -351,7 +351,6 @@ static status_t
 {
     const xmlChar     *name;
     status_t           res;
-    printf("\nwalter: make a guess 9, in handle_subtree_node_callback");
     if (newnode != NULL) {
         name = newnode->name;
     } else if (curnode != NULL) {
@@ -359,7 +358,6 @@ static status_t
     } else {
         name = NULL;
     }
-    printf("\nwalter: make a guess 9.1, name is NULL: %s", name == NULL ? "true":"false");
 
     if (newnode && curnode) {
         int  retval;
@@ -367,7 +365,6 @@ static status_t
             newnode->parent->editop == OP_EDITOP_REPLACE &&
             newnode->parent->editvars &&
             newnode->parent->editvars->operset) {
-            printf("\nwalter: make a guess 9.2, in replace");
             /* replace parent was explicitly requested and this
              * function would not have been called unless something
              * in the replaced node changed.
@@ -435,33 +432,16 @@ static status_t
 {
     val_value_t  *newchild, *curchild;
     status_t      res = NO_ERR;
-    printf("\nwalter: make a guess 7");
 
 
     if (newnode == NULL) {
-        printf("\nwalter: newnode is null");
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    log_debug("\nwalter: make a guess 8");
-    log_debug("\nwalter: make a guess 8.11");
-    log_debug("\nwalter: make a guess 8.12");
-    log_debug("\nwalter: make a guess 8.13");
-    log_debug("\nwalter: make a guess 8.17, newNode->name: %s", newnode->name);
-    log_debug("\nwalter: make a guess 8.14");
-    log_debug("\nwalter: make a guess 8.15");
-    log_debug("\nwalter: make a guess 8.16");
     newchild = val_get_first_child(newnode);
-    log_debug("\nwalter: make a guess 8.17");
-    log_debug("\nwalter: make a guess 8.18");
-    log_debug("\nwalter: make a guess 8.19");
     newchild = val_get_next_child(newchild);
-    log_debug("\nwalter: make a guess 8.20");
-    log_debug("\nwalter: make a guess 8.21");
-    log_debug("\nwalter: make a guess 8.22");
     for (newchild = val_get_first_child(newnode);
          newchild != NULL;
          newchild = val_get_next_child(newchild)) {
-        log_debug("\nwalter: make a guess 8.2, newchild->name: %s", newchild->name);
 
         if (!obj_is_config(newchild->obj)) {
             continue;
@@ -480,19 +460,12 @@ static status_t
         }
     }
 
-    log_debug("\nwalter: make a guess 8.2322");
     if (curnode == NULL) {
         return NO_ERR;
     }
 
-    log_debug("\nwalter: make a guess 8.23");
-    log_debug("\nwalter: make a guess 8.24");
-    log_debug("\nwalter: make a guess 8.25");
     curchild = val_get_first_child(curnode);
-    log_debug("\nwalter: make a guess 8.26");
     curchild = val_get_next_child(curchild);
-    log_debug("\nwalter: make a guess 8.27");
-    log_debug("\nwalter: make a guess 8.28");
 
     for (curchild = val_get_first_child(curnode);
          curchild != NULL;
@@ -571,7 +544,6 @@ static status_t
             res = delete_children_first(cbtyp, scb, msg, curchild);
         } else {
             if (LOGDEBUG) {
-                log_debug("\nwalter: in delete_children_first, calling handle_subtree_node_callback");
             }
             res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
                                                msg, NULL, curchild);
@@ -583,7 +555,6 @@ static status_t
 
     if (!obj_is_leafy(curnode->obj)) {
         if (LOGDEBUG) {
-            log_debug("\nwalter: in delete_children_first222222, calling handle_subtree_node_callback");
         }
         res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
                                            msg, NULL, curnode);
@@ -684,13 +655,9 @@ static status_t
         for(cbset_node=val->obj?(agt_cb_fnset_node_t *)dlq_firstEntry(&val->obj->cbsetQ):NULL;
             cbset_node!=NULL;
             cbset_node=(agt_cb_fnset_node_t *)dlq_nextEntry(cbset_node)) {
-            log_debug("\nwalter: counter is %d", counter);
             counter++;
-            log_debug("\nwalter: val-> obj %p", val->obj);
             cbset = cbset_node->fnset_ptr;
             if(cbset->cbfn[cbtyp]==NULL) {
-                log_debug("\nwalter: cbset is %s", cbset);
-                log_debug("\nwalter: cbtyp is %d, got NULL, ignore", cbtyp);
                 continue;
             } else {
                 cbfn_calls++;
@@ -702,14 +669,11 @@ static status_t
                            val_get_mod_name(val),
                            val->name);
             }
-            printf("\nwalter: make a guess 2");
 
             editop = cvt_editop(editop, newnode, curnode);
-            printf("\nwalter: make a guess 3");
             res = (*cbset->cbfn[cbtyp])(scb, msg, cbtyp, editop,
                                         newnode, curnode);
 
-            printf("\nwalter: make a guess 4");
 
             if(res != NO_ERR) {
                 if (LOGDEBUG) {
@@ -722,20 +686,8 @@ static status_t
                 }
                 return res;
             }
-            printf("\nwalter: make a guess 5");
         }
-        printf("\nwalter: make a guess 6");
-        log_debug("\nwalter: cnfn_calls is %d", cbfn_calls);
-        log_debug("\nwalter: val is %s", val->name);
-        printf("\nwalter: make a guess 6.11");
-        log_debug("\nwalter: cbtyp is %p", cbtyp);
-        log_debug("\nwalter: editop is %p", editop);
-        log_debug("\nwalter: scb is %p", scb);
-        log_debug("\nwalter: msg is %p", msg);
-        log_debug("\nwalter: newnode is %p", newnode);
-        log_debug("\nwalter: curnode is %p", curnode);
         if(cbfn_calls>0) {
-            log_debug("\nwalter: cnfn_calls2 is %d", cbfn_calls);
             if (res == NO_ERR) {
                 val->res = NO_ERR;
 
@@ -745,32 +697,24 @@ static status_t
                 case OP_EDITOP_REPLACE:
                 case OP_EDITOP_LOAD:
                     if (cbtyp != AGT_CB_VALIDATE) {
-                        log_debug("\nwalter: make a guess 6.12");
 
                         res = handle_subtree_callback(cbtyp, editop, scb, msg,
                                                       newnode, curnode);
-                        log_debug("\nwalter: make a guess 6.20");
                     }
                     break;
-                default:
-                    log_debug("\nwalter: switch editop default, edittop is %d", editop);
                 }
             }
             return res;
         } else if (!lookparent) {
-            log_debug("\nwalter: !lookparent");
             done = TRUE;
         } else if (val->parent != NULL &&
                    !obj_is_root(val->parent->obj) &&
                    val_get_nsid(val) == val_get_nsid(val->parent)) {
-            log_debug("\nwalter: check parent");
             val = val->parent;
         } else {
-            log_debug("\nwalter: else");
             done = TRUE;
         }
     }
-    log_debug("\n handle_user_callback return no_err");
     return NO_ERR;
 
 } /* handle_user_callback */
@@ -1645,11 +1589,8 @@ static status_t
         topreplace = TRUE;
     }
 
-    log_debug("\n===============================");
     log_debug("\napply_write_val: %s start", name);
-    log_debug("\n===============================");
 
-    log_debug("\nwalter: @1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     /* check if this node needs the edit operation applied */
     if (*done || (newval && obj_is_root(newval->obj))) {
         applyhere = FALSE;
@@ -1665,7 +1606,6 @@ static status_t
         applyhere = agt_apply_this_node(cur_editop, newval, curval);
         *done = applyhere;
     }
-    log_debug("\nwalter: @2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     if (applyhere && newval) {
         /* check corner case applying to the config root */
@@ -1682,7 +1622,6 @@ static status_t
             }
         }
     }
-    log_debug("\nwalter: @3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     /* apply the requested edit operation */
     if (applyhere) {
@@ -1713,7 +1652,6 @@ static status_t
                 }
             }
         }
-        log_debug("\nwalter: @4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
         if (target->cfg_id == NCX_CFGID_RUNNING) {
             /* only call SIL-apply once, when the data tree edits
@@ -1750,7 +1688,6 @@ static status_t
          * no longer deleted, just marked as deleted until commit
          * The newnode and curnode pointers MUST be rooted in a data
          * tree until after all SIL callbacks have been invoked  */
-        log_debug("\nwalter: @5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         switch (cur_editop) {
         case OP_EDITOP_LOAD:
         case OP_EDITOP_DELETE:
@@ -1770,8 +1707,6 @@ static status_t
             } // else keep source leaf or leaf-list node in place
         }
 
-        log_debug("\nwalter: @6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cur_editop is %d", cur_editop);
-        log_debug("\nwalter: @6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ cur_editop is %d", cur_editop);
         switch (cur_editop) {
         case OP_EDITOP_MERGE:
             if (curval) {
@@ -1811,17 +1746,12 @@ static status_t
             break;
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_COMMIT:
-            log_debug("\nwalter: @6.1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-            log_debug("\nwalter: @6.1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@, curval is null: %s", curval == NULL?"true":"false");
-            log_debug("\nwalter: @6.1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@, newval is null: %s", newval == NULL?"true":"false");
             if (curval) {
                  if (newval && newval->editvars &&
                     newval->editvars->insertstr) {
-                    log_debug("\nwalter: @6.2@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     res = move_child_node(newval, newval_marker, curval,
                                            parent, msg, cur_editop);
                  } else if (newval) {
-                    log_debug("\nwalter: @6.3@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     undo = add_undo_node(msg, cur_editop, newval,
                                         newval_marker, curval, NULL, parent);
                     if (undo == NULL) {
@@ -1831,40 +1761,24 @@ static status_t
                         restore_newnode2(newval, newval_marker);
                         return ERR_INTERNAL_MEM;
                     }
-                    log_debug("\nwalter: @6.4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
                     if (obj_is_leafy(curval->obj)) {
-                        log_debug("\nwalter: @6.41@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                         undo->apply_res = res = val_merge(newval, curval);
                         undo->edit_action = AGT_CFG_EDIT_ACTION_SET;
                         restore_newnode(undo);
-                        log_debug("\nwalter: @6.42@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     } else {
-                        log_debug("\nwalter: @6.43@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-                        log_debug("\nwalter: parent == NULL: %s", parent==NULL?"true":"false");
-                        log_debug("\nwalter: newval == NULL: %s", newval==NULL?"true":"false");
-                        log_debug("\nwalter: curval == NULL: %s", curval==NULL?"true":"false");
                         val_insert_child(newval, curval, parent);
-                        log_debug("\nwalter: @6.441@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                         VAL_MARK_DELETED(curval);
-                        log_debug("\nwalter: @6.442@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                         undo->edit_action = AGT_CFG_EDIT_ACTION_REPLACE;
-                        log_debug("\nwalter: @6.443@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                         undo->free_curnode = TRUE;
-                        log_debug("\nwalter: @6.444@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-                        log_debug("\nwalter: @6.445@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     }
-                    log_debug("\nwalter: @6.45@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                  } else {
-                    log_debug("\nwalter: @6.5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     res = SET_ERROR(ERR_INTERNAL_VAL);
                  }
             } else if (newval) {
-                log_debug("\nwalter: @6.6@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                 res = add_child_node(newval, newval_marker, parent, msg,
                                       cur_editop);
             } else {
-                log_debug("\nwalter: @6.7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                 res = SET_ERROR(ERR_INTERNAL_VAL);
             }
             break;
@@ -1939,7 +1853,6 @@ static status_t
          }
      }
 
-    log_debug("\nwalter: @7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
      if (res == NO_ERR && applyhere == TRUE && newval && curval &&
          newval->btyp == NCX_BT_LIST && cur_editop == OP_EDITOP_MERGE) {
 
@@ -1964,7 +1877,6 @@ static status_t
              res = apply_commit_deletes(scb, msg, target, newval, curval);
          }
      }
-    log_debug("\nwalter: @8@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     /* TBD: should this be moved to the commit phase somehow, although no
      * recovery is possible during a OP_EDITOP_LOAD at boot-time   */
@@ -1976,7 +1888,6 @@ static status_t
          cfg_apply_load_root(target, newval);
      }
 
-    log_debug("\nwalter: @9@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
      return res;
 
  }  /* apply_write_val */
@@ -2053,10 +1964,8 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
                                            val_value_t *curparent )
 {
     assert ( newval && "newval is NULL!" );
-    log_debug4("\n===============================");
     log_debug4( "\ninvoke_simval:validate: %s:%s start",
                 obj_get_mod_name(newval->obj), newval->name);
-    log_debug4("\n===============================");
 
     /* check and adjust the operation attribute */
     boolean is_validate = msg->rpc_txcb->is_validate;
@@ -2317,18 +2226,9 @@ static status_t
     status_t          res = NO_ERR, retres = NO_ERR;
     op_editop_t       cur_editop = OP_EDITOP_NONE, cvtop = OP_EDITOP_NONE;
     boolean           isroot = FALSE, isdirty = TRUE;
-    log_debug4("\nwalter: =========1======================");
-    if (newval != NULL) {
-        log_debug4("\nwalter: invoke_cpxval_cb, newval is %s", newval->name);
-    }
-    if (curval != NULL) {
-        log_debug4("\nwalter: invoke_cpxval_cb, curval is %s", curval->name);
-    }
-    log_debug4("\nwalter: ==========2=====================");
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        log_debug("\nwalter: =======3========================= is AGT_CB_VALIDATE");
         assert ( newval && "newval is NULL!" );
 
         isroot = obj_is_root(newval->obj);
@@ -2450,10 +2350,8 @@ static status_t
          */
         if (res == NO_ERR && !isroot && isdirty &&
             agt_apply_this_node(cur_editop, newval, curval)) {
-            log_debug("\nwalter: b4 handler_user_callback");
             res = handle_user_callback(AGT_CB_VALIDATE, cur_editop, scb,
                                        msg, newval, curval, TRUE, FALSE);
-            log_debug("\nwalter: after handler_user_callback");
         }
         if (res != NO_ERR) {
             retres = res;
@@ -2461,7 +2359,6 @@ static status_t
         break;
 
     case AGT_CB_APPLY:
-        log_debug("\nwalter: ======4========================== is AGT_CB_APPLY");
         if (newval) {
             cur_editop = newval->editop;
             if (cur_editop == OP_EDITOP_NONE) {
@@ -2474,10 +2371,8 @@ static status_t
         } else {
             cur_editop = editop;
         }
-        log_debug("\nwalter: ======5========================== b4");
         res = apply_write_val(cur_editop, scb, msg, target,
                               curparent, newval, curval, &done);
-        log_debug("\nwalter: ======6========================== after");
         if (res != NO_ERR) {
             SET_ERROR(res);
             retres = res;
@@ -3114,7 +3009,6 @@ static status_t
             undo->commit_res =
                 handle_user_callback(AGT_CB_COMMIT, undo->editop, scb, msg,
                                      undo->newnode, undo->curnode, TRUE, FALSE);
-            log_debug("\nwalter: what a guess0 ");
 
             if (undo->commit_res != NO_ERR) {
                 val_value_t *logval = undo->newnode ? undo->newnode :
@@ -3131,7 +3025,6 @@ static status_t
             }
         }
     }
-    log_debug("\nwalter: what a guess ");
 
     /* all SIL commit callbacks accepted and finalized the commit
      * now go through and finalize the edit; this step should not fail
@@ -3168,7 +3061,6 @@ static status_t
                   " on %s database",  (unsigned long long)txcb->txid,
                   target->name);
     }
-    log_debug("\nwalter: leaving attempt_commit");
     return NO_ERR;
 
 }  /* attempt_commit */
@@ -3278,13 +3170,11 @@ static status_t
 
     if (LOGDEBUG2) {
         if (editop == OP_EDITOP_DELETE) {
-            log_debug("\nwalter: editop is delete");
             log_debug2("\n\n***** start commit_deletes for "
                        "session %d, transaction %llu *****\n",
                        scb ? SES_MY_SID(scb) : 0,
                        (unsigned long long)txcb->txid);
         } else {
-            log_debug("\nwalter: editop is else");
             log_debug2("\n\n***** start %s callback phase for "
                        "session %d, transaction %llu *****\n",
                        agt_cbtype_name(cbtyp), scb ? SES_MY_SID(scb) : 0,

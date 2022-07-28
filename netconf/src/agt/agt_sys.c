@@ -1302,6 +1302,283 @@ static status_t
 }
 
 static status_t
+    ietf_system_ntp_edit_handler(
+        char *handler_caller,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res = NO_ERR;
+    val_value_t *server_name_val, *udp_val, *address_val;
+    if (LOGDEBUG) {
+        log_debug("\n===============================================");
+        log_debug("\nwalter: func = ietf_system_ntp_edit_handler , called by %s", handler_caller);
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        if (newval!=NULL) {
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            val_dump_value(newval, 0);
+        }
+        if (curval!=NULL) {
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            val_dump_value(curval, 0);
+        }
+        log_debug("\n===============================================");
+    }
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        /* database manipulation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            log_debug("\nwalter: op = %s, newval.name is %s", op_editop_name(editop), newval->name);
+            struct timepb_Config *time_config = malloc(sizeof(*time_config));
+            struct emptypb_Empty *epty = malloc(sizeof(*epty));
+            time_Time_GetConfig(epty, time_config);
+            if(curval!=NULL) {
+                /*
+                curval existing means this val has been created and
+                */
+                log_debug("\nwalter: op = %s, curval.name is %s", op_editop_name(editop), curval->name);
+                log_debug("\nwalter: op = %s, curval.parent.name is %s", op_editop_name(editop), curval->parent->name);
+                udp_val = curval->parent;
+                log_debug("\nwalter: udp_val,parent is %s", udp_val->parent->name);
+                if(udp_val!=NULL) {
+                    server_name_val = val_find_child(udp_val->parent, ietf_system, ietf_system_ntp_server_name);
+                    if (server_name_val!=NULL) {
+                        log_debug("\nwalter: server_name_val's val is %s", VAL_STRING(server_name_val));
+                        if (xml_strcmp(VAL_STRING(server_name_val), "primary")==0) {
+                            time_config->MainNTPServer = VAL_STRING(newval);
+                        } else if (xml_strcmp(VAL_STRING(server_name_val), "secondary")==0) {
+                            time_config->BackupNTPServer = VAL_STRING(newval);
+                        }
+                    }
+                }
+            } else if(newval!=NULL) {
+                /*
+                    Other than the upper case, the newval should always exist,
+                */
+                server_name_val = val_find_child(newval, ietf_system, ietf_system_ntp_server_name);
+                if (server_name_val != NULL) {
+                    log_debug("\nwalter: server's name is %s", VAL_STRING(server_name_val));
+                    udp_val = val_find_child(newval, ietf_system, ietf_system_ntp_server_udp);
+                    if (udp_val != NULL) {
+                        address_val = val_find_child(udp_val, ietf_system, ietf_system_ntp_server_udp_address);
+                        log_debug("\nwalter: address is %s", VAL_STRING(address_val));
+                        if (xml_strcmp(VAL_STRING(server_name_val), "primary")==0) {
+                            time_config->MainNTPServer = VAL_STRING(address_val);
+                        } else if (xml_strcmp(VAL_STRING(server_name_val), "secondary")==0) {
+                            time_config->BackupNTPServer = VAL_STRING(address_val);
+                        }
+                    }
+                }
+            }
+            time_Time_SetConfig(time_config, epty);
+            log_debug("\n==================================");
+            log_debug("\nwalter: API applyied!!!!!!!!");
+            log_debug("\n==================================");
+            // should check the situation that the curval exists
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return res;
+}
+
+static status_t
+    ietf_system_ntp_server_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_system_ntp_edit_handler(
+        "ietf_system_ntp_server_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\nwalter: res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_system_ntp_server_edit return");
+    return res;
+}
+
+static status_t
+    ietf_system_ntp_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_system_ntp_edit_handler(
+        "ietf_system_ntp_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\nwalter: res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_system_ntp_edit return");
+    return res;
+}
+
+static status_t
+    ietf_system_ntp_enabled_edit(
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    if (LOGDEBUG) {
+        log_debug("\n======================================================");
+        log_debug("\nwalter: func = ietf_system_ntp_enabled_edit ");
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes":"no" , curval == NULL?"yes":"no");
+        if (newval!=NULL) {
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            val_dump_value(newval, 0);
+        }
+        if (curval!=NULL) {
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            val_dump_value(curval, 0);
+        }
+        log_debug("\n======================================================");
+    }
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            if(newval!=NULL) {
+                log_debug("\nwalter: Setting bool %s\n", VAL_BOOL(newval)?"true":"false");
+                struct timepb_Config *time_config = malloc(sizeof(*time_config));
+                struct emptypb_Empty *epty = malloc(sizeof(*epty));
+                // log_debug("\nwalter: whay1 ");
+                time_Time_GetConfig(epty, time_config);
+                // log_debug("\nwalter: whay2 ");
+                if (VAL_BOOL(newval)) {
+                    time_config->Mode = timepb_ModeTypeOptions_MODE_TYPE_AUTO;
+                } else {
+                    time_config->Mode = timepb_ModeTypeOptions_MODE_TYPE_MANUAL;
+                }
+                time_Time_SetConfig(time_config, epty);
+            }
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    log_debug("\nwalter: res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_system_ntp_enabled_edit return");
+    return res;
+}
+
+static status_t
     ietf_system_clock_edit(
         ses_cb_t *scb,
         rpc_msg_t *msg,
@@ -1433,7 +1710,6 @@ static status_t
         case OP_EDITOP_REPLACE:
             if(newval!=NULL) {
                 log_debug("\nwalter: Setting newval %s\n", VAL_STRING(newval));
-                // res = set_api_string_router(private_api_set_time_timezone, VAL_STRING(newval));
                 struct timepb_Config *time_config = malloc(sizeof(*time_config));
                 struct emptypb_Empty *epty = malloc(sizeof(*epty));
                 log_debug("\nwalter: whay1 ");
@@ -1883,12 +2159,39 @@ status_t
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }
-    // [FIXME] after all other callback is done
     res = agt_cb_register_callback(
         "ietf-system",
         (const xmlChar *)"/system/clock/timezone-name",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
         ietf_system_clock_timzone_name_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    /*
+        Require register callback at /system/ntp/ to avoid
+        applying won't take effect until the second apply
+    */
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/ntp",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_ntp_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/ntp/server",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_ntp_server_edit);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/ntp/enabled",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_system_ntp_enabled_edit);
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }

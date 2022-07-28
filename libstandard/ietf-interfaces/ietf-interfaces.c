@@ -516,10 +516,10 @@ static status_t
     }
     log_debug("\n in add_interface_state_entry 6");
 
-    // [DEPRECATED][FIXME] open this will get Error 258 invalid value, check it later
+    // [DEPRECATED]
     // /* /interfaces-state/interface/type */
-    // int32_t *if_type = 6; // ethernetCsmacd(6)
-    // childval = agt_make_int_leaf(
+    // xmlChar * if_type= "ethernetCsmacd"; // ethernetCsmacd(6)
+    // childval = agt_make_leaf(
     //     parentval->obj,
     //     ietf_interfaces_interfaces_state_type,
     //     if_type,

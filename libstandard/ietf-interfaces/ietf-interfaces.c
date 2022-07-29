@@ -91,6 +91,14 @@
 /* [RO] */
 #define ietf_ip_interfaces_state_ipv4_address_netmask (const xmlChar *)"netmask"
 
+/* for ietf-ip applying API */
+#define update_ipv4_field_indicator_ip (int)0
+#define update_ipv4_field_indicator_netmask (int)1
+#define update_ipv4_field_indicator_mtu (int)2
+#define update_ipv6_field_indicator_enabled (int)3
+#define update_ipv6_field_indicator_ip (int)4
+#define update_ipv6_field_indicator_prefix_length (int)5
+
 /********************************************************************
  *                                                                   *
  *                       V A R I A B L E S                           *
@@ -304,6 +312,334 @@ ietf_interfaces_interface_edit_handler(
     return res;
 }
 
+void update_network(int which, char *target, int32 int_target, boolean bool_target)
+{
+    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
+    network_Network_GetConfig(in, network_cfg);
+    switch (which)
+    {
+    case update_ipv4_field_indicator_mtu:
+        network_cfg->Basic->LocalMTU = int_target;
+        network_Network_SetBasicConfig(network_cfg->Basic, in2);
+        log_debug("\n========================");
+        log_debug("\network_Network_SetBasicConfig Applied!!");
+        log_debug("\n========================");
+        break;
+    case update_ipv4_field_indicator_ip:
+    case update_ipv4_field_indicator_netmask:
+        switch (which)
+        {
+        case update_ipv4_field_indicator_ip:
+            network_cfg->IP->V4->Static->IPAddress = target;
+            break;
+        case update_ipv4_field_indicator_netmask:
+            network_cfg->IP->V4->Static->SubnetMask = target;
+            break;
+        }
+        network_Network_SetIPv4Config(network_cfg->IP->V4, in2);
+        log_debug("\n========================");
+        log_debug("\network_Network_SetIPv4Config Applied!!");
+        log_debug("\n========================");
+        break;
+    case update_ipv6_field_indicator_enabled:
+    case update_ipv6_field_indicator_ip:
+    case update_ipv6_field_indicator_prefix_length:
+        switch (which)
+        {
+        case update_ipv6_field_indicator_enabled:
+            network_cfg->IP->V6->Enabled = bool_target;
+            break;
+        case update_ipv6_field_indicator_ip:
+        case update_ipv6_field_indicator_prefix_length:
+            /*
+                Core combines the ip and prefix length together,
+                so the target here should be the combined string
+                ex: fe80::eade:d6ff:fe00:206/64
+            */
+            log_debug("\nwalter: current ip is %s", network_cfg->IP->V6->Static->IPAddress);
+            if (which == update_ipv6_field_indicator_ip)
+            {
+                log_debug("\nwalter: current target is %s", target);
+            }
+            else if (which == update_ipv6_field_indicator_prefix_length)
+            {
+                log_debug("\nwalter: current target is %d", int_target);
+            }
+            network_cfg->IP->V6->Static->IPAddress = target;
+            network_Network_SetIPv6Config(network_cfg->IP->V6, in2);
+            log_debug("\n========================");
+            log_debug("\network_Network_SetIPv6Config Applied!!");
+            log_debug("\n========================");
+            break;
+        }
+        break;
+    }
+
+    free(in);
+    free(in2);
+    free(network_cfg);
+}
+
+status_t update_ipv4_ip(char *ip)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv4_field_indicator_ip, ip, 0, FALSE);
+    return res;
+}
+
+status_t update_ipv4_netmask(char *netmask)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv4_field_indicator_netmask, netmask, 0, FALSE);
+    return res;
+}
+
+status_t update_ipv4_mtu(int mtu)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv4_field_indicator_mtu, "", mtu, FALSE);
+    return res;
+}
+
+status_t update_ipv6_enabled(boolean enabled)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv6_field_indicator_enabled, "", 0, enabled);
+    return res;
+}
+
+status_t update_ipv6_ip(char *ip)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv6_field_indicator_ip, ip, 0, FALSE);
+    return res;
+}
+
+status_t update_ipv6_prefix_length(int prefix_length)
+{
+    status_t res = NO_ERR;
+    update_network(update_ipv6_field_indicator_prefix_length, "", prefix_length, FALSE);
+    return res;
+}
+
+static status_t
+ietf_ipv4_edit_handler(
+    char *handler_caller,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res = NO_ERR;
+
+    if (LOGDEBUG && cbtyp != AGT_CB_VALIDATE)
+    {
+        log_debug("\n===============================================");
+        log_debug("\nwalter: func = ietf_ipv4_edit_handler , called by %s", handler_caller);
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes" : "no", curval == NULL ? "yes" : "no");
+        if (newval != NULL)
+        {
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            val_dump_value(newval, 0);
+        }
+        if (curval != NULL)
+        {
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            val_dump_value(curval, 0);
+        }
+        log_debug("\n===============================================");
+    }
+    val_value_t *ipv4_val, *ipv4_mtu_val, *ipv4_address_val, *ipv4_address_ip_val, *ipv4_address_netmask_val;
+    val_value_t *ipv6_val, *ipv6_forwarding_val, *ipv6_address_ip_val, *ipv6_address_prefix_length_val;
+
+    switch (cbtyp)
+    {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+    case AGT_CB_COMMIT:
+        /* database manipulation done here */
+        /* device instrumentation done here */
+        switch (editop)
+        {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            log_debug("\nwalter: op = %s, newval.name is %s", op_editop_name(editop), newval->name);
+            if (curval != NULL)
+            {
+                log_debug("\nwalter: op = %s, curval.name is %s", op_editop_name(editop), curval->name);
+                log_debug("\nwalter: op = %s, curval.parent.name is %s", op_editop_name(editop), curval->parent->name);
+                if (xml_strcmp(curval->name, "mtu") == 0)
+                {
+                    update_ipv4_mtu(VAL_INT(newval));
+                }
+                else if (xml_strcmp(curval->name, "ip") == 0)
+                {
+                    update_ipv4_ip(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(newval->name, "netmask") == 0)
+                {
+                    update_ipv4_netmask(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(newval->name, "ipv4") == 0)
+                {
+                    /* do nothing for now */
+                }
+                else if (xml_strcmp(newval->name, "address") == 0)
+                {
+                    /* do nothing for now */
+                }
+                else
+                {
+                    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                    return res;
+                }
+            }
+            else if (newval != NULL)
+            {
+                log_debug("\nwalter: op = %s, newval.name is %s", op_editop_name(editop), newval->name);
+                if (xml_strcmp(newval->name, "mtu") == 0)
+                {
+                    update_ipv4_mtu(VAL_INT(newval));
+                }
+                else if (xml_strcmp(newval->name, "ip") == 0)
+                {
+                    update_ipv4_ip(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(newval->name, "netmask") == 0)
+                {
+                    update_ipv4_netmask(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(newval->name, "ipv4") == 0)
+                {
+                    /* do nothing for now */
+                }
+                else if (xml_strcmp(newval->name, "address") == 0)
+                {
+                    /* do nothing for now */
+                }
+                else
+                {
+                    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                    return res;
+                }
+            }
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /* if error: set the res, errorstr, and errorval parms */
+    log_debug("\nwalter: b4 ietf_ipv4_edit_handler return");
+    return res;
+}
+
+static status_t
+ietf_ipv6_edit_handler(
+    char *handler_caller,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res = NO_ERR;
+
+    if (LOGDEBUG)
+    {
+        log_debug("\n===============================================");
+        log_debug("\nwalter: func = ietf_ipv6_edit_handler , called by %s", handler_caller);
+        log_debug("\nwalter: cb = %s , op = %s", agt_cbtype_name(cbtyp), op_editop_name(editop));
+        log_debug("\nwalter: newval is NULL: %s, curval is NULL %s", newval == NULL ? "yes" : "no", curval == NULL ? "yes" : "no");
+        if (newval != NULL)
+        {
+            log_debug("\nwalter: newval.name is %s", newval->name);
+            val_dump_value(newval, 0);
+        }
+        if (curval != NULL)
+        {
+            log_debug("\nwalter: curval.name is %s", curval->name);
+            val_dump_value(curval, 0);
+        }
+        log_debug("\n===============================================");
+    }
+
+    val_value_t *ipv4_val, *ipv4_mtu_val, *ipv4_address_val, *ipv4_address_ip_val, *ipv4_address_netmask_val;
+    val_value_t *ipv6_val, *ipv6_forwarding_val, *ipv6_address_ip_val, *ipv6_address_prefix_length_val;
+
+    switch (cbtyp)
+    {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+    case AGT_CB_COMMIT:
+        /* database manipulation done here */
+        /* device instrumentation done here */
+        switch (editop)
+        {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+            log_debug("\nwalter: op = %s, newval.name is %s", op_editop_name(editop), newval->name);
+            if (curval != NULL)
+            {
+                log_debug("\nwalter: op = %s, curval.name is %s", op_editop_name(editop), curval->name);
+                log_debug("\nwalter: op = %s, curval.parent.name is %s", op_editop_name(editop), curval->parent->name);
+            }
+            else if (newval != NULL)
+            {
+                log_debug("\nwalter: op = %s, newval.name is %s", op_editop_name(editop), newval->name);
+                if (xml_strcmp(newval->name, "enabled") == 0)
+                {
+                    update_ipv6_enabled(VAL_BOOL(newval));
+                }
+                else if (xml_strcmp(newval->name, "ip") == 0)
+                {
+                    update_ipv6_ip(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(newval->name, "prefix-length") == 0)
+                {
+                    update_ipv6_prefix_length(VAL_INT(newval));
+                }
+                else
+                {
+                    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                    return res;
+                }
+            }
+            break;
+        case OP_EDITOP_CREATE:
+            break;
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_ROLLBACK:
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /* if error: set the res, errorstr, and errorval parms */
+    log_debug("\nwalter: b4 ietf_ipv6_edit_handler return");
+    return res;
+}
+
 static status_t
 ietf_interfaces_interface_edit(
     ses_cb_t *scb,
@@ -427,6 +763,216 @@ ietf_interfaces_interface_enabled_edit(
             errorval);
     }
     log_debug("\nwalter: b4 ietf_interfaces_interface_enabled_edit return");
+    return res;
+}
+
+static status_t
+ietf_ipv4_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv4_edit_handler(
+        "ietf_ipv4_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ipv4_edit return");
+    return res;
+}
+
+static status_t
+ietf_ipv4_mtu_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv4_edit_handler(
+        "ietf_ipv4_mtu_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ipv4_mtu_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv4_address_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv4_edit_handler(
+        "ietf_ip_ipv4_address_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv4_address_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv4_address_ip_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv4_edit_handler(
+        "ietf_ip_ipv4_address_ip_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv4_address_ip_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv4_address_netmask_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv4_edit_handler(
+        "ietf_ip_ipv4_address_netmask_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv4_address_netmask_edit return");
     return res;
 }
 
@@ -1634,7 +2180,7 @@ y_ietf_interfaces_init(
         &mod);
 
     res = agt_cb_register_callback(
-        "ietf-interfaces",
+        ietf_interfaces,
         (const xmlChar *)"/interfaces/interface",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
         ietf_interfaces_interface_edit);
@@ -1643,7 +2189,7 @@ y_ietf_interfaces_init(
         return SET_ERROR(res);
     }
     res = agt_cb_register_callback(
-        "ietf-interfaces",
+        ietf_interfaces,
         (const xmlChar *)"/interfaces/interface/description",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
         ietf_interfaces_interface_description_edit);
@@ -1652,10 +2198,59 @@ y_ietf_interfaces_init(
         return SET_ERROR(res);
     }
     res = agt_cb_register_callback(
-        "ietf-interfaces",
+        ietf_interfaces,
         (const xmlChar *)"/interfaces/interface/enabled",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
         ietf_interfaces_interface_description_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv4",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ipv4_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv4/mtu",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ipv4_mtu_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv4/address",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ip_ipv4_address_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv4/address/ip",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ip_ipv4_address_ip_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv4/address/netmask",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ip_ipv4_address_netmask_edit);
     if (res != NO_ERR)
     {
         return SET_ERROR(res);

@@ -45,90 +45,6 @@
 
 static ncx_module_t *intri_snmp_mod;
 
-static status_t intri_snmp_SNMP_RunRestartSNMPServer_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct commonpb_Confirm *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_common_Confirm(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmp_SNMP_RunRestartSNMPServer(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_snmp_SNMP_ActivateAgentCertificate_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct filespb_CertificateID *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_files_CertificateID(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmp_SNMP_ActivateAgentCertificate(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_snmp_SNMP_ActivateManagerCertificate_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct filespb_CertificateUserIDList *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_files_CertificateUserIDList(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmp_SNMP_ActivateManagerCertificate(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
-static status_t intri_snmp_SNMP_DeactivateManagerCertificate_invoke(
-    ses_cb_t *scb,
-    rpc_msg_t *msg,
-    xml_node_t *methnode) {
-  status_t res = NO_ERR;
-  struct filespb_CertificateUserID *in = malloc(sizeof(*in));
-  struct emptypb_Empty *out = malloc(sizeof(*out));
-
-  /* ian: this func has no prefix Update/Set */
-  res = build_to_priv_files_CertificateUserID(msg->rpc_input, in);
-  if (res != NO_ERR) {
-    free(in);
-    free(out);
-    return SET_ERROR(res);
-  }
-  snmp_SNMP_DeactivateManagerCertificate(in, out);
-
-  free(in);
-  free(out);
-  return res;
-}
 
 status_t y_intri_snmp_init(
     const xmlChar *modname,
@@ -192,42 +108,6 @@ status_t y_intri_snmp_init(
     return SET_ERROR(res);
   }
 
-  res = agt_rpc_register_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-RunRestartSNMPServer",
-      AGT_RPC_PH_INVOKE,
-      intri_snmp_SNMP_RunRestartSNMPServer_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-ActivateAgentCertificate",
-      AGT_RPC_PH_INVOKE,
-      intri_snmp_SNMP_ActivateAgentCertificate_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-ActivateManagerCertificate",
-      AGT_RPC_PH_INVOKE,
-      intri_snmp_SNMP_ActivateManagerCertificate_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
-  res = agt_rpc_register_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-DeactivateManagerCertificate",
-      AGT_RPC_PH_INVOKE,
-      intri_snmp_SNMP_DeactivateManagerCertificate_invoke);
-  if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   return res;
 }
 
@@ -237,16 +117,4 @@ status_t y_intri_snmp_init2(void) {
 }
 
 void y_intri_snmp_cleanup(void) {
-  agt_rpc_unregister_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-RunRestartSNMPServer");
-  agt_rpc_unregister_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-ActivateAgentCertificate");
-  agt_rpc_unregister_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-ActivateManagerCertificate");
-  agt_rpc_unregister_method(
-      y_M_intri_snmp,
-      "intri-snmp-SNMP-DeactivateManagerCertificate");
 }

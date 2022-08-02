@@ -10,15 +10,6 @@ module intri-snmp {
     description "Build date.";
   }
 
-  import intri-common {
-    prefix intri-common;
-  }
-  import intri-files {
-    prefix intri-files;
-  }
-  import intri-empty {
-    prefix intri-empty;
-  }
   grouping EngineInfo {
     leaf Boots {
       mandatory "true";
@@ -27,26 +18,6 @@ module intri-snmp {
     leaf RunTime {
       mandatory "true";
       type int64;
-    }
-  }
-  rpc intri-snmp-SNMP-RunRestartSNMPServer {
-    input {
-      uses intri-common:Confirm;
-    }
-  }
-  rpc intri-snmp-SNMP-ActivateAgentCertificate {
-    input {
-      uses intri-files:CertificateID;
-    }
-  }
-  rpc intri-snmp-SNMP-ActivateManagerCertificate {
-    input {
-      uses intri-files:CertificateUserIDList;
-    }
-  }
-  rpc intri-snmp-SNMP-DeactivateManagerCertificate {
-    input {
-      uses intri-files:CertificateUserID;
     }
   }
 }

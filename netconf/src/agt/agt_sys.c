@@ -2540,10 +2540,6 @@ void agt_sys_cleanup(void)
 
     agt_cb_unregister_callbacks(
         ietf_system,
-        (const xmlChar *)"/system/clock");
-
-    agt_cb_unregister_callbacks(
-        ietf_system,
         (const xmlChar *)"/system/hostname");
 
     agt_cb_unregister_callbacks(
@@ -2553,6 +2549,26 @@ void agt_sys_cleanup(void)
     agt_cb_unregister_callbacks(
         ietf_system,
         (const xmlChar *)"/system/location");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/clock");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/clock/timezone-name");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/ntp");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/ntp/server");
+
+    agt_cb_unregister_callbacks(
+        ietf_system,
+        (const xmlChar *)"/system/ntp/enabled");
 
 } /* agt_sys_cleanup */
 

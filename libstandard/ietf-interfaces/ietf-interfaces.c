@@ -350,6 +350,10 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
         {
         case update_ipv6_field_indicator_enabled:
             network_cfg->IP->V6->Enabled = bool_target;
+            network_Network_SetIPv6Config(network_cfg->IP->V6, in2);
+            log_debug("\n========================");
+            log_debug("\network_Network_SetIPv6Config Applied!!");
+            log_debug("\n========================");
             break;
         case update_ipv6_field_indicator_ip:
         case update_ipv6_field_indicator_prefix_length:
@@ -359,15 +363,34 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
                 ex: fe80::eade:d6ff:fe00:206/64
             */
             log_debug("\nwalter: current ip is %s", network_cfg->IP->V6->Static->IPAddress);
+            /* split fe80::eade:d6ff:fe00:205/64 =>  fe80::eade:d6ff:fe00:205 and 64*/
+            char *addr = malloc(128);
+            char *prefix_len = malloc(128);
+            char *origin_addr = malloc(128);
+            if (strlen(network_cfg->IP->V6->Static->IPAddress) != 0)
+            {
+                strcpy(origin_addr, network_cfg->IP->V6->Static->IPAddress);
+                strcpy(addr, strtok(origin_addr, "/"));
+                strcpy(prefix_len, strtok(NULL, "/"));
+            }
+
             if (which == update_ipv6_field_indicator_ip)
             {
-                log_debug("\nwalter: current target is %s", target);
+                log_debug("\nwalter: current value is %s", target);
+                addr = target;
             }
             else if (which == update_ipv6_field_indicator_prefix_length)
             {
                 log_debug("\nwalter: current target is %d", int_target);
+                sprintf(prefix_len, "%d", int_target);
             }
-            network_cfg->IP->V6->Static->IPAddress = target;
+
+            char *result = malloc(strlen(addr) + strlen(prefix_len) + 2);
+            strcpy(result, addr);
+            strcat(result, "/");
+            strcat(result, prefix_len);
+
+            network_cfg->IP->V6->Static->IPAddress = result;
             network_Network_SetIPv6Config(network_cfg->IP->V6, in2);
             log_debug("\n========================");
             log_debug("\network_Network_SetIPv6Config Applied!!");
@@ -599,6 +622,31 @@ ietf_ipv6_edit_handler(
             {
                 log_debug("\nwalter: op = %s, curval.name is %s", op_editop_name(editop), curval->name);
                 log_debug("\nwalter: op = %s, curval.parent.name is %s", op_editop_name(editop), curval->parent->name);
+                if (xml_strcmp(curval->name, "enabled") == 0)
+                {
+                    update_ipv6_enabled(VAL_BOOL(newval));
+                }
+                else if (xml_strcmp(curval->name, "ip") == 0)
+                {
+                    update_ipv6_ip(VAL_STRING(newval));
+                }
+                else if (xml_strcmp(curval->name, "prefix-length") == 0)
+                {
+                    update_ipv6_prefix_length(VAL_INT(newval));
+                }
+                else if (xml_strcmp(curval->name, "ipv6") == 0)
+                {
+                    /* do nothing and return*/
+                }
+                else if (xml_strcmp(curval->name, "address") == 0)
+                {
+                    /* do nothing and return*/
+                }
+                else
+                {
+                    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                    return res;
+                }
             }
             else if (newval != NULL)
             {
@@ -614,6 +662,14 @@ ietf_ipv6_edit_handler(
                 else if (xml_strcmp(newval->name, "prefix-length") == 0)
                 {
                     update_ipv6_prefix_length(VAL_INT(newval));
+                }
+                else if (xml_strcmp(newval->name, "ipv6") == 0)
+                {
+                    /* do nothing and return*/
+                }
+                else if (xml_strcmp(newval->name, "address") == 0)
+                {
+                    /* do nothing and return*/
                 }
                 else
                 {
@@ -973,6 +1029,174 @@ ietf_ip_ipv4_address_netmask_edit(
             errorval);
     }
     log_debug("\nwalter: b4 ietf_ip_ipv4_address_netmask_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv6_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv6_edit_handler(
+        "ietf_ip_ipv6_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv6_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv6_enabled_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv6_edit_handler(
+        "ietf_ip_ipv6_enabled_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv6_enabled_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv6_ip_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv6_edit_handler(
+        "ietf_ip_ipv6_ip_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv6_ip_edit return");
+    return res;
+}
+
+static status_t
+ietf_ip_ipv6_prefix_length_edit(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    agt_cbtyp_t cbtyp,
+    op_editop_t editop,
+    val_value_t *newval,
+    val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval = (curval) ? curval : newval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    res = ietf_ipv6_edit_handler(
+        "ietf_ip_ipv6_prefix_length_edit",
+        cbtyp,
+        editop,
+        newval,
+        curval);
+    log_debug("\n res is %s", get_error_string(res));
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR)
+    {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+    log_debug("\nwalter: b4 ietf_ip_ipv6_prefix_length_edit return");
     return res;
 }
 
@@ -2255,6 +2479,42 @@ y_ietf_interfaces_init(
     {
         return SET_ERROR(res);
     }
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv6",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ip_ipv6_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+    res = agt_cb_register_callback(
+        ietf_ip,
+        (const xmlChar *)"/interfaces/interface/ipv6/enabled",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        ietf_ip_ipv6_enabled_edit);
+    if (res != NO_ERR)
+    {
+        return SET_ERROR(res);
+    }
+    // res = agt_cb_register_callback(
+    //     ietf_ip,
+    //     (const xmlChar *)"/interfaces/interface/ipv6/address/ip",
+    //     (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+    //     ietf_ip_ipv6_ip_edit);
+    // if (res != NO_ERR)
+    // {
+    //     return SET_ERROR(res);
+    // }
+    // res = agt_cb_register_callback(
+    //     ietf_ip,
+    //     (const xmlChar *)"/interfaces/interface/ipv6/address/prefix-length",
+    //     (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+    //     ietf_ip_ipv6_prefix_length_edit);
+    // if (res != NO_ERR)
+    // {
+    //     return SET_ERROR(res);
+    // }
 
     assert(res == NO_ERR);
 
@@ -2341,10 +2601,24 @@ status_t y_ietf_interfaces_init2(void)
 
 void y_ietf_interfaces_cleanup(void)
 {
-#if 0
-    agt_cb_unregister_callbacks( "ietf-interfaces",
-                               (const xmlChar *)"/interfaces/interface");
-    agt_cb_unregister_callbacks( "ietf-interfaces",
-                               (const xmlChar *)"/interfaces/interface/enable");
-#endif
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/enabled");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/description");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv4");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv4/mtu");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv4/address");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv4/address/ip");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv4/address/netmask");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv6");
+    agt_cb_unregister_callbacks(ietf_interfaces,
+                                (const xmlChar *)"/interfaces/interface/ipv6/enabled");
 }

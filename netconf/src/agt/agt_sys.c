@@ -1971,6 +1971,98 @@ ietf_system_location_edit(
         curval);
 } /* ietf_system_location_edit */
 
+static status_t
+ietf_system_system_restart(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    xml_node_t *methnode)
+{
+    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    struct commonpb_Confirm *confirm = malloc(sizeof(*(confirm)));
+    confirm->Confirm = "CONFIRM";
+    maintenance_Maintenance_RunRebootDevice(confirm, in);
+    return NO_ERR;
+}
+
+char *replace_string(
+    char *original,
+    char *pattern,
+    char *replacement)
+{
+    size_t const replen = strlen(replacement);
+    size_t const patlen = strlen(pattern);
+    size_t const orilen = strlen(original);
+
+    size_t patcnt = 0;
+    const char *oriptr;
+    const char *patloc;
+
+    // find how many times the pattern occurs in the original string
+    for (oriptr = original; patloc = strstr(oriptr, pattern); oriptr = patloc + patlen)
+    {
+        patcnt++;
+    }
+
+    {
+        // allocate memory for the new string
+        size_t const retlen = orilen + patcnt * (replen - patlen);
+        char *const returned = (char *)malloc(sizeof(char) * (retlen + 1));
+
+        if (returned != NULL)
+        {
+            // copy the original string,
+            // replacing all the instances of the pattern
+            char *retptr = returned;
+            for (oriptr = original; patloc = strstr(oriptr, pattern); oriptr = patloc + patlen)
+            {
+                size_t const skplen = patloc - oriptr;
+                // copy the section until the occurence of the pattern
+                strncpy(retptr, oriptr, skplen);
+                retptr += skplen;
+                // copy the replacement
+                strncpy(retptr, replacement, replen);
+                retptr += replen;
+            }
+            // copy the rest of the string.
+            strcpy(retptr, oriptr);
+        }
+        return returned;
+    }
+}
+
+static status_t
+ietf_system_set_current_datetime(
+    ses_cb_t *scb,
+    rpc_msg_t *msg,
+    xml_node_t *methnode)
+{
+    val_value_t *current_datetime_val;
+
+    current_datetime_val = val_find_child(
+        msg->rpc_input,
+        ietf_system,
+        ietf_system_state_current_datetime);
+    assert(current_datetime_val != NULL);
+
+    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    struct timepb_Config *time_cfg = malloc(sizeof(*(time_cfg)));
+
+    time_Time_GetConfig(in, time_cfg);
+    if (time_cfg->Mode != timepb_ModeTypeOptions_MODE_TYPE_MANUAL)
+    {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+    // time_Time_SetConfig(struct timepb_Config * param0, struct emptypb_Empty * param1);
+
+    log_debug("\nwalter val is %s", VAL_STRING(current_datetime_val));
+    char *tmp = replace_string(VAL_STRING(current_datetime_val), "Z", "");
+    tmp = replace_string(tmp, "T", " ");
+    time_cfg->Manual = tmp;
+    time_Time_SetConfig(time_cfg, in2);
+    return NO_ERR;
+}
+
 /********************************************************************
  * FUNCTION payload_error
  *
@@ -2436,6 +2528,27 @@ agt_sys_init(void)
     {
         return SET_ERROR(res);
     }
+
+    res = agt_rpc_register_method(
+        ietf_system,
+        "set-current-datetime",
+        AGT_RPC_PH_INVOKE,
+        ietf_system_set_current_datetime);
+    if (res != NO_ERR)
+    {
+        return res;
+    }
+
+    res = agt_rpc_register_method(
+        ietf_system,
+        "system-restart",
+        AGT_RPC_PH_INVOKE,
+        ietf_system_system_restart);
+    if (res != NO_ERR)
+    {
+        return res;
+    }
+
     return NO_ERR;
 
 } /* agt_sys_init */

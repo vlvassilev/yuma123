@@ -1,0 +1,77 @@
+module sercom-maintenance {
+
+  namespace "sercom:sercom-maintenance";
+  prefix "sercom-maintenance";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-common {
+    prefix sercom-common;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping FirmwareInfo {
+    leaf Version {
+      mandatory "true";
+      type string;
+    }
+    leaf BuildDate {
+      mandatory "true";
+      type string;
+    }
+    leaf BuildNumber {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping UpgradePathRequest {
+    leaf Path {
+      mandatory "true";
+      type string;
+    }
+    leaf FTPSEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf RebootAfterAction {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-RunRebootDevice {
+    input {
+      uses sercom-common:Confirm;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-RunCreateSnapshot {
+    input {
+      uses sercom-common:ExportPathRequest;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-GetCurrentFirmware {
+    output {
+      uses FirmwareInfo;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-GetPreviousFirmware {
+    output {
+      uses FirmwareInfo;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-RunGotoPreviousFirmware {
+    input {
+      uses sercom-common:Confirm;
+    }
+  }
+  rpc sercom-maintenance-Maintenance-RunUpgradeFirmware {
+    input {
+      uses UpgradePathRequest;
+    }
+  }
+}

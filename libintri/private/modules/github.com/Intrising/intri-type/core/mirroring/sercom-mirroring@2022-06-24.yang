@@ -1,0 +1,190 @@
+module sercom-mirroring {
+
+  namespace "sercom:sercom-mirroring";
+  prefix "sercom-mirroring";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef DestinationTypeOptions {
+    type enumeration {
+      enum DESTINATION_TYPE_LOCAL {
+        description "[Local] to set SPAN(Local Switched Port Analyzer) destination port interface";
+        value 0;
+      }
+      enum DESTINATION_TYPE_REMOTE {
+        description "[Remote] to set RSPAN(Remote SPAN) VLAN";
+        value 1;
+      }
+    }
+  }
+  typedef SourceInterfaceTypeOptions {
+    type enumeration {
+      enum SOURCE_INTERFACE_TYPE_LOCAL {
+        description "[Local] to set SPAN(Local Switched Port Analyzer) source port interface";
+        value 0;
+      }
+      enum SOURCE_INTERFACE_TYPE_VLAN {
+        description "*[Internal] to set source port interface";
+        value 1;
+      }
+      enum SOURCE_INTERFACE_TYPE_REMOTE {
+        description "[Remote] to set RSPAN(Remote SPAN) VLAN";
+        value 2;
+      }
+    }
+  }
+  typedef DirectionTypeOptions {
+    type enumeration {
+      enum MIRRORING_DIRECTION_TYPE_NONE {
+        description "[None] to disable mirroring direction";
+        value 0;
+      }
+      enum MIRRORING_DIRECTION_TYPE_TX_ONLY {
+        description "[TX only] to set mirroring direction TX only";
+        value 1;
+      }
+      enum MIRRORING_DIRECTION_TYPE_RX_ONLY {
+        description "[RX only] to set mirroring direction RX only";
+        value 2;
+      }
+      enum MIRRORING_DIRECTION_TYPE_BOTH {
+        description "[TX+RX] to set mirroring direction TX and RX both";
+        value 3;
+      }
+    }
+  }
+  grouping Config {
+    container RSPAN {
+      uses RSPANConfig;
+    }
+    container DestinationList {
+      uses DestinationSession;
+    }
+    container SourceList {
+      uses SourceSession;
+    }
+  }
+  grouping DestinationSessionEntry {
+    leaf Index {
+      mandatory "true";
+      type int32;
+    }
+    leaf Type {
+      mandatory "true";
+      type DestinationTypeOptions;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+  }
+  grouping DestinationSession {
+    container List {
+      list List_Entry {
+        uses DestinationSessionEntry;
+      }
+    }
+  }
+  grouping SourceSessionEntry {
+    leaf DestinationIndex {
+      mandatory "true";
+      type int32;
+    }
+    leaf SourceInterface {
+      mandatory "true";
+      type SourceInterfaceTypeOptions;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf DirectionType {
+      mandatory "true";
+      type DirectionTypeOptions;
+    }
+  }
+  grouping SourceSession {
+    container List {
+      list List_Entry {
+        uses SourceSessionEntry;
+      }
+    }
+  }
+  grouping RSPANConfig {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-GetRSPAN {
+    output {
+      uses RSPANConfig;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-SetRSPAN {
+    input {
+      uses RSPANConfig;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-GetDestinationList {
+    output {
+      uses DestinationSession;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-AddDestination {
+    input {
+      uses DestinationSessionEntry;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-DeleteDestination {
+    input {
+      uses sercom-common:Index;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-UpdateDestination {
+    input {
+      uses DestinationSessionEntry;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-GetSourceList {
+    output {
+      uses SourceSession;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-AddSource {
+    input {
+      uses SourceSessionEntry;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-DeleteSource {
+    input {
+      uses SourceSessionEntry;
+    }
+  }
+  rpc sercom-mirroring-Mirroring-UpdateSource {
+    input {
+      uses SourceSessionEntry;
+    }
+  }
+}

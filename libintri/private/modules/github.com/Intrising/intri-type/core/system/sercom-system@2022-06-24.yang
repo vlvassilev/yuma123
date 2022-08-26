@@ -1,0 +1,77 @@
+module sercom-system {
+
+  namespace "sercom:sercom-system";
+  prefix "sercom-system";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping Status {
+    leaf LastBootTime {
+      mandatory "true";
+      type string;
+    }
+    leaf Uptime {
+      mandatory "true";
+      type int64;
+    }
+  }
+  grouping Config {
+    leaf SysName {
+      mandatory "true";
+      type string;
+    }
+    leaf SysLocation {
+      mandatory "true";
+      type string;
+    }
+    leaf SysGroup {
+      mandatory "true";
+      type string;
+    }
+    leaf SysContact {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping IdentificationConfig {
+    leaf SysName {
+      mandatory "true";
+      type string;
+    }
+    leaf SysLocation {
+      mandatory "true";
+      type string;
+    }
+    leaf SysGroup {
+      mandatory "true";
+      type string;
+    }
+    leaf SysContact {
+      mandatory "true";
+      type string;
+    }
+  }
+  rpc sercom-system-System-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-system-System-SetConfig {
+    input {
+      uses Config;
+    }
+  }
+  rpc sercom-system-System-GetStatus {
+    output {
+      uses Status;
+    }
+  }
+}

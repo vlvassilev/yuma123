@@ -1,0 +1,23 @@
+module sercom-snmp {
+
+  namespace "sercom:sercom-snmp";
+  prefix "sercom-snmp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  grouping EngineInfo {
+    leaf Boots {
+      mandatory "true";
+      type int32;
+    }
+    leaf RunTime {
+      mandatory "true";
+      type int64;
+    }
+  }
+}

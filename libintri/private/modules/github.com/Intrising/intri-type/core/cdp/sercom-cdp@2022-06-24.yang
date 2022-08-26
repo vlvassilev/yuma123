@@ -1,0 +1,314 @@
+module sercom-cdp {
+
+  namespace "sercom:sercom-cdp";
+  prefix "sercom-cdp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef VersionTypeOptions {
+    type enumeration {
+      enum VERSION_TYPE_V1 {
+        description "[V1] Use the CDP V1";
+        value 0;
+      }
+      enum VERSION_TYPE_V2 {
+        description "[V2] Use the CDP V2";
+        value 1;
+      }
+    }
+  }
+  typedef CapabilityTypeOptions {
+    type enumeration {
+      enum CAPABILITY_TYPE_ROUTER {
+        description "[Router] Show the capability as a router";
+        value 0;
+      }
+      enum CAPABILITY_TYPE_TRANSPARENT_BRIDGE {
+        description "[Transparent Bridge] Show the capability as a transparent bridge";
+        value 1;
+      }
+      enum CAPABILITY_TYPE_SOURCE_ROUTE_BRIDGE {
+        description "[Route Bridge] Show the capability as a route bridge";
+        value 2;
+      }
+      enum CAPABILITY_TYPE_SWITCH {
+        description "[Switch] Show the capability as a switch";
+        value 3;
+      }
+      enum CAPABILITY_TYPE_HOST {
+        description "[Host] Show the capability as a host";
+        value 4;
+      }
+      enum CAPABILITY_TYPE_IGMP_CAPABLE {
+        description "[IGMP] Show the capability as an IGMP capable device";
+        value 5;
+      }
+      enum CAPABILITY_TYPE_REPEATER {
+        description "[Repeater] Show the capability as a repeater";
+        value 6;
+      }
+      enum CAPABILITY_TYPE_VOIP_PHONE {
+        description "[VoIP Phone] Show the capability as a VoIP Phone";
+        value 7;
+      }
+      enum CAPABILITY_TYPE_REMOTELY_MANAGED_DEVICE {
+        description "[Remotely Managed Device] Show the capability as a remotely managed device";
+        value 8;
+      }
+      enum CAPABILITY_TYPE_CVTA_STP_DISPUTE_RESOLUTION_CISCO_VT_CAMERA {
+        description "[Camara] Show the capability as a camera";
+        value 9;
+      }
+      enum CAPABILITY_TYPE_TWO_PORT_MAC_REPLY {
+        description "[Two Port MAC Replay] Show the capability as a two port MAC reply";
+        value 10;
+      }
+    }
+  }
+  grouping Config {
+    container SystemConfig {
+      uses SystemConfig;
+    }
+  }
+  grouping SystemConfig {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf TimeToLive {
+      mandatory "true";
+      type int32;
+    }
+    leaf MsgTxInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf CDPVersion {
+      mandatory "true";
+      type VersionTypeOptions;
+    }
+  }
+  grouping LocalInfo {
+    container List {
+      list List_Entry {
+        uses LocalInfoEntry;
+      }
+    }
+  }
+  grouping LocalInfoEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container PowerAvailable {
+      uses PowerAvailable;
+    }
+    container SystemInfo {
+      uses SystemInfo;
+    }
+    container VoiceVlan {
+      uses VoiceVLAN;
+    }
+    container PortInfo {
+      uses PortInfo;
+    }
+    container Capability {
+      leaf-list Capability_Entry {
+        type CapabilityTypeOptions;
+      }
+    }
+  }
+  grouping NeighborInfo {
+    container List {
+      list List_Entry {
+        uses NeighborInfoEntry;
+      }
+    }
+  }
+  grouping NeighborInfoEntry {
+    container IdentifyNo {
+      uses RecvIdentifyInfo;
+    }
+    container SystemInfo {
+      uses SystemInfo;
+    }
+    container PowerAvailable {
+      uses PowerAvailable;
+    }
+    leaf TTL {
+      mandatory "true";
+      type int64;
+    }
+    leaf VoIPVlan {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping RecvIdentifyInfo {
+    container RecvIdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf PortThroughInterface {
+      mandatory "true";
+      type string;
+    }
+    container Capability {
+      leaf-list Capability_Entry {
+        type CapabilityTypeOptions;
+      }
+    }
+  }
+  grouping SystemInfo {
+    container IP {
+      leaf-list IP_Entry {
+        type string;
+      }
+    }
+    leaf DeviceID {
+      mandatory "true";
+      type string;
+    }
+    leaf Platform {
+      mandatory "true";
+      type string;
+    }
+    leaf SystemName {
+      mandatory "true";
+      type string;
+    }
+    leaf SoftwareVersion {
+      mandatory "true";
+      type string;
+    }
+    leaf CDPVersion {
+      mandatory "true";
+      type VersionTypeOptions;
+    }
+  }
+  grouping VoiceVLAN {
+    leaf Data {
+      mandatory "true";
+      type uint8;
+    }
+    leaf VoiceVlan {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PortInfo {
+    leaf PortThroughInterface {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping PowerAvailable {
+    leaf RequestID {
+      mandatory "true";
+      type int32;
+    }
+    leaf ManagementID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Allocated {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Supported {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping NeighborPoe {
+    leaf RequestId {
+      mandatory "true";
+      type int32;
+    }
+    leaf Allocated {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping Statistic {
+    container List {
+      list List_Entry {
+        uses StatisticEntry;
+      }
+    }
+  }
+  grouping StatisticEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf FramesOutV1 {
+      mandatory "true";
+      type uint64;
+    }
+    leaf FramesOutV2 {
+      mandatory "true";
+      type uint64;
+    }
+    leaf FramesInV1 {
+      mandatory "true";
+      type uint64;
+    }
+    leaf FramesInV2 {
+      mandatory "true";
+      type uint64;
+    }
+    leaf IllegalChecksum {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OtherErrors {
+      mandatory "true";
+      type uint64;
+    }
+  }
+  rpc sercom-cdp-CDP-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-cdp-CDP-SetConfig {
+    input {
+      uses Config;
+    }
+  }
+  rpc sercom-cdp-CDP-GetLocalInfo {
+    output {
+      uses LocalInfo;
+    }
+  }
+  rpc sercom-cdp-CDP-GetNeighborInfo {
+    output {
+      uses NeighborInfo;
+    }
+  }
+  rpc sercom-cdp-CDP-GetStatistic {
+    output {
+      uses Statistic;
+    }
+  }
+  rpc sercom-cdp-CDP-RunClearStatistic {
+    input {
+      uses sercom-device:PortList;
+    }
+  }
+}

@@ -1,0 +1,346 @@
+module sercom-fdb {
+
+  namespace "sercom:sercom-fdb";
+  prefix "sercom-fdb";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-event {
+    prefix sercom-event;
+  }
+  typedef MACTableStateTypeOptions {
+    type enumeration {
+      enum MAC_TABLE_STATE_TYPE_UNUSED {
+        description "[Unused] The field was not set";
+        value 0;
+      }
+      enum MAC_TABLE_STATE_TYPE_OTHER {
+        description "[Other] Unspecified entry state";
+        value 1;
+      }
+      enum MAC_TABLE_STATE_TYPE_INVALID {
+        description "[Invalid] This entry is not longer valid (aged)";
+        value 2;
+      }
+      enum MAC_TABLE_STATE_TYPE_LEARNED {
+        description "[Learned] This entry was learned and is valid";
+        value 3;
+      }
+      enum MAC_TABLE_STATE_TYPE_SELF {
+        description "[Self] This entry corresponds to the local MAC address";
+        value 4;
+      }
+      enum MAC_TABLE_STATE_TYPE_PACC {
+        description "[PACC] This entry was created by port access control";
+        value 5;
+      }
+      enum MAC_TABLE_STATE_TYPE_MULTICAST {
+        description "* This is an internal multicast address";
+        value 6;
+      }
+      enum MAC_TABLE_STATE_TYPE_REJECT {
+        description "[Reject] This entry was rejected because of dropping";
+        value 7;
+      }
+    }
+  }
+  typedef PortOccupiedTypeOptions {
+    type enumeration {
+      enum PORT_OCCUPIED_TYPE_NONE {
+        description "[None]";
+        value 0;
+      }
+      enum PORT_OCCUPIED_TYPE_PACC {
+        description "[PACC]";
+        value 1;
+      }
+      enum PORT_OCCUPIED_TYPE_PORT_SECURITY {
+        description "[Port Security]";
+        value 2;
+      }
+    }
+  }
+  grouping Config {
+    container AgeTime {
+      uses AgingTime;
+    }
+    container PortLimit {
+      uses PortLearningLimit;
+    }
+    container ForwardConfig {
+      uses ForwardConfig;
+    }
+    container DropConfig {
+      uses DropConfig;
+    }
+  }
+  grouping AgingTime {
+    leaf GlobalAgingTime {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping ForwardConfig {
+    container List {
+      list List_Entry {
+        uses ForwardConfigEntry;
+      }
+    }
+  }
+  grouping ForwardConfigEntry {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+  }
+  grouping DropConfig {
+    container List {
+      list List_Entry {
+        uses DropConfigEntry;
+      }
+    }
+  }
+  grouping DropConfigEntry {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+  }
+  grouping PortLearningLimit {
+    container List {
+      list List_Entry {
+        uses PortLearningLimitEntry;
+      }
+    }
+  }
+  grouping PortLearningLimitEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Limit {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping Info {
+    leaf UsedAgingTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfFreeEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfUsedEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfMacUnicastDynamicEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfMacUnicastStaticEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfMacMulticastDynamicEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfMacMulticastStaticEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfIpv4MulticastEntries {
+      mandatory "true";
+      type int32;
+    }
+    leaf NumberOfIpv6MulticastEntries {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping Status {
+    container List {
+      list List_Entry {
+        uses StatusEntry;
+      }
+    }
+  }
+  grouping StatusEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf State {
+      mandatory "true";
+      type MACTableStateTypeOptions;
+    }
+  }
+  grouping SpecificMac {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping FlushOption {
+    leaf DynamicAll {
+      mandatory "true";
+      type boolean;
+    }
+    container Identify {
+      uses sercom-device:PortList;
+    }
+  }
+  grouping PortOccupied {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Type {
+      mandatory "true";
+      type PortOccupiedTypeOptions;
+    }
+  }
+  rpc sercom-fdb-FDB-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-fdb-FDB-GetMACAgingTime {
+    output {
+      uses AgingTime;
+    }
+  }
+  rpc sercom-fdb-FDB-SetMACAgingTime {
+    input {
+      uses AgingTime;
+    }
+  }
+  rpc sercom-fdb-FDB-GetFDBForwardTable {
+    output {
+      uses ForwardConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-AddForwardMACAddress {
+    input {
+      uses ForwardConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-DeleteForwardMACAddress {
+    input {
+      uses ForwardConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-UpdateForwardMACAddress {
+    input {
+      uses ForwardConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-GetFDBDropTable {
+    output {
+      uses DropConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-AddDropMACAddress {
+    input {
+      uses DropConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-DeleteDropMACAddress {
+    input {
+      uses DropConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-UpdateDropMACAddress {
+    input {
+      uses DropConfig;
+    }
+  }
+  rpc sercom-fdb-FDB-UpdatePortLearningLimit {
+    input {
+      uses PortLearningLimit;
+    }
+  }
+  rpc sercom-fdb-FDB-GetInfo {
+    output {
+      uses Info;
+    }
+  }
+  rpc sercom-fdb-FDB-GetTable {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-fdb-FDB-GetAuthorizedTable {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-fdb-FDB-GetSecurityTable {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-fdb-FDB-GetSpecificTable {
+    input {
+      uses SpecificMac;
+    }
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-fdb-FDB-RunClearMACTable {
+  }
+  rpc sercom-fdb-FDB-RunClearMACTableForInterface {
+    input {
+      uses FlushOption;
+    }
+  }
+  rpc sercom-fdb-FDB-AddEntry {
+    input {
+      uses sercom-event:FDBEntry;
+    }
+  }
+  rpc sercom-fdb-FDB-DeleteEntry {
+    input {
+      uses sercom-event:FDBEntry;
+    }
+  }
+  rpc sercom-fdb-FDB-UpdateEntry {
+    input {
+      uses sercom-event:FDBEntry;
+    }
+  }
+}

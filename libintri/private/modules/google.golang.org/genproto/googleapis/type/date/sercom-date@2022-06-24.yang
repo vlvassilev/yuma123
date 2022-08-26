@@ -1,0 +1,27 @@
+module sercom-date {
+
+  namespace "sercom:sercom-date";
+  prefix "sercom-date";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  grouping Date {
+    leaf Year {
+      mandatory "true";
+      type int32;
+    }
+    leaf Month {
+      mandatory "true";
+      type int32;
+    }
+    leaf Day {
+      mandatory "true";
+      type int32;
+    }
+  }
+}

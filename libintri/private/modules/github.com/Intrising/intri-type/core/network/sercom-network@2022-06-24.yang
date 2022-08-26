@@ -1,0 +1,254 @@
+module sercom-network {
+
+  namespace "sercom:sercom-network";
+  prefix "sercom-network";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-common {
+    prefix sercom-common;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef IPv4DhcpModeTypeOptions {
+    type enumeration {
+      enum IPV4_DHCP_MODE_TYPE_DISABLED {
+        description "[Static]";
+        value 0;
+      }
+      enum IPV4_DHCP_MODE_TYPE_USE_DHCP {
+        description "[Use DHCP]";
+        value 1;
+      }
+      enum IPV4_DHCP_MODE_TYPE_DHCP_WITH_OPTION_66_67 {
+        description "[Use DHCP with Option 66/67]";
+        value 2;
+      }
+    }
+  }
+  typedef IPV4ConfigDefaultAddressSelectionTypeOptions {
+    type enumeration {
+      enum IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_PRIMARY {
+        description "[Primary]";
+        value 0;
+      }
+      enum IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_SECONDARY {
+        description "[Secondary]";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    container Basic {
+      uses BasicConfig;
+    }
+    container IP {
+      uses IPConfig;
+    }
+  }
+  grouping BasicConfig {
+    leaf HostName {
+      mandatory "true";
+      type string;
+    }
+    leaf DomainName {
+      mandatory "true";
+      type string;
+    }
+    leaf LocalMTU {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping IPConfig {
+    container V4 {
+      uses IPv4Config;
+    }
+    container V6 {
+      uses IPv6Config;
+    }
+  }
+  grouping IPv4Config {
+    leaf DHCPMode {
+      mandatory "true";
+      type IPv4DhcpModeTypeOptions;
+    }
+    container Static {
+      uses IPv4Static;
+    }
+  }
+  grouping IPv4Static {
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf SubnetMask {
+      mandatory "true";
+      type string;
+    }
+    leaf Gateway {
+      mandatory "true";
+      type string;
+    }
+    leaf DNSServer {
+      mandatory "true";
+      type string;
+    }
+    leaf SecondaryDeviceIP {
+      mandatory "true";
+      type string;
+    }
+    leaf SecondarySubnetMask {
+      mandatory "true";
+      type string;
+    }
+    leaf DefaultAddressSelection {
+      mandatory "true";
+      type IPV4ConfigDefaultAddressSelectionTypeOptions;
+    }
+  }
+  grouping IPv6Config {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf IcmpAutoAddressEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf AutoConfigurationEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    container Static {
+      uses IPv6Static;
+    }
+  }
+  grouping IPv6Static {
+    leaf DNSServer {
+      mandatory "true";
+      type string;
+    }
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping IPv4Status {
+    leaf DynamicDeviceIP {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicSubnetMask {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicGateway {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicDNSServer1 {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicDNSServer2 {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicDNSServer3 {
+      mandatory "true";
+      type string;
+    }
+    leaf DynamicDNSServer4 {
+      mandatory "true";
+      type string;
+    }
+    leaf OutgoingDeviceIP {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping IPv6StatusEntry {
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf Scope {
+      mandatory "true";
+      type sercom-common:IPv6ScopeTypeOptions;
+    }
+  }
+  grouping IPv6Status {
+    container List {
+      list List_Entry {
+        uses IPv6StatusEntry;
+      }
+    }
+  }
+  rpc sercom-network-Network-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-network-Network-GetBasicConfig {
+    output {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-network-Network-SetBasicConfig {
+    input {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-network-Network-GetIPConfig {
+    output {
+      uses IPConfig;
+    }
+  }
+  rpc sercom-network-Network-GetIPv4Config {
+    output {
+      uses IPv4Config;
+    }
+  }
+  rpc sercom-network-Network-SetIPv4Config {
+    input {
+      uses IPv4Config;
+    }
+  }
+  rpc sercom-network-Network-GetIPv6Config {
+    output {
+      uses IPv6Config;
+    }
+  }
+  rpc sercom-network-Network-SetIPv6Config {
+    input {
+      uses IPv6Config;
+    }
+  }
+  rpc sercom-network-Network-GetV4Status {
+    output {
+      uses IPv4Status;
+    }
+  }
+  rpc sercom-network-Network-GetV6Status {
+    output {
+      uses IPv6Status;
+    }
+  }
+  rpc sercom-network-Network-GetIPv6Address {
+    output {
+      uses sercom-common:IPv6List;
+    }
+  }
+  rpc sercom-network-Network-GetIPv4Address {
+    output {
+      uses sercom-common:IPAddress;
+    }
+  }
+}

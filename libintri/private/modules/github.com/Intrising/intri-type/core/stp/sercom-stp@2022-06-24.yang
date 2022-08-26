@@ -1,0 +1,1185 @@
+module sercom-stp {
+
+  namespace "sercom:sercom-stp";
+  prefix "sercom-stp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-device {
+    prefix sercom-device;
+  }
+  typedef BridgeConfigModeTypeOptions {
+    type enumeration {
+      enum BRIDGE_CONFIG_MODE_TYPE_DISABLED {
+        description "[Disabled] Disabled mode";
+        value 0;
+      }
+      enum BRIDGE_CONFIG_MODE_TYPE_STP {
+        description "[STP] Stp bridge mode";
+        value 1;
+      }
+      enum BRIDGE_CONFIG_MODE_TYPE_RSTP {
+        description "[RSTP] Rstp bridge mode";
+        value 2;
+      }
+      enum BRIDGE_CONFIG_MODE_TYPE_MSTP {
+        description "[MSTP] Mstp bridge mode";
+        value 3;
+      }
+    }
+  }
+  typedef PortConfigAdminP2PPortTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO {
+        description "[Auto] Auto mode";
+        value 0;
+      }
+      enum PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE {
+        description "[Force False] Force false mode";
+        value 1;
+      }
+      enum PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE {
+        description "[Force True] Force true mode";
+        value 2;
+      }
+    }
+  }
+  typedef PortConfigBPDUGuardTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED {
+        description "[Disabled] Disabled mode";
+        value 0;
+      }
+      enum PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT {
+        description "[Drop And Event] Drop and event mode";
+        value 1;
+      }
+      enum PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT {
+        description "[Block Port] Block port mode";
+        value 2;
+      }
+    }
+  }
+  typedef PortStatusStateTypeOptions {
+    type enumeration {
+      enum PORT_STATUS_STATE_TYPE_UNKNOWN {
+        description "[Unknown] Unknown state";
+        value 0;
+      }
+      enum PORT_STATUS_STATE_TYPE_DISCARDING {
+        description "[Discarding] Discarding state";
+        value 1;
+      }
+      enum PORT_STATUS_STATE_TYPE_LEARNING {
+        description "[Learning] Learning state ";
+        value 2;
+      }
+      enum PORT_STATUS_STATE_TYPE_FORWARDING {
+        description "[Forwarding] Forwarding state";
+        value 3;
+      }
+      enum PORT_STATUS_STATE_TYPE_BLOCKING {
+        description "[Blocking] Blocking state";
+        value 4;
+      }
+      enum PORT_STATUS_STATE_TYPE_LISTENING {
+        description "[Listening] Listening state";
+        value 5;
+      }
+      enum PORT_STATUS_STATE_TYPE_BROKEN {
+        description "[Broken] Broken state";
+        value 6;
+      }
+    }
+  }
+  typedef PortStatusRoleTypeOptions {
+    type enumeration {
+      enum PORT_STATUS_ROLE_TYPE_UNKNOWN {
+        description "[Unknown] Unknown";
+        value 0;
+      }
+      enum PORT_STATUS_ROLE_TYPE_ROOT {
+        description "[Root bridge] Root bridge";
+        value 1;
+      }
+      enum PORT_STATUS_ROLE_TYPE_DESIGNATED {
+        description "[Designated bridge] Designated bridge";
+        value 2;
+      }
+      enum PORT_STATUS_ROLE_TYPE_ALTERNATE {
+        description "[Alternate bridge] Alternate bridge";
+        value 3;
+      }
+      enum PORT_STATUS_ROLE_TYPE_BACKUP {
+        description "[Backup bridge] Backup bridge";
+        value 4;
+      }
+      enum PORT_STATUS_ROLE_TYPE_MASTER {
+        description "[Master bridge] Master bridge";
+        value 5;
+      }
+      enum PORT_STATUS_ROLE_TYPE_DISABLED {
+        description "[Disabled] Disabled";
+        value 6;
+      }
+    }
+  }
+  grouping MSTPConfig {
+    leaf Mode {
+      mandatory "true";
+      type BridgeConfigModeTypeOptions;
+    }
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf Revision {
+      mandatory "true";
+      type int32;
+    }
+    leaf MaxAge {
+      mandatory "true";
+      type int32;
+    }
+    leaf HelloTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf ForwardDelay {
+      mandatory "true";
+      type int32;
+    }
+    leaf MaxHops {
+      mandatory "true";
+      type int32;
+    }
+    leaf TxHoldCount {
+      mandatory "true";
+      type int32;
+    }
+    container Cist {
+      uses CISTEntry;
+    }
+    container Mstis {
+      list Mstis_Entry {
+        uses MSTIEntry;
+      }
+    }
+  }
+  grouping CISTEntry {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses MSTPCistPort;
+      }
+    }
+  }
+  grouping MSTIEntry {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    container Vlans {
+      leaf-list Vlans_Entry {
+        type int32;
+      }
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses MSTPMstiPort;
+      }
+    }
+  }
+  grouping MSTIList {
+    container List {
+      list List_Entry {
+        uses MSTIEntry;
+      }
+    }
+  }
+  grouping MSTPCistPort {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    leaf PathCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf STPEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf P2PMode {
+      mandatory "true";
+      type PortConfigAdminP2PPortTypeOptions;
+    }
+    leaf EdgeMode {
+      mandatory "true";
+      type boolean;
+    }
+    leaf BPDUGuard {
+      mandatory "true";
+      type PortConfigBPDUGuardTypeOptions;
+    }
+    leaf RestrictRoot {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping MSTPMstiPort {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    leaf PathCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping MSTPID {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping CISTStatus {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    container BridgeID {
+      uses MSTPID;
+    }
+    container RootID {
+      uses MSTPID;
+    }
+    leaf RootPort {
+      mandatory "true";
+      type int32;
+    }
+    leaf RootCost {
+      mandatory "true";
+      type int32;
+    }
+    container RegionalRoot {
+      uses MSTPID;
+    }
+    leaf InternalRootCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf TopologyChange {
+      mandatory "true";
+      type boolean;
+    }
+    leaf TopologyChangeCount {
+      mandatory "true";
+      type int32;
+    }
+    leaf TimeSinceTopologyChange {
+      mandatory "true";
+      type int32;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses CISTPortEntryStatus;
+      }
+    }
+  }
+  grouping CISTPortEntryStatus {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    leaf Role {
+      mandatory "true";
+      type string;
+    }
+    leaf State {
+      mandatory "true";
+      type string;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf PathCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf EdgeMode {
+      mandatory "true";
+      type boolean;
+    }
+    leaf P2PMode {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Uptime {
+      mandatory "true";
+      type int32;
+    }
+    leaf BPDUGuard {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping MSTIStatus {
+    container List {
+      list List_Entry {
+        uses MSTIStatusEntry;
+      }
+    }
+  }
+  grouping MSTIStatusEntry {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    container BridgeID {
+      uses MSTPID;
+    }
+    container RootID {
+      uses MSTPID;
+    }
+    leaf RootPort {
+      mandatory "true";
+      type int32;
+    }
+    leaf RootCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf TopologyChange {
+      mandatory "true";
+      type boolean;
+    }
+    leaf TopologyChangeCount {
+      mandatory "true";
+      type int32;
+    }
+    leaf TimeSinceTopologyChange {
+      mandatory "true";
+      type int32;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses MSTIPortStatusEntry;
+      }
+    }
+  }
+  grouping MSTIPortStatusEntry {
+    leaf No {
+      mandatory "true";
+      type int32;
+    }
+    leaf Role {
+      mandatory "true";
+      type string;
+    }
+    leaf State {
+      mandatory "true";
+      type string;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf PathCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf Uptime {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping MSTPVLANGroupPortEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf Tagged {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping MSTPVLANGroupEntry {
+    leaf VLANID {
+      mandatory "true";
+      type int32;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses MSTPVLANGroupPortEntry;
+      }
+    }
+  }
+  grouping STPConfigBridge {
+    leaf Mode {
+      mandatory "true";
+      type BridgeConfigModeTypeOptions;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf HelloTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf MaxAge {
+      mandatory "true";
+      type int32;
+    }
+    leaf ForwardDelay {
+      mandatory "true";
+      type int32;
+    }
+    leaf TxHoldCount {
+      mandatory "true";
+      type int32;
+    }
+    leaf MSTPRegionName {
+      mandatory "true";
+      type string;
+    }
+    leaf MSTPRevisionLevel {
+      mandatory "true";
+      type int32;
+    }
+    leaf MSTPMaxHops {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPConfigPortEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf AdminP2PPort {
+      mandatory "true";
+      type PortConfigAdminP2PPortTypeOptions;
+    }
+    leaf AdminEdgePort {
+      mandatory "true";
+      type boolean;
+    }
+    leaf AdminPathCost {
+      mandatory "true";
+      type int32;
+    }
+    leaf MSTPDefaultPriority {
+      mandatory "true";
+      type int32;
+    }
+    container MSTPPortPriority {
+      leaf-list MSTPPortPriority_Entry {
+        type string;
+      }
+    }
+    leaf MSTPDefaultAdminPathCost {
+      mandatory "true";
+      type int32;
+    }
+    container MSTPPortAdminPathCost {
+      leaf-list MSTPPortAdminPathCost_Entry {
+        type string;
+      }
+    }
+    leaf BPDUGuard {
+      mandatory "true";
+      type PortConfigBPDUGuardTypeOptions;
+    }
+  }
+  grouping STPConfigMSTPGroupEntry {
+    leaf MSTPID {
+      mandatory "true";
+      type int32;
+    }
+    leaf BridgePriority {
+      mandatory "true";
+      type int32;
+    }
+    container VIDs {
+      leaf-list VIDs_Entry {
+        type int32;
+      }
+    }
+  }
+  grouping STPConfig {
+    container Bridge {
+      uses STPConfigBridge;
+    }
+    container Ports {
+      list Ports_Entry {
+        uses STPConfigPortEntry;
+      }
+    }
+    container MSTPGroups {
+      list MSTPGroups_Entry {
+        uses STPConfigMSTPGroupEntry;
+      }
+    }
+  }
+  grouping BridgeConfigMode {
+    leaf Mode {
+      mandatory "true";
+      type BridgeConfigModeTypeOptions;
+    }
+  }
+  grouping BridgeConfigPriority {
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigHelloTime {
+    leaf HelloTime {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigMaxAge {
+    leaf MaxAge {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigForwardDelay {
+    leaf ForwardDelay {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigTxHoldCount {
+    leaf TxHoldCount {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigMSTPRegionName {
+    leaf MSTPRegionName {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping BridgeConfigMSTPRevisionLevel {
+    leaf MSTPRevisionLevel {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BridgeConfigMSTPMaxHops {
+    leaf MSTPMaxHops {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPPortConfigEnabledEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping STPPortConfigEnabled {
+    container List {
+      list List_Entry {
+        uses STPPortConfigEnabledEntry;
+      }
+    }
+  }
+  grouping STPPortConfigPriorityEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPPortConfigPriority {
+    container List {
+      list List_Entry {
+        uses STPPortConfigPriorityEntry;
+      }
+    }
+  }
+  grouping STPPortConfigAdminP2PPortEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf AdminP2PPort {
+      mandatory "true";
+      type PortConfigAdminP2PPortTypeOptions;
+    }
+  }
+  grouping STPPortConfigAdminP2PPort {
+    container List {
+      list List_Entry {
+        uses STPPortConfigAdminP2PPortEntry;
+      }
+    }
+  }
+  grouping STPPortConfigAdminEdgePortEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf AdminEdgePort {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping STPPortConfigAdminEdgePort {
+    container List {
+      list List_Entry {
+        uses STPPortConfigAdminEdgePortEntry;
+      }
+    }
+  }
+  grouping STPPortConfigAdminPathCostEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf AdminPathCost {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPPortConfigAdminPathCost {
+    container List {
+      list List_Entry {
+        uses STPPortConfigAdminPathCostEntry;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPDefaultPriorityEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf MSTPDefaultPriority {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPPortConfigMSTPDefaultPriority {
+    container List {
+      list List_Entry {
+        uses STPPortConfigMSTPDefaultPriorityEntry;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPPortPriorityEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    container MSTPPortPriority {
+      leaf-list MSTPPortPriority_Entry {
+        type string;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPPortPriority {
+    container List {
+      list List_Entry {
+        uses STPPortConfigMSTPPortPriorityEntry;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPDefaultAdminPathCostEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf MSTPDefaultAdminPathCost {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping STPPortConfigMSTPDefaultAdminPathCost {
+    container List {
+      list List_Entry {
+        uses STPPortConfigMSTPDefaultAdminPathCostEntry;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPPortAdminPathCostEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    container MSTPPortAdminPathCost {
+      leaf-list MSTPPortAdminPathCost_Entry {
+        type string;
+      }
+    }
+  }
+  grouping STPPortConfigMSTPPortAdminPathCost {
+    container List {
+      list List_Entry {
+        uses STPPortConfigMSTPPortAdminPathCostEntry;
+      }
+    }
+  }
+  grouping STPPortConfigBPDUGuardEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf BPDUGuard {
+      mandatory "true";
+      type PortConfigBPDUGuardTypeOptions;
+    }
+  }
+  grouping STPPortConfigBPDUGuard {
+    container List {
+      list List_Entry {
+        uses STPPortConfigBPDUGuardEntry;
+      }
+    }
+  }
+  grouping STPPortConfigBPDUReceiveOnlyEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf BPDUReceiveOnly {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping STPPortConfigBPDUReceiveOnly {
+    container List {
+      list List_Entry {
+        uses STPPortConfigBPDUReceiveOnlyEntry;
+      }
+    }
+  }
+  grouping STPPortConfigRestrictTcnEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf RestrictTcn {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping STPPortConfigRestrictTcn {
+    container List {
+      list List_Entry {
+        uses STPPortConfigRestrictTcnEntry;
+      }
+    }
+  }
+  grouping STPPortConfigRestrictRootEntry {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf RestrictRoot {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping STPPortConfigRestrictRoot {
+    container List {
+      list List_Entry {
+        uses STPPortConfigRestrictRootEntry;
+      }
+    }
+  }
+  grouping MSTPIDList {
+    container IDList {
+      leaf-list IDList_Entry {
+        type int32;
+      }
+    }
+  }
+  grouping STPMSTPGroupEntry {
+    leaf MSTPID {
+      mandatory "true";
+      type int32;
+    }
+    leaf BridgePriority {
+      mandatory "true";
+      type int32;
+    }
+    container VIDs {
+      leaf-list VIDs_Entry {
+        type int32;
+      }
+    }
+  }
+  grouping MSTPGroup {
+    container List {
+      list List_Entry {
+        uses STPMSTPGroupEntry;
+      }
+    }
+  }
+  rpc sercom-stp-MSTP-GetConfig {
+    output {
+      uses MSTPConfig;
+    }
+  }
+  rpc sercom-stp-MSTP-SetConfig {
+    input {
+      uses MSTPConfig;
+    }
+  }
+  rpc sercom-stp-MSTP-SetCistConfig {
+    input {
+      uses CISTEntry;
+    }
+  }
+  rpc sercom-stp-MSTP-SetMstiConfig {
+    input {
+      uses MSTIList;
+    }
+  }
+  rpc sercom-stp-MSTP-GetCistStatus {
+    output {
+      uses CISTStatus;
+    }
+  }
+  rpc sercom-stp-MSTP-GetMstiStatus {
+    output {
+      uses MSTIStatus;
+    }
+  }
+  rpc sercom-stp-MSTP-RunReconfigPortState {
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigMode {
+    output {
+      uses BridgeConfigMode;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigMode {
+    input {
+      uses BridgeConfigMode;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigPriority {
+    output {
+      uses BridgeConfigPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigPriority {
+    input {
+      uses BridgeConfigPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigHelloTime {
+    output {
+      uses BridgeConfigHelloTime;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigHelloTime {
+    input {
+      uses BridgeConfigHelloTime;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigMaxAge {
+    output {
+      uses BridgeConfigMaxAge;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigMaxAge {
+    input {
+      uses BridgeConfigMaxAge;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigForwardDelay {
+    output {
+      uses BridgeConfigForwardDelay;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigForwardDelay {
+    input {
+      uses BridgeConfigForwardDelay;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigTxHoldCount {
+    output {
+      uses BridgeConfigTxHoldCount;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigTxHoldCount {
+    input {
+      uses BridgeConfigTxHoldCount;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigMSTPRegionName {
+    output {
+      uses BridgeConfigMSTPRegionName;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigMSTPRegionName {
+    input {
+      uses BridgeConfigMSTPRegionName;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigMSTPRevisionLevel {
+    output {
+      uses BridgeConfigMSTPRevisionLevel;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigMSTPRevisionLevel {
+    input {
+      uses BridgeConfigMSTPRevisionLevel;
+    }
+  }
+  rpc sercom-stp-MSTP-GetBridgeConfigMSTPMaxHops {
+    output {
+      uses BridgeConfigMSTPMaxHops;
+    }
+  }
+  rpc sercom-stp-MSTP-SetBridgeConfigMSTPMaxHops {
+    input {
+      uses BridgeConfigMSTPMaxHops;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigEnabled {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigEnabled;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigEnabled {
+    input {
+      uses STPPortConfigEnabled;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigPriority {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigPriority {
+    input {
+      uses STPPortConfigPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigAdminP2PPort {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigAdminP2PPort;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigAdminP2PPort {
+    input {
+      uses STPPortConfigAdminP2PPort;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigAdminEdgePort {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigAdminEdgePort;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigAdminEdgePort {
+    input {
+      uses STPPortConfigAdminEdgePort;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigAdminPathCost {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigAdminPathCost {
+    input {
+      uses STPPortConfigAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigMSTPDefaultPriority {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigMSTPDefaultPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigMSTPDefaultPriority {
+    input {
+      uses STPPortConfigMSTPDefaultPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigMSTPPortPriority {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigMSTPPortPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigMSTPPortPriority {
+    input {
+      uses STPPortConfigMSTPPortPriority;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigMSTPDefaultAdminPathCost {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigMSTPDefaultAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigMSTPDefaultAdminPathCost {
+    input {
+      uses STPPortConfigMSTPDefaultAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigMSTPPortAdminPathCost {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigMSTPPortAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigMSTPPortAdminPathCost {
+    input {
+      uses STPPortConfigMSTPPortAdminPathCost;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigBPDUGuard {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigBPDUGuard;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigBPDUGuard {
+    input {
+      uses STPPortConfigBPDUGuard;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigBPDUReceiveOnly {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigBPDUReceiveOnly;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigBPDUReceiveOnly {
+    input {
+      uses STPPortConfigBPDUReceiveOnly;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigRestrictTcn {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigRestrictTcn;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigRestrictTcn {
+    input {
+      uses STPPortConfigRestrictTcn;
+    }
+  }
+  rpc sercom-stp-MSTP-GetPortConfigRestrictRoot {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses STPPortConfigRestrictRoot;
+    }
+  }
+  rpc sercom-stp-MSTP-SetPortConfigRestrictRoot {
+    input {
+      uses STPPortConfigRestrictRoot;
+    }
+  }
+  rpc sercom-stp-MSTP-GetMSTPGroup {
+    input {
+      uses MSTPIDList;
+    }
+    output {
+      uses MSTPGroup;
+    }
+  }
+  rpc sercom-stp-MSTP-SetMSTPGroup {
+    input {
+      uses MSTPGroup;
+    }
+  }
+  rpc sercom-stp-MSTP-DeleteMSTPGroup {
+    input {
+      uses MSTPIDList;
+    }
+  }
+}

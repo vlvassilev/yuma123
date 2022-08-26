@@ -1,0 +1,207 @@
+module sercom-poe {
+
+  namespace "sercom:sercom-poe";
+  prefix "sercom-poe";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-hardware {
+    prefix sercom-hardware;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef LLDPDeliverUsageTypeOptions {
+    type enumeration {
+      enum LLDP_L2_USAGE_TYPE_L1 {
+        description "";
+        value 0;
+      }
+      enum LLDP_L2_USAGE_TYPE_L1_AUTO {
+        description "";
+        value 1;
+      }
+      enum LLDP_L2_USAGE_TYPE_LLDP {
+        description "";
+        value 2;
+      }
+      enum LLDP_L2_USAGE_TYPE_LLDP_AUTO {
+        description "";
+        value 3;
+      }
+      enum LLDP_L2_USAGE_TYPE_CDP {
+        description "";
+        value 4;
+      }
+      enum LLDP_L2_USAGE_TYPE_CDP_AUTO {
+        description "";
+        value 5;
+      }
+    }
+  }
+  grouping Config {
+    container Budget {
+      uses SystemBudget;
+    }
+    container Port {
+      uses PortConfig;
+    }
+  }
+  grouping SystemBudget {
+    leaf MaxPowerAvailable {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PortConfig {
+    container List {
+      list List_Entry {
+        uses ConfigEntry;
+      }
+    }
+  }
+  grouping ConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Mode {
+      mandatory "true";
+      type sercom-hardware:PoEPortModeTypeOptions;
+    }
+    leaf Priority {
+      mandatory "true";
+      type sercom-hardware:PoEPriorityLevelTypeOptions;
+    }
+  }
+  grouping SystemStatus {
+    leaf MinShutDownVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf MaxShutDownVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf VMainVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf IMainCurrent {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerConsumption {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping PortStatus {
+    container List {
+      list List_Entry {
+        uses PortStatusEntry;
+      }
+    }
+  }
+  grouping PortStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Condition {
+      mandatory "true";
+      type sercom-hardware:PoEConditionTypeOptions;
+    }
+    leaf DeterminedClass {
+      mandatory "true";
+      type sercom-hardware:PoEDeterminedClassTypeOptions;
+    }
+    leaf Priority {
+      mandatory "true";
+      type sercom-hardware:PoEPriorityLevelTypeOptions;
+    }
+    leaf OutputCurrent {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf OutputVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf OutputPower {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf SupportMaxPower {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping SetPoEMaxPowerAvailableRequest {
+    leaf MaxPowerAvailable {
+      mandatory "true";
+      type int32;
+    }
+  }
+  rpc sercom-poe-PoE-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-poe-PoE-UpdatePortConfig {
+    input {
+      uses PortConfig;
+    }
+  }
+  rpc sercom-poe-PoE-RunRestartPoEPort {
+    input {
+      uses sercom-device:PortList;
+    }
+  }
+  rpc sercom-poe-PoE-SetPoEMaxPowerAvailable {
+    input {
+      uses SystemBudget;
+    }
+  }
+  rpc sercom-poe-PoE-GetPortStatus {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses PortStatus;
+    }
+  }
+  rpc sercom-poe-PoE-GetSystemStatus {
+    output {
+      uses SystemStatus;
+    }
+  }
+}

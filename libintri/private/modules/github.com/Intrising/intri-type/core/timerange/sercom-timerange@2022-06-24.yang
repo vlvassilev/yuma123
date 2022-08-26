@@ -1,0 +1,149 @@
+module sercom-timerange {
+
+  namespace "sercom:sercom-timerange";
+  prefix "sercom-timerange";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-timeofday {
+    prefix sercom-timeofday;
+  }
+  import sercom-date {
+    prefix sercom-date;
+  }
+  import sercom-dayofweek {
+    prefix sercom-dayofweek;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef CommandTypeOptions {
+    type enumeration {
+      enum COMMAND_TYPE_PERIODIC {
+        description "[Periodic]";
+        value 0;
+      }
+      enum COMMAND_TYPE_ABSOLUTE {
+        description "[Absolute]";
+        value 1;
+      }
+    }
+  }
+  typedef PeriodicDayTypeOptions {
+    type enumeration {
+      enum PERIODIC_DAY_TYPE_DAYOFWEEK {
+        description "[Day of the week]";
+        value 0;
+      }
+      enum PERIODIC_DAY_TYPE_DAILY {
+        description "[Daily]";
+        value 1;
+      }
+      enum PERIODIC_DAY_TYPE_WEEKDAYS {
+        description "[Weekdays]";
+        value 2;
+      }
+      enum PERIODIC_DAY_TYPE_WEEKEND {
+        description "[Weekend]";
+        value 3;
+      }
+    }
+  }
+  grouping Config {
+    container List {
+      list List_Entry {
+        uses ConfigEntry;
+      }
+    }
+  }
+  grouping ConfigEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Command {
+      mandatory "true";
+      type CommandTypeOptions;
+    }
+    container PeriodicDay {
+      uses DayTime;
+    }
+    container StartTime {
+      uses sercom-timeofday:TimeOfDay;
+    }
+    container EndTime {
+      uses sercom-timeofday:TimeOfDay;
+    }
+    container StartDate {
+      uses sercom-date:Date;
+    }
+    container EndDate {
+      uses sercom-date:Date;
+    }
+  }
+  grouping DayTime {
+    leaf PeriodicType {
+      mandatory "true";
+      type PeriodicDayTypeOptions;
+    }
+    container DayOfWeekLists {
+      leaf-list DayOfWeekLists_Entry {
+        type sercom-dayofweek:DayOfWeek;
+      }
+    }
+  }
+  grouping EntryStatus {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf IsActive {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Status {
+    container List {
+      list List_Entry {
+        uses EntryStatus;
+      }
+    }
+  }
+  rpc sercom-timerange-TimeRange-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-timerange-TimeRange-GetStatus {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-timerange-TimeRange-AddTimeRange {
+    input {
+      uses ConfigEntry;
+    }
+  }
+  rpc sercom-timerange-TimeRange-DeleteTimeRange {
+    input {
+      uses sercom-common:Name;
+    }
+  }
+  rpc sercom-timerange-TimeRange-UpdateTimeRange {
+    input {
+      uses ConfigEntry;
+    }
+  }
+}

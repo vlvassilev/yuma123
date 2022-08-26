@@ -1,0 +1,218 @@
+module sercom-lacp {
+
+  namespace "sercom:sercom-lacp";
+  prefix "sercom-lacp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef ConfigLinkAggregationTypeOptions {
+    type enumeration {
+      enum CONFIG_LINK_AGGREGATION_STATIC {
+        description "[Static]";
+        value 0;
+      }
+      enum CONFIG_LINK_AGGREGATION_DYNAMIC {
+        description "[Dyanmic]";
+        value 1;
+      }
+    }
+  }
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_PASSIVE {
+        description "[Passive]";
+        value 0;
+      }
+      enum MODE_TYPE_ACTIVE {
+        description "[Active]";
+        value 1;
+      }
+    }
+  }
+  typedef IntervalTypeOptions {
+    type enumeration {
+      enum INTERVAL_TYPE_SLOW {
+        description "[Slow]";
+        value 0;
+      }
+      enum INTERVAL_TYPE_FAST {
+        description "[Fast]";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    container System {
+      uses SystemConfig;
+    }
+    container LAG {
+      uses LAGConfig;
+    }
+  }
+  grouping SystemConfig {
+    leaf SystemPriority {
+      mandatory "true";
+      type int32;
+    }
+    leaf Mode {
+      mandatory "true";
+      type ModeTypeOptions;
+    }
+    leaf TransmitInterval {
+      mandatory "true";
+      type IntervalTypeOptions;
+    }
+  }
+  grouping LAGConfig {
+    container Lists {
+      list Lists_Entry {
+        uses LAGConfigEntry;
+      }
+    }
+  }
+  grouping LAGConfigEntry {
+    leaf TrunkID {
+      mandatory "true";
+      type int32;
+    }
+    leaf LacpEnable {
+      mandatory "true";
+      type ConfigLinkAggregationTypeOptions;
+    }
+    container Identify {
+      uses sercom-device:PortList;
+    }
+  }
+  grouping Status {
+    container PortLists {
+      list PortLists_Entry {
+        uses StatusEntry;
+      }
+    }
+  }
+  grouping StatusEntry {
+    leaf TrunkID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf LacpEnable {
+      mandatory "true";
+      type ConfigLinkAggregationTypeOptions;
+    }
+    container Actor {
+      uses ActorPartnerInfo;
+    }
+    container Partner {
+      uses ActorPartnerInfo;
+    }
+  }
+  grouping ActorPartnerInfo {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf PortPriority {
+      mandatory "true";
+      type int32;
+    }
+    leaf SystemPriority {
+      mandatory "true";
+      type int32;
+    }
+    leaf MACAddress {
+      mandatory "true";
+      type uint8;
+    }
+    leaf AdminKey {
+      mandatory "true";
+      type int32;
+    }
+    leaf OperKey {
+      mandatory "true";
+      type int32;
+    }
+    container Status {
+      uses State;
+    }
+  }
+  grouping State {
+    leaf Activity {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Timeout {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Aggr {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Sync {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Collect {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Distribute {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Defaulted {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Expired {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  rpc sercom-lacp-LACP-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-lacp-LACP-SetSystem {
+    input {
+      uses SystemConfig;
+    }
+  }
+  rpc sercom-lacp-LACP-GetSystem {
+    output {
+      uses SystemConfig;
+    }
+  }
+  rpc sercom-lacp-LACP-SetTrunk {
+    input {
+      uses LAGConfig;
+    }
+  }
+  rpc sercom-lacp-LACP-GetTrunk {
+    input {
+      uses sercom-device:InterfaceIdentify;
+    }
+    output {
+      uses LAGConfigEntry;
+    }
+  }
+  rpc sercom-lacp-LACP-GetPortStatus {
+    output {
+      uses Status;
+    }
+  }
+}

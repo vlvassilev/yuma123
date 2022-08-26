@@ -1,0 +1,366 @@
+module sercom-config {
+
+  namespace "sercom:sercom-config";
+  prefix "sercom-config";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-acl {
+    prefix sercom-acl;
+  }
+  import sercom-vlan {
+    prefix sercom-vlan;
+  }
+  import sercom-gvrp {
+    prefix sercom-gvrp;
+  }
+  import sercom-access {
+    prefix sercom-access;
+  }
+  import sercom-userinterface {
+    prefix sercom-userinterface;
+  }
+  import sercom-system {
+    prefix sercom-system;
+  }
+  import sercom-network {
+    prefix sercom-network;
+  }
+  import sercom-time {
+    prefix sercom-time;
+  }
+  import sercom-port {
+    prefix sercom-port;
+  }
+  import sercom-sfp {
+    prefix sercom-sfp;
+  }
+  import sercom-mirroring {
+    prefix sercom-mirroring;
+  }
+  import sercom-isolation {
+    prefix sercom-isolation;
+  }
+  import sercom-fdb {
+    prefix sercom-fdb;
+  }
+  import sercom-portsecurity {
+    prefix sercom-portsecurity;
+  }
+  import sercom-files {
+    prefix sercom-files;
+  }
+  import sercom-lacp {
+    prefix sercom-lacp;
+  }
+  import sercom-multicast {
+    prefix sercom-multicast;
+  }
+  import sercom-stormcontrol {
+    prefix sercom-stormcontrol;
+  }
+  import sercom-dhcp {
+    prefix sercom-dhcp;
+  }
+  import sercom-qos {
+    prefix sercom-qos;
+  }
+  import sercom-loop {
+    prefix sercom-loop;
+  }
+  import sercom-lldp {
+    prefix sercom-lldp;
+  }
+  import sercom-poe {
+    prefix sercom-poe;
+  }
+  import sercom-cdp {
+    prefix sercom-cdp;
+  }
+  import sercom-dhcpserver {
+    prefix sercom-dhcpserver;
+  }
+  import sercom-stp {
+    prefix sercom-stp;
+  }
+  import sercom-timerange {
+    prefix sercom-timerange;
+  }
+  import sercom-ptp {
+    prefix sercom-ptp;
+  }
+  import sercom-monitor {
+    prefix sercom-monitor;
+  }
+  import sercom-timesync {
+    prefix sercom-timesync;
+  }
+  import sercom-udld {
+    prefix sercom-udld;
+  }
+  import sercom-portauthentication {
+    prefix sercom-portauthentication;
+  }
+  import sercom-log {
+    prefix sercom-log;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef StorageTypeOptions {
+    type enumeration {
+      enum STORAGE_TYPE_RAM_DISK {
+        description "[In RAM Disk] Configuration is saved in RAM dist";
+        value 0;
+      }
+    }
+  }
+  typedef SaveModeTypeOptions {
+    type enumeration {
+      enum SAVE_MODE_TYPE_TEMPORARILY {
+        description "[Temporarily] Modification on config is temporarily before save.";
+        value 0;
+      }
+    }
+  }
+  typedef ConfigTypeOptions {
+    type enumeration {
+      enum CONIFG_TYPE_RUNNING {
+        description "[Running] Running Configuration";
+        value 0;
+      }
+      enum CONIFG_TYPE_DEFAULT {
+        description "[Default] Default Configuration";
+        value 1;
+      }
+      enum CONIFG_TYPE_SAVE {
+        description "[Save] Save Configuration";
+        value 2;
+      }
+    }
+  }
+  typedef ConfigStateTypeOptions {
+    type enumeration {
+      enum CONFIG_STATE_TYPE_SAVED {
+        description "[Saved] Configuration is saved";
+        value 0;
+      }
+      enum CONFIG_STATE_TYPE_CHANGED {
+        description "[Changed] Configuration is changed";
+        value 1;
+      }
+    }
+  }
+  typedef FactoryDefaultModeTypeOptions {
+    type enumeration {
+      enum FACTORY_DEFAULT_MODE_TYPE_KEEP_ALL {
+        description "[Keep All] Reset default but keep user/network configs";
+        value 0;
+      }
+      enum FACTORY_DEFAULT_MODE_TYPE_KEEP_USER_ACCOUNTS {
+        description "[Keep User Accounts] Reset default but keep user accounts";
+        value 1;
+      }
+      enum FACTORY_DEFAULT_MODE_TYPE_KEEP_NETWORK_CONFIGS {
+        description "[Keep Network Configs] Reset default but keep network configs";
+        value 2;
+      }
+      enum FACTORY_DEFAULT_MODE_TYPE_RESET_ALL {
+        description "[Reset All] Reset to factory default";
+        value 3;
+      }
+    }
+  }
+  grouping ImportAction {
+    leaf FileURL {
+      mandatory "true";
+      type string;
+    }
+    leaf RebootAfterAction {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping ExportAction {
+    leaf FileURL {
+      mandatory "true";
+      type string;
+    }
+    leaf IsFTPS {
+      mandatory "true";
+      type boolean;
+    }
+    leaf ForceTFTP {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping SaveModeStatus {
+    leaf SaveStorageOption {
+      mandatory "true";
+      type StorageTypeOptions;
+    }
+    leaf SaveModeOption {
+      mandatory "true";
+      type SaveModeTypeOptions;
+    }
+    leaf ConfigStateOption {
+      mandatory "true";
+      type ConfigStateTypeOptions;
+    }
+    leaf ConfigLastUpdated {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping RestoreDefaultType {
+    leaf Type {
+      mandatory "true";
+      type FactoryDefaultModeTypeOptions;
+    }
+  }
+  grouping AllServicesConfig {
+    container Acl {
+      uses sercom-acl:Config;
+    }
+    container Vlan {
+      uses sercom-vlan:Config;
+    }
+    container Gvrp {
+      uses sercom-gvrp:Config;
+    }
+    container Access {
+      uses sercom-access:Config;
+    }
+    container UserInterface {
+      uses sercom-userinterface:Config;
+    }
+    container System {
+      uses sercom-system:Config;
+    }
+    container Network {
+      uses sercom-network:Config;
+    }
+    container Time {
+      uses sercom-time:Config;
+    }
+    container Port {
+      uses sercom-port:Config;
+    }
+    container Sfp {
+      uses sercom-sfp:Config;
+    }
+    container Mirroring {
+      uses sercom-mirroring:Config;
+    }
+    container Isolation {
+      uses sercom-isolation:Config;
+    }
+    container Fdb {
+      uses sercom-fdb:Config;
+    }
+    container PortSecurity {
+      uses sercom-portsecurity:Config;
+    }
+    container Files {
+      uses sercom-files:Config;
+    }
+    container Lacp {
+      uses sercom-lacp:Config;
+    }
+    container Multicast {
+      uses sercom-multicast:Config;
+    }
+    container StormControl {
+      uses sercom-stormcontrol:Config;
+    }
+    container Dhcp {
+      uses sercom-dhcp:Config;
+    }
+    container QoS {
+      uses sercom-qos:Config;
+    }
+    container Loop {
+      uses sercom-loop:Config;
+    }
+    container Lldp {
+      uses sercom-lldp:Config;
+    }
+    container Poe {
+      uses sercom-poe:Config;
+    }
+    container Cdp {
+      uses sercom-cdp:Config;
+    }
+    container DhcpServer {
+      uses sercom-dhcpserver:Config;
+    }
+    container Stp {
+      uses sercom-stp:STPConfig;
+    }
+    container Mstp {
+      uses sercom-stp:MSTPConfig;
+    }
+    container TimeRange {
+      uses sercom-timerange:Config;
+    }
+    container ArpInspection {
+      uses sercom-dhcp:ARPInspectionConfig;
+    }
+    container Ptp {
+      uses sercom-ptp:Config;
+    }
+    container Monitor {
+      uses sercom-monitor:Config;
+    }
+    container TimeSync {
+      uses sercom-timesync:Config;
+    }
+    container Udld {
+      uses sercom-udld:Config;
+    }
+    container PortAuthentication {
+      uses sercom-portauthentication:Config;
+    }
+    container Log {
+      uses sercom-log:Config;
+    }
+  }
+  grouping ValidateConfigResult {
+    container List {
+      leaf-list List_Entry {
+        type string;
+      }
+    }
+  }
+  rpc sercom-config-Config-RunImportConfig {
+    input {
+      uses sercom-common:ImportPathRequest;
+    }
+  }
+  rpc sercom-config-Config-RunExportConfig {
+    input {
+      uses sercom-common:ExportPathRequest;
+    }
+  }
+  rpc sercom-config-Config-GetSaveModeStatus {
+    output {
+      uses SaveModeStatus;
+    }
+  }
+  rpc sercom-config-Config-RunSaveRunningConfig {
+  }
+  rpc sercom-config-Config-RunRestoreDefaultConfig {
+    input {
+      uses RestoreDefaultType;
+    }
+  }
+}

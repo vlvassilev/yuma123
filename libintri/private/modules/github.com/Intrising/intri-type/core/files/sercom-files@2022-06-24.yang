@@ -1,0 +1,192 @@
+module sercom-files {
+
+  namespace "sercom:sercom-files";
+  prefix "sercom-files";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef CertificateTypeOptions {
+    type enumeration {
+      enum CERTIFICATE_TYPE_WEB {
+        description "[Web]";
+        value 0;
+      }
+      enum CERTIFICATE_TYPE_SNMP {
+        description "[SNMP]";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    leaf FTPEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    container Certificate {
+      uses ActivateCertificate;
+    }
+  }
+  grouping ActivateCertificate {
+    container Web {
+      uses CertificateID;
+    }
+    container SnmpAgent {
+      uses CertificateID;
+    }
+    container SnmpManager {
+      uses CertificateUserIDList;
+    }
+  }
+  grouping CertificateID {
+    leaf ID {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping CertificateIDList {
+    container List {
+      leaf-list List_Entry {
+        type string;
+      }
+    }
+  }
+  grouping CertificateData {
+    leaf ID {
+      mandatory "true";
+      type string;
+    }
+    leaf CrtPath {
+      mandatory "true";
+      type string;
+    }
+    leaf KeyPath {
+      mandatory "true";
+      type string;
+    }
+    leaf FTPSEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf AuthCrtPath {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping CertificateUserID {
+    leaf ID {
+      mandatory "true";
+      type string;
+    }
+    leaf Username {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping CertificateUserIDList {
+    container List {
+      list List_Entry {
+        uses CertificateUserID;
+      }
+    }
+  }
+  grouping CertificateType {
+    leaf Type {
+      mandatory "true";
+      type CertificateTypeOptions;
+    }
+  }
+  grouping CertificateInfo {
+    leaf CrtPath {
+      mandatory "true";
+      type string;
+    }
+    leaf KeyPath {
+      mandatory "true";
+      type string;
+    }
+    leaf Passphrase {
+      mandatory "true";
+      type string;
+    }
+    leaf AuthCrtPath {
+      mandatory "true";
+      type string;
+    }
+  }
+  rpc sercom-files-Files-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-files-Files-GetFTPServerEnabled {
+    output {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-files-Files-SetFTPServerEnabled {
+    input {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-files-Files-GetActivateCertificate {
+    output {
+      uses ActivateCertificate;
+    }
+  }
+  rpc sercom-files-Files-SetActivateCertificateForWeb {
+    input {
+      uses CertificateID;
+    }
+  }
+  rpc sercom-files-Files-SetActivateCertificateForSNMP {
+    input {
+      uses CertificateID;
+    }
+  }
+  rpc sercom-files-Files-AddActivateCertificateForSNMPManager {
+    input {
+      uses CertificateUserID;
+    }
+  }
+  rpc sercom-files-Files-DeleteActivateCertificateForSNMPManager {
+    input {
+      uses CertificateUserID;
+    }
+  }
+  rpc sercom-files-Files-UpdateActivateCertificateForSNMPManager {
+    input {
+      uses CertificateUserID;
+    }
+  }
+  rpc sercom-files-Files-RunImportCertificate {
+    input {
+      uses CertificateData;
+    }
+  }
+  rpc sercom-files-Files-RunExportCertificate {
+    input {
+      uses CertificateData;
+    }
+  }
+  rpc sercom-files-Files-RunRemoveCertificate {
+    input {
+      uses CertificateID;
+    }
+  }
+  rpc sercom-files-Files-GetCertificateList {
+    output {
+      uses CertificateIDList;
+    }
+  }
+}

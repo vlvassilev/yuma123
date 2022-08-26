@@ -1,0 +1,470 @@
+module sercom-acl {
+
+  namespace "sercom:sercom-acl";
+  prefix "sercom-acl";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef RuleActionTypeOptions {
+    type enumeration {
+      enum RULE_ACTION_TYPE_UNUSED {
+        description "[Unused] this rule is unused yet";
+        value 0;
+      }
+      enum RULE_ACTION_TYPE_PERMIT {
+        description "[Permit] this rule action will permit packet";
+        value 1;
+      }
+      enum RULE_ACTION_TYPE_DENY {
+        description "[Deny] this rule action will deny packet";
+        value 2;
+      }
+      enum RULE_ACTION_TYPE_MIRROR {
+        description "*internal usage";
+        value 3;
+      }
+    }
+  }
+  typedef RuleParamTypeOptions {
+    type enumeration {
+      enum RULE_PARAM_TYPE_MAC {
+        description "[MAC] this rule param is MAC address specification";
+        value 0;
+      }
+      enum RULE_PARAM_TYPE_IP_V_4 {
+        description "[IPv4] this rule param is IPv4 address specification";
+        value 1;
+      }
+      enum RULE_PARAM_TYPE_IP_V_6 {
+        description "[IPv6] this rule param is IPv6 address specification";
+        value 2;
+      }
+    }
+  }
+  typedef RuleDirectionTypeOptions {
+    type enumeration {
+      enum RULE_DIRECTION_TYPE_INGRESS {
+        description "*internal usage";
+        value 0;
+      }
+      enum RULE_DIRECTION_TYPE_EGRESS {
+        description "*internal usage";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    container Interfaces {
+      uses InterfaceList;
+    }
+    container AclList {
+      uses ACLList;
+    }
+    container AceList {
+      uses ACEList;
+    }
+    container Binding {
+      uses BindingList;
+    }
+    container Flow {
+      uses FlowMirroringList;
+    }
+  }
+  grouping InterfaceList {
+    container List {
+      list List_Entry {
+        uses InterfaceEntry;
+      }
+    }
+  }
+  grouping InterfaceEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf IngressAclName {
+      mandatory "true";
+      type string;
+    }
+    leaf EgressAclName {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping ACLList {
+    container List {
+      list List_Entry {
+        uses ACLEntry;
+      }
+    }
+  }
+  grouping ACLEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    container RuleList {
+      leaf-list RuleList_Entry {
+        type string;
+      }
+    }
+  }
+  grouping ACEList {
+    container List {
+      list List_Entry {
+        uses ACEEntry;
+      }
+    }
+  }
+  grouping ACEEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf Action {
+      mandatory "true";
+      type RuleActionTypeOptions;
+    }
+    leaf Priority {
+      mandatory "true";
+      type int32;
+    }
+    leaf TimeRangeName {
+      mandatory "true";
+      type string;
+    }
+    leaf ParamType {
+      mandatory "true";
+      type RuleParamTypeOptions;
+    }
+    choice Param {
+    mandatory "true";
+      container Mac {
+        uses RuleMAC;
+      }
+      container IPv4 {
+        uses RuleIPv4;
+      }
+      container IPv6 {
+        uses RuleIPv6;
+      }
+      container MacIPv4 {
+        uses RuleMACIPv4;
+      }
+      container MacIPv6 {
+        uses RuleMACIPv6;
+      }
+    }
+  }
+  grouping RuleVlan {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf VlanIDMask {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping RuleMACIPv4 {
+    container Mac {
+      uses RuleMAC;
+    }
+    container IPv4 {
+      uses RuleIPv4;
+    }
+  }
+  grouping RuleMACIPv6 {
+    container Mac {
+      uses RuleMAC;
+    }
+    container IPv6 {
+      uses RuleIPv6;
+    }
+  }
+  grouping RuleMAC {
+    container EtherType {
+      uses EtherTypeConfig;
+    }
+    container Source {
+      uses MACConfig;
+    }
+    container Destination {
+      uses MACConfig;
+    }
+    leaf VlanId {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping MACConfig {
+    leaf Address {
+      mandatory "true";
+      type string;
+    }
+    leaf AddressMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping EtherTypeConfig {
+    leaf Type {
+      mandatory "true";
+      type string;
+    }
+    leaf EtherTypeMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping IPProtocolConfig {
+    leaf Protocol {
+      mandatory "true";
+      type string;
+    }
+    leaf ProtocolMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping RuleIPv4 {
+    container Protocol {
+      uses IPProtocolConfig;
+    }
+    container Source {
+      uses IPv4Config;
+    }
+    container Destination {
+      uses IPv4Config;
+    }
+    container Layer4Port {
+      uses RuleLayer4Port;
+    }
+  }
+  grouping IPv4Config {
+    leaf Address {
+      mandatory "true";
+      type string;
+    }
+    leaf AddressMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping RuleIPv6 {
+    container NextHeader {
+      uses IPProtocolConfig;
+    }
+    container Source {
+      uses IPv6Config;
+    }
+    container Destination {
+      uses IPv6Config;
+    }
+    container Layer4Port {
+      uses RuleLayer4Port;
+    }
+  }
+  grouping IPv6Config {
+    leaf Address {
+      mandatory "true";
+      type string;
+    }
+    leaf AddressMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping RuleLayer4Port {
+    container Source {
+      uses IPWithLayer4PortConfig;
+    }
+    container Destination {
+      uses IPWithLayer4PortConfig;
+    }
+  }
+  grouping IPWithLayer4PortConfig {
+    leaf PortNumber {
+      mandatory "true";
+      type int32;
+    }
+    leaf PortNumberMask {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping BindingList {
+    container List {
+      list List_Entry {
+        uses BindingEntry;
+      }
+    }
+  }
+  grouping BindingEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Mac {
+      mandatory "true";
+      type string;
+    }
+    leaf ParamType {
+      mandatory "true";
+      type RuleParamTypeOptions;
+    }
+    choice Param {
+    mandatory "true";
+      leaf IPv4 {
+        mandatory "true";
+        type string;
+      }
+      leaf IPv6 {
+        mandatory "true";
+        type string;
+      }
+    }
+  }
+  grouping FlowMirroringEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    container ACLNameList {
+      leaf-list ACLNameList_Entry {
+        type string;
+      }
+    }
+    container SourceList {
+      list SourceList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+    container Destination {
+      uses sercom-device:InterfaceIdentify;
+    }
+  }
+  grouping FlowMirroringList {
+    container List {
+      list List_Entry {
+        uses FlowMirroringEntry;
+      }
+    }
+  }
+  rpc sercom-acl-ACL-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-acl-ACL-GetInterfaceList {
+    output {
+      uses InterfaceList;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateInterface {
+    input {
+      uses InterfaceEntry;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateInterfaceList {
+    input {
+      uses InterfaceList;
+    }
+  }
+  rpc sercom-acl-ACL-GetACLList {
+    output {
+      uses ACLList;
+    }
+  }
+  rpc sercom-acl-ACL-AddACL {
+    input {
+      uses ACLEntry;
+    }
+  }
+  rpc sercom-acl-ACL-DeleteACL {
+    input {
+      uses sercom-common:Name;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateACL {
+    input {
+      uses ACLEntry;
+    }
+  }
+  rpc sercom-acl-ACL-GetACEList {
+    output {
+      uses ACEList;
+    }
+  }
+  rpc sercom-acl-ACL-AddACE {
+    input {
+      uses ACEEntry;
+    }
+  }
+  rpc sercom-acl-ACL-DeleteACE {
+    input {
+      uses sercom-common:Name;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateACE {
+    input {
+      uses ACEEntry;
+    }
+  }
+  rpc sercom-acl-ACL-GetBindingList {
+    output {
+      uses BindingList;
+    }
+  }
+  rpc sercom-acl-ACL-AddBinding {
+    input {
+      uses BindingEntry;
+    }
+  }
+  rpc sercom-acl-ACL-DeleteBinding {
+    input {
+      uses sercom-common:Name;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateBinding {
+    input {
+      uses BindingEntry;
+    }
+  }
+  rpc sercom-acl-ACL-GetFlowMirroringList {
+    output {
+      uses FlowMirroringList;
+    }
+  }
+  rpc sercom-acl-ACL-AddFlowMirroring {
+    input {
+      uses FlowMirroringEntry;
+    }
+  }
+  rpc sercom-acl-ACL-DeleteFlowMirroring {
+    input {
+      uses sercom-common:Name;
+    }
+  }
+  rpc sercom-acl-ACL-UpdateFlowMirroring {
+    input {
+      uses FlowMirroringEntry;
+    }
+  }
+}

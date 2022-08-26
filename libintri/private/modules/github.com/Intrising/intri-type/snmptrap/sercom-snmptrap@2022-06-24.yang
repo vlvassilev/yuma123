@@ -1,0 +1,23 @@
+module sercom-snmptrap {
+
+  namespace "sercom:sercom-snmptrap";
+  prefix "sercom-snmptrap";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  grouping SNMPTrapCounter {
+    leaf ErrorCounts {
+      mandatory "true";
+      type int32;
+    }
+    leaf TrapCounts {
+      mandatory "true";
+      type int32;
+    }
+  }
+}

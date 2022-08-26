@@ -1,0 +1,65 @@
+module sercom-diagnostic {
+
+  namespace "sercom:sercom-diagnostic";
+  prefix "sercom-diagnostic";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-common {
+    prefix sercom-common;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping ARPEntry {
+    leaf IPAddr {
+      mandatory "true";
+      type string;
+    }
+    leaf MACAddr {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping ARPTables {
+    container List {
+      list List_Entry {
+        uses ARPEntry;
+      }
+    }
+  }
+  rpc sercom-diagnostic-Diagnostic-RunPingTest {
+    input {
+      uses sercom-common:IPAddress;
+    }
+    output {
+      uses sercom-common:Reply;
+    }
+  }
+  rpc sercom-diagnostic-Diagnostic-RunTraceRoute {
+    input {
+      uses sercom-common:IPAddress;
+    }
+    output {
+      uses sercom-common:Reply;
+    }
+  }
+  rpc sercom-diagnostic-Diagnostic-RunDNSLookup {
+    input {
+      uses sercom-common:Name;
+    }
+    output {
+      uses sercom-common:Reply;
+    }
+  }
+  rpc sercom-diagnostic-Diagnostic-GetARPTable {
+    output {
+      uses ARPTables;
+    }
+  }
+}

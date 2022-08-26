@@ -1,0 +1,1187 @@
+module sercom-hardware {
+
+  namespace "sercom:sercom-hardware";
+  prefix "sercom-hardware";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-timestamp {
+    prefix sercom-timestamp;
+  }
+  import sercom-event {
+    prefix sercom-event;
+  }
+  typedef PowerTypeOptions {
+    type enumeration {
+      enum POWER_TYPE_REDUNDANT {
+        description "[REDUNDANT] Redundant Power";
+        value 0;
+      }
+      enum POWER_TYPE_GENERAL {
+        description "[GENERAL] General Power";
+        value 1;
+      }
+    }
+  }
+  typedef LEDModeTypeOptions {
+    type enumeration {
+      enum LED_MODE_TYPE_DYNAMIC {
+        description "[Dynamic] Display static states and blink when data is present on a port.";
+        value 0;
+      }
+      enum LED_MODE_TYPE_STATIC {
+        description "[Static] Display static states but do not blink with data.";
+        value 1;
+      }
+      enum LED_MODE_TYPE_QUIET_DISPLAY {
+        description "[Quiet Display] Desplay is reduced to sys and on LED,and Port LEDs remain off.";
+        value 2;
+      }
+      enum LED_MODE_TYPE_ALL_DARK {
+        description "[All Dark] This mode is not recommended, as the unit may mistakenly be deemed powered down.";
+        value 3;
+      }
+      enum LED_MODE_TYPE_LIGHTSHOW {
+        description "[Lightshow] Similar to a led_test but permanent. This may be turned on to easier locate a physical unit among others.";
+        value 4;
+      }
+    }
+  }
+  typedef LEDBehaviorModeTypeOptions {
+    type enumeration {
+      enum LED_BEHAVIOR_MODE_TYPE_LINK1G {
+        description "* internal";
+        value 0;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_LINK5G10G {
+        description "* internal";
+        value 1;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLOCKED {
+        description "* internal";
+        value 2;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_REJECT {
+        description "* internal";
+        value 3;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_IDLE {
+        description "* internal";
+        value 4;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POE {
+        description "* internal";
+        value 5;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POEPLUS {
+        description "* internal";
+        value 6;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS {
+        description "* internal";
+        value 7;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_OFF {
+        description "* internal";
+        value 8;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL {
+        description "* internal";
+        value 9;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM {
+        description "* internal";
+        value 10;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM {
+        description "* internal";
+        value 11;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_USER_DEF1 {
+        description "* internal";
+        value 12;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_USER_DEF2 {
+        description "* internal";
+        value 13;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN {
+        description "* internal";
+        value 14;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE {
+        description "* internal";
+        value 15;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_RED {
+        description "* internal";
+        value 16;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE {
+        description "* internal";
+        value 17;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA {
+        description "* internal";
+        value 18;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP {
+        description "* internal";
+        value 19;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK {
+        description "* internal";
+        value 20;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE {
+        description "* internal";
+        value 21;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION {
+        description "* internal";
+        value 22;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL {
+        description "* internal blink 1 time a 200 milliseconds.";
+        value 23;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW {
+        description "* internal blink 1 time a 500 milliseconds.";
+        value 24;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST {
+        description "* internal blink 1 time a 100 milliseconds.";
+        value 25;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_NA {
+        description "* internal This LED is not support";
+        value 9999;
+      }
+    }
+  }
+  typedef LEDTypeOptions {
+    type enumeration {
+      enum LED_TYPE_SYSTEM {
+        description "";
+        value 0;
+      }
+      enum LED_TYPE_GPS {
+        description "";
+        value 1;
+      }
+      enum LED_TYPE_POEMAX {
+        description "";
+        value 2;
+      }
+      enum LED_TYPE_FAN {
+        description "";
+        value 3;
+      }
+      enum LED_TYPE_POE {
+        description "";
+        value 4;
+      }
+      enum LED_TYPE_SFP {
+        description "";
+        value 5;
+      }
+    }
+  }
+  typedef PoEPriorityLevelTypeOptions {
+    type enumeration {
+      enum POE_PRIORITY_LEVEL_TYPE_UNKNOWN {
+        description "[Unknown] Priority unknow";
+        value 0;
+      }
+      enum POE_PRIORITY_LEVEL_TYPE_LOW {
+        description "[Low] Priority low";
+        value 1;
+      }
+      enum POE_PRIORITY_LEVEL_TYPE_MEDIUM {
+        description "[Medium] Priority medium";
+        value 2;
+      }
+      enum POE_PRIORITY_LEVEL_TYPE_HIGH {
+        description "[High] Priority high";
+        value 3;
+      }
+    }
+  }
+  typedef PoEPortModeTypeOptions {
+    type enumeration {
+      enum POE_PORT_MODE_TYPE_POE {
+        description "[PoE] 802.3af PoE";
+        value 0;
+      }
+      enum POE_PORT_MODE_TYPE_POE_PLUS {
+        description "[PoE+] 802.3at PoE+";
+        value 1;
+      }
+      enum POE_PORT_MODE_TYPE_POE_PLUS_PLUS {
+        description "[PoE++] 802.3bt PoE++";
+        value 2;
+      }
+      enum POE_PORT_MODE_TYPE_POE_LLDP {
+        description "*[PoE LLDP Control] PoE mode is controlled by LLDP";
+        value 3;
+      }
+    }
+  }
+  typedef PoEDeterminedClassTypeOptions {
+    type enumeration {
+      enum POE_DETERMINED_CLASS_TYPE_CLASS0 {
+        description "[Class0] Class level 0";
+        value 0;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS1 {
+        description "[Class1] Class level 1";
+        value 1;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS2 {
+        description "[Class2] Class level 2";
+        value 2;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS3 {
+        description "[Class3] Class level 3";
+        value 3;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS4 {
+        description "[Class4] Class level 4";
+        value 4;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS5 {
+        description "[Class5] Class level 5";
+        value 5;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS6 {
+        description "[Class6] Class level 6";
+        value 6;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS7 {
+        description "[Class7] Class level 7";
+        value 7;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_CLASS8 {
+        description "[Class8] Class level 8";
+        value 8;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_OVERLOAD {
+        description "[Overload] Overload";
+        value 9;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_PROBES_NOT_EQUAL {
+        description "[Probes Not Equal] Probes not equal";
+        value 10;
+      }
+      enum POE_DETERMINED_CLASS_TYPE_UNKNOWN {
+        description "[Unknown] Unknown";
+        value 11;
+      }
+    }
+  }
+  typedef PoEConditionTypeOptions {
+    type enumeration {
+      enum POE_CONDITION_TYPE_DISABLED {
+        description "[Disabled] Disabled";
+        value 0;
+      }
+      enum POE_CONDITION_TYPE_POWER_OFF {
+        description "[Power Off] Power off";
+        value 1;
+      }
+      enum POE_CONDITION_TYPE_DTYPECOVERING {
+        description "[Dtypecovering] Dtypecovering";
+        value 2;
+      }
+      enum POE_CONDITION_TYPE_POWERED {
+        description "[Powered] Powered";
+        value 3;
+      }
+      enum POE_CONDITION_TYPE_CLASS_MTYPEMATCH {
+        description "[Class Mtypematch] Class mtypematch";
+        value 4;
+      }
+      enum POE_CONDITION_TYPE_SHORT_CIRCUIT {
+        description "[Short Circuit] Short circuit";
+        value 5;
+      }
+      enum POE_CONDITION_TYPE_REJECTED {
+        description "[Rejected] Rejected";
+        value 6;
+      }
+      enum POE_CONDITION_TYPE_OVERLOAD {
+        description "[Overload] Overload";
+        value 7;
+      }
+      enum POE_CONDITION_TYPE_UNDERLOAD {
+        description "[Underload] Underload";
+        value 8;
+      }
+      enum POE_CONDITION_TYPE_OVER_TEMP {
+        description "[Over Temperature] Over temperature";
+        value 9;
+      }
+      enum POE_CONDITION_TYPE_VOLTAGE_TOO_LOW {
+        description "[Voltage Too Low] Voltage too low";
+        value 10;
+      }
+      enum POE_CONDITION_TYPE_VOLTAGE_TOO_HIGH {
+        description "[Voltage Too High] Voltage too high";
+        value 11;
+      }
+      enum POE_CONDITION_TYPE_UNKNOW_ERROR {
+        description "[Unknow Error] Unknow error";
+        value 12;
+      }
+      enum POE_CONDITION_TYPE_BUDGET_EXCEEDED {
+        description "[Budget Exceeded] Budget exceeded";
+        value 13;
+      }
+      enum POE_CONDITION_TYPE_TYPE_NON_STANDARD_PD {
+        description "[None Standard PD Type] None standard PD type";
+        value 14;
+      }
+    }
+  }
+  typedef GPSStatusTypeOptions {
+    type enumeration {
+      enum GPS_STATUS_TYPE_DISABLED {
+        description "[Disabled] Disabled";
+        value 0;
+      }
+      enum GPS_STATUS_TYPE_TRACKING {
+        description "[Tracking] Tracking";
+        value 1;
+      }
+      enum GPS_STATUS_TYPE_SYNC {
+        description "[Sync] Sync";
+        value 2;
+      }
+    }
+  }
+  typedef DLDPAuthCationModeTypeOptions {
+    type enumeration {
+      enum DLDP_AUTHCATION_MODE_TYPE_NONE {
+        description "";
+        value 0;
+      }
+      enum DLDP_AUTHCATION_MODE_TYPE_PLAINTEXT {
+        description "";
+        value 1;
+      }
+      enum DLDP_AUTHCATION_MODE_TYPE_MD5 {
+        description "";
+        value 2;
+      }
+    }
+  }
+  typedef ShutdownModeTypeOptions {
+    type enumeration {
+      enum SHUT_MODE_TYPE_AUTO {
+        description "";
+        value 0;
+      }
+      enum SHUT_MODE_TYPE_MANUAL {
+        description "";
+        value 1;
+      }
+    }
+  }
+  typedef DLDPWorkModeTypeOptions {
+    type enumeration {
+      enum DLDP_WORK_MODE_TYPE_NORMAL {
+        description "";
+        value 0;
+      }
+      enum DLDP_WORK_MODE_TYPE_ENHANCE {
+        description "";
+        value 1;
+      }
+    }
+  }
+  typedef DLDPNeighobrStateTypeOptions {
+    type enumeration {
+      enum DLDP_NEIGHBOR_STATE_TYPE_UNCONFIRM {
+        description "";
+        value 0;
+      }
+      enum DLDP_NEIGHBOR_STATE_TYPE_CONFIRM {
+        description "";
+        value 1;
+      }
+    }
+  }
+  typedef DLDPProtocolStateTypeOptions {
+    type enumeration {
+      enum DLDP_PROTOCOL_STATE_TYPE_INITAL {
+        description "";
+        value 0;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_INACTIVE {
+        description "";
+        value 1;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_ACTIVE {
+        description "";
+        value 2;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_ADVERTISEMENT {
+        description "";
+        value 3;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_PROBE {
+        description "";
+        value 4;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_DISABLE {
+        description "";
+        value 5;
+      }
+      enum DLDP_PROTOCOL_STATE_TYPE_DELAY_DOWN {
+        description "";
+        value 6;
+      }
+    }
+  }
+  typedef PowerRedundantTypeOptions {
+    type enumeration {
+      enum POWER_REDUNDANT_TYPE_A {
+        description "[PSU A]";
+        value 0;
+      }
+      enum POWER_REDUNDANT_TYPE_B {
+        description "[PSU B]";
+        value 1;
+      }
+    }
+  }
+  grouping IPv4Static {
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf SubnetMask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping DLDPConfig {
+    container System {
+      uses DLDPSystemConfig;
+    }
+    container Port {
+      uses DLDPPortConfig;
+    }
+  }
+  grouping DLDPSystemConfig {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf AdvertisementInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf ShutDownMode {
+      mandatory "true";
+      type ShutdownModeTypeOptions;
+    }
+    leaf AuthMode {
+      mandatory "true";
+      type DLDPAuthCationModeTypeOptions;
+    }
+    leaf WorkMode {
+      mandatory "true";
+      type DLDPWorkModeTypeOptions;
+    }
+  }
+  grouping DLDPPortConfig {
+    container List {
+      list List_Entry {
+        uses DLDPPortConfigEntry;
+      }
+    }
+  }
+  grouping DLDPPortConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping DLDPPortStatus {
+    container List {
+      uses DLDPPortStatusEntry;
+    }
+  }
+  grouping DLDPPortStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf State {
+      mandatory "true";
+      type DLDPProtocolStateTypeOptions;
+    }
+    leaf Link {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping DLDPNeighborEntry {
+    leaf NeighborMACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf NeighborAgetime {
+      mandatory "true";
+      type int32;
+    }
+    leaf NeighborState {
+      mandatory "true";
+      type DLDPNeighobrStateTypeOptions;
+    }
+  }
+  grouping EnableRequest {
+    container List {
+      list List_Entry {
+        uses EnableRequestEntry;
+      }
+    }
+  }
+  grouping EnableRequestEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping PortLED {
+    container List {
+      list List_Entry {
+        uses PortLEDEntry;
+      }
+    }
+  }
+  grouping PortLEDEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf State {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+  }
+  grouping BoardLED {
+    leaf Power {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf System {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf PoEMax {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf Fan {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf GPS {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+  }
+  grouping LEDStatus {
+    container PortLED {
+      uses PortLED;
+    }
+    container SystemLED {
+      uses BoardLED;
+    }
+  }
+  grouping Coordinates {
+    leaf Latitude {
+      mandatory "true";
+      type string;
+    }
+    leaf Longitude {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping GNSSVerboseInfomation {
+    leaf Mode {
+      mandatory "true";
+      type string;
+    }
+    leaf NavigationalStatus {
+      mandatory "true";
+      type string;
+    }
+    leaf Speed {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Course {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf MagneticVariation {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping GPSEnable {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping GPSStatus {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Status {
+      mandatory "true";
+      type GPSStatusTypeOptions;
+    }
+    container VerboseInfo {
+      uses GNSSVerboseInfomation;
+    }
+    container Location {
+      uses Coordinates;
+    }
+    container DateTime {
+      uses sercom-timestamp:Timestamp;
+    }
+  }
+  grouping GPSCommand {
+    leaf Request {
+      mandatory "true";
+      type string;
+    }
+    container Respond {
+      leaf-list Respond_Entry {
+        type string;
+      }
+    }
+  }
+  grouping USBStatus {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Connected {
+      mandatory "true";
+      type boolean;
+    }
+    leaf ConnectedDevice {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping USBEthernetConfig {
+    container Static {
+      uses IPv4Static;
+    }
+  }
+  grouping FanSpeedConfig {
+    container List {
+      list List_Entry {
+        uses FanSpeedConfigEntry;
+      }
+    }
+  }
+  grouping FanSpeedConfigEntry {
+    leaf FanNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf RotatingSpeed {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping FanStatus {
+    container List {
+      list List_Entry {
+        uses FanStatusEntry;
+      }
+    }
+  }
+  grouping FanStatusEntry {
+    leaf FanNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf RotatingSpeedRPM {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping TemperatureStatus {
+    container List {
+      list List_Entry {
+        uses TemperatureStatusEntry;
+      }
+    }
+  }
+  grouping TemperatureStatusEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf ID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Temperature {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PowerRedundantState {
+    container RedundantList {
+      list RedundantList_Entry {
+        uses PowerRedundantStateEntry;
+      }
+    }
+  }
+  grouping PowerRedundantStateEntry {
+    leaf PwOption {
+      mandatory "true";
+      type PowerRedundantTypeOptions;
+    }
+    leaf PowerRedundantPlugIn {
+      mandatory "true";
+      type boolean;
+    }
+    leaf PowerRedundantACOk {
+      mandatory "true";
+      type boolean;
+    }
+    leaf PowerRedundantOk {
+      mandatory "true";
+      type boolean;
+    }
+    leaf PowerRedundantVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerRedundantCurrent {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerRedundantPowerConsumption {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerRedundantTemperature {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  grouping PowerGeneralState {
+    leaf Power_12V {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Power_54V {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping PowerState {
+    leaf Type {
+      mandatory "true";
+      type PowerTypeOptions;
+    }
+    choice PowerType {
+    mandatory "true";
+      container PowerRedundantState {
+        uses PowerRedundantState;
+      }
+      container PowerGeneralState {
+        uses PowerGeneralState;
+      }
+    }
+  }
+  grouping TimeControlRegister {
+    leaf RegBase {
+      mandatory "true";
+      type int32;
+    }
+    leaf Offset {
+      mandatory "true";
+      type int32;
+    }
+    leaf Data {
+      mandatory "true";
+      type uint8;
+    }
+  }
+  grouping Config {
+    container LED {
+      uses LEDConfig;
+    }
+    container Fan {
+      uses FanSpeedConfig;
+    }
+    container GPS {
+      uses GPSEnable;
+    }
+  }
+  grouping Ports {
+    container List {
+      list List_Entry {
+        uses PortEntry;
+      }
+    }
+  }
+  grouping PortEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf HardwarePortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf SwitchPortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf InterfaceType {
+      mandatory "true";
+      type sercom-device:PortInterfaceTypeOptions;
+    }
+    container Properies {
+      leaf-list Properies_Entry {
+        type sercom-device:PortPropertyTypeOptions;
+      }
+    }
+    leaf SupportPoE {
+      mandatory "true";
+      type boolean;
+    }
+    leaf SupportSFP {
+      mandatory "true";
+      type boolean;
+    }
+    leaf LinkLED {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf PoELED {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+    leaf SpeedLED {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+  }
+  grouping SystemInfo {
+    container Fan {
+      uses FanPercent;
+    }
+    container Temp {
+      uses TemperatureStatus;
+    }
+    container BoardLED {
+      uses BoardLED;
+    }
+    container GPS {
+      uses GPSStatus;
+    }
+  }
+  grouping LEDConfig {
+    leaf Mode {
+      mandatory "true";
+      type LEDModeTypeOptions;
+    }
+    leaf ResetButton {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping FanPercent {
+    container List {
+      list List_Entry {
+        uses FanPercentEntry;
+      }
+    }
+  }
+  grouping FanPercentEntry {
+    leaf FanNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf PercentRPM {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping LEDType {
+    leaf LED {
+      mandatory "true";
+      type LEDBehaviorModeTypeOptions;
+    }
+  }
+  grouping SignalState {
+    container List {
+      list List_Entry {
+        uses SignalStateEntry;
+      }
+    }
+  }
+  grouping SignalStateEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf State {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping SFPInfo {
+    container List {
+      list List_Entry {
+        uses SFPInfoEntry;
+      }
+    }
+  }
+  grouping SFPInfoEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container Info {
+      uses sercom-event:SFPInfo;
+    }
+  }
+  grouping DeviceI2CAddress {
+    container Bus0 {
+      leaf-list Bus0_Entry {
+        type string;
+      }
+    }
+    leaf Mux {
+      mandatory "true";
+      type string;
+    }
+    container List {
+      list List_Entry {
+        uses DeviceI2CAddressInfo;
+      }
+    }
+  }
+  grouping DeviceI2CAddressInfo {
+    leaf Ch {
+      mandatory "true";
+      type int32;
+    }
+    container Address {
+      leaf-list Address_Entry {
+        type string;
+      }
+    }
+  }
+  grouping InfoList {
+    container Info {
+      leaf-list Info_Entry {
+        type string;
+      }
+    }
+  }
+  grouping Enable {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Network {
+    leaf IP {
+      mandatory "true";
+      type string;
+    }
+    leaf Mask {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping MCUInfo {
+    container List {
+      list List_Entry {
+        uses MCUVersion;
+      }
+    }
+  }
+  grouping MCUVersion {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf Version {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping PoESetting {
+    container List {
+      list List_Entry {
+        uses PoESettingEntry;
+      }
+    }
+  }
+  grouping PoESettingEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enable {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Mode {
+      mandatory "true";
+      type PoEPortModeTypeOptions;
+    }
+    leaf Priority {
+      mandatory "true";
+      type PoEPriorityLevelTypeOptions;
+    }
+  }
+  grouping PoEPortStatusList {
+    container List {
+      list List_Entry {
+        uses PoEPortStatusEntry;
+      }
+    }
+  }
+  grouping PoEPortStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf IsLinkUp {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Class {
+      mandatory "true";
+      type PoEDeterminedClassTypeOptions;
+    }
+    leaf PowerConsumption {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Current {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Voltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Temperature {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Condition {
+      mandatory "true";
+      type PoEConditionTypeOptions;
+    }
+  }
+  grouping PoESystemStatus {
+    leaf MinShutDownVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf MaxShutDownVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf VMainVoltage {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf IMainCurrent {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerConsumption {
+      mandatory "true";
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Budget {
+      mandatory "true";
+      type int32;
+    }
+    leaf Version {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping PoESystemBudgetEntry {
+    leaf Budget {
+      mandatory "true";
+      type int32;
+    }
+  }
+}

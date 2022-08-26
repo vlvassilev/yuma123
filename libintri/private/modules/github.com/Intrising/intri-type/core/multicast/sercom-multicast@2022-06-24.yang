@@ -1,0 +1,541 @@
+module sercom-multicast {
+
+  namespace "sercom:sercom-multicast";
+  prefix "sercom-multicast";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef RouterDetectionTypeOptions {
+    type enumeration {
+      enum ROUTER_DETECTION_TYPE_QUERY_MESSAGE {
+        description "[Query Message]";
+        value 0;
+      }
+    }
+  }
+  typedef ProtocolTypeOptions {
+    type enumeration {
+      enum PROTOCOL_TYPE_NONE {
+        description "[NONE]";
+        value 0;
+      }
+      enum PROTOCOL_TYPE_IGMP {
+        description "[IGMP]";
+        value 1;
+      }
+      enum PROTOCOL_TYPE_MLD {
+        description "[MLD]";
+        value 2;
+      }
+      enum PROTOCOL_TYPE_BOTH {
+        description "[BOTH]";
+        value 3;
+      }
+    }
+  }
+  typedef RouterStatusTypeOptions {
+    type enumeration {
+      enum ROUTER_STATUS_TYPE_DISABLED {
+        description "[Disabled]";
+        value 0;
+      }
+      enum ROUTER_STATUS_TYPE_DYNAMIC {
+        description "[Dynamic]";
+        value 1;
+      }
+      enum ROUTER_STATUS_TYPE_STATIC {
+        description "[Static]";
+        value 2;
+      }
+      enum ROUTER_STATUS_TYPE_BOTH {
+        description "[Both]";
+        value 3;
+      }
+    }
+  }
+  typedef VersionTypeOptions {
+    type enumeration {
+      enum VERSION_TYPE_IGMP_V1 {
+        description "[IGMP V1]";
+        value 0;
+      }
+      enum VERSION_TYPE_IGMP_V2 {
+        description "[IGMP V2]";
+        value 1;
+      }
+      enum VERSION_TYPE_IGMP_V3 {
+        description "[IGMP V3]";
+        value 2;
+      }
+      enum VERSION_TYPE_MLD_V1 {
+        description "[MLD V1]";
+        value 3;
+      }
+      enum VERSION_TYPE_MLD_V2 {
+        description "[MLD V2]";
+        value 4;
+      }
+      enum VERSION_TYPE_DISABLED {
+        description "[Disabled]";
+        value 5;
+      }
+    }
+  }
+  typedef StaticTypeOptions {
+    type enumeration {
+      enum STATIC_TYPE_L2 {
+        description "[L2]";
+        value 0;
+      }
+      enum STATIC_TYPE_L3 {
+        description "[L3]";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    leaf IGMPSnoopingGlobalEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf MLDSnoopingGlobalEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    container IGMPConfig {
+      uses Snooping;
+    }
+    container MLDConfig {
+      uses Snooping;
+    }
+    container RouterConfig {
+      uses RouterPort;
+    }
+    container UnregisterConfig {
+      uses UnregisterFlood;
+    }
+    container StaticGroups {
+      uses Static;
+    }
+  }
+  grouping Snooping {
+    container VlanList {
+      list VlanList_Entry {
+        uses SnoopingConfigEntry;
+      }
+    }
+  }
+  grouping SnoopingConfigEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf SnoopingEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf QuerierVersion {
+      mandatory "true";
+      type VersionTypeOptions;
+    }
+    leaf MulticastRouterDetection {
+      mandatory "true";
+      type RouterDetectionTypeOptions;
+    }
+    leaf EnableFastLeave {
+      mandatory "true";
+      type boolean;
+    }
+    leaf EnableReportSuppression {
+      mandatory "true";
+      type boolean;
+    }
+    leaf GroupLimit {
+      mandatory "true";
+      type int32;
+    }
+    leaf GroupMembershipInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf LastMemberQueryTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf MaxResponseTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf RouterAgingTime {
+      mandatory "true";
+      type int32;
+    }
+    leaf StartQueryCount {
+      mandatory "true";
+      type int32;
+    }
+    leaf StartQueryInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf QueryInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf Robustness {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyiesConfig {
+      list IdentifyiesConfig_Entry {
+        uses PortEnabledEntry;
+      }
+    }
+  }
+  grouping UnregisterFlood {
+    container VlanList {
+      list VlanList_Entry {
+        uses UnregisterFloodVlan;
+      }
+    }
+  }
+  grouping UnregisterFloodVlan {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping RouterPort {
+    container VlanList {
+      list VlanList_Entry {
+        uses RouterPortVlanEntry;
+      }
+    }
+  }
+  grouping RouterPortVlanEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    container PortList {
+      list PortList_Entry {
+        uses PortEnabledEntry;
+      }
+    }
+  }
+  grouping PortEnabledEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Static {
+    container List {
+      list List_Entry {
+        uses StaticGroupsConfigEntry;
+      }
+    }
+  }
+  grouping StaticGroupsConfigEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf MulticastAddress {
+      mandatory "true";
+      type string;
+    }
+    container ForwardingPort {
+      uses sercom-device:PortList;
+    }
+  }
+  grouping IGMPStatistics {
+    container List {
+      list List_Entry {
+        uses IGMPStatisticEntry;
+      }
+    }
+  }
+  grouping IGMPStatisticEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxGeneralQueries {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV3Reports {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV2Reports {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV2Leaves {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV1Reports {
+      mandatory "true";
+      type int32;
+    }
+    leaf Querier {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping RouterStatus {
+    container VlanList {
+      list VlanList_Entry {
+        uses RouterStatusEntry;
+      }
+    }
+  }
+  grouping RouterStatusEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    container List {
+      list List_Entry {
+        uses RouterPortStatusEntry;
+      }
+    }
+  }
+  grouping RouterPortStatusEntry {
+    leaf Type {
+      mandatory "true";
+      type ProtocolTypeOptions;
+    }
+    leaf Status {
+      mandatory "true";
+      type RouterStatusTypeOptions;
+    }
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+  }
+  grouping DynamicGroups {
+    container List {
+      list List_Entry {
+        uses DynamicGroupEntry;
+      }
+    }
+  }
+  grouping DynamicGroupEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Address {
+      mandatory "true";
+      type string;
+    }
+    leaf TTL {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyList {
+      list IdentifyList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping MLDStatistics {
+    container List {
+      list List_Entry {
+        uses MLDStatisticEntry;
+      }
+    }
+  }
+  grouping MLDStatisticEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxGeneralQueries {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV2Reports {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV1Reports {
+      mandatory "true";
+      type int32;
+    }
+    leaf RxV1Leaves {
+      mandatory "true";
+      type int32;
+    }
+    leaf Querier {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping VlanList {
+    container List {
+      leaf-list List_Entry {
+        type int32;
+      }
+    }
+  }
+  rpc sercom-multicast-Multicast-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetIGMPSnoopingEnabled {
+    input {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetMLDSnoopingEnabled {
+    input {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetIGMPSnoopingConfig {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses Snooping;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetIGMPSnoopingConfig {
+    input {
+      uses Snooping;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetMLDSnoopingConfig {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses Snooping;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetMLDSnoopingConfig {
+    input {
+      uses Snooping;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetStaticGroupConfig {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses Static;
+    }
+  }
+  rpc sercom-multicast-Multicast-UpdateStaticGroupConfig {
+    input {
+      uses Static;
+    }
+  }
+  rpc sercom-multicast-Multicast-AddStaticGroupConfig {
+    input {
+      uses Static;
+    }
+  }
+  rpc sercom-multicast-Multicast-DeleteStaticGroupConfig {
+    input {
+      uses Static;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetUnregisterFloodingConfig {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses UnregisterFlood;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetUnregisterFloodingConfig {
+    input {
+      uses UnregisterFlood;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetRouterPortStatus {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses RouterStatus;
+    }
+  }
+  rpc sercom-multicast-Multicast-SetRouterPortConfig {
+    input {
+      uses RouterPort;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetRouterPortConfig {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses RouterPort;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetIGMPGroups {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses DynamicGroups;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetMLDGroups {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses DynamicGroups;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetIGMPStatistics {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses IGMPStatistics;
+    }
+  }
+  rpc sercom-multicast-Multicast-GetMLDStatistics {
+    input {
+      uses VlanList;
+    }
+    output {
+      uses MLDStatistics;
+    }
+  }
+}

@@ -1,0 +1,245 @@
+module sercom-dhcpserver {
+
+  namespace "sercom:sercom-dhcpserver";
+  prefix "sercom-dhcpserver";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef PoolTypeOptions {
+    type enumeration {
+      enum POOL_TYPE_BASIC {
+        description "";
+        value 0;
+      }
+      enum POOL_TYPE_MAC_BASED {
+        description "";
+        value 1;
+      }
+      enum POOL_TYPE_PORT_BASED {
+        description "";
+        value 2;
+      }
+    }
+  }
+  typedef InterfaceType {
+    type enumeration {
+      enum INTERFACE_TYPE_PORT {
+        description "[Port] Select a port as the interface";
+        value 0;
+      }
+      enum INTERFACE_TYPE_VLAN {
+        description "[VLAN] Select a VLAN as the interface";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    container V4 {
+      uses V4Config;
+    }
+  }
+  grouping V4Config {
+    container Sys {
+      uses System;
+    }
+    container Pool {
+      uses Pool;
+    }
+  }
+  grouping System {
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Pool {
+    container List {
+      list List_Entry {
+        uses PoolEntry;
+      }
+    }
+  }
+  grouping PoolEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    container Interface {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf EntryType {
+      mandatory "true";
+      type PoolTypeOptions;
+    }
+    container Basic {
+      uses Basic;
+    }
+    container MACBased {
+      uses MACBased;
+    }
+    container PortBased {
+      uses PortBased;
+    }
+    leaf ID {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping Basic {
+    leaf RangeLow {
+      mandatory "true";
+      type string;
+    }
+    leaf RangeHigh {
+      mandatory "true";
+      type string;
+    }
+    leaf Netmask {
+      mandatory "true";
+      type string;
+    }
+    leaf Gateway {
+      mandatory "true";
+      type string;
+    }
+    leaf PrimaryDNS {
+      mandatory "true";
+      type string;
+    }
+    leaf SecondaryDNS {
+      mandatory "true";
+      type string;
+    }
+    leaf LeaseTime {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping MACBased {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf DesiredIP {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping PortBased {
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf Ignore {
+      mandatory "true";
+      type boolean;
+    }
+    leaf DesiredIP {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping StatusEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    container Interface {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf PortNo {
+      mandatory "true";
+      type int32;
+    }
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf AvailableLeaseTime {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping Status {
+    container List {
+      list List_Entry {
+        uses StatusEntry;
+      }
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-GetV4Config {
+    output {
+      uses V4Config;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-SetV4System {
+    input {
+      uses System;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-AddV4Basic {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-UpdateV4Basic {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-DeleteV4Basic {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-GetV4Status {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-GetV4MACBased {
+    output {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-AddV4MACBased {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-DeleteV4MACBased {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-UpdateV4MACBased {
+    input {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-GetV4PortBased {
+    output {
+      uses Pool;
+    }
+  }
+  rpc sercom-dhcpserver-DHCPServer-UpdateV4PortBased {
+    input {
+      uses Pool;
+    }
+  }
+}

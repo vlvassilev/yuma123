@@ -1,0 +1,88 @@
+module sercom-loop {
+
+  namespace "sercom:sercom-loop";
+  prefix "sercom-loop";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-timestamp {
+    prefix sercom-timestamp;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping Config {
+    container PortList {
+      list PortList_Entry {
+        uses PortConfigEntry;
+      }
+    }
+  }
+  grouping PortConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping PortConfig {
+    container List {
+      list List_Entry {
+        uses PortConfigEntry;
+      }
+    }
+  }
+  grouping StatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container LastLoopTs {
+      uses sercom-timestamp:Timestamp;
+    }
+    leaf LoopCount {
+      mandatory "true";
+      type int32;
+    }
+    leaf IsLoopCurrent {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Status {
+    container List {
+      list List_Entry {
+        uses StatusEntry;
+      }
+    }
+  }
+  rpc sercom-loop-Loop-GetStatus {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-loop-Loop-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-loop-Loop-GetPortConfig {
+    output {
+      uses PortConfig;
+    }
+  }
+  rpc sercom-loop-Loop-UpdatePortConfig {
+    input {
+      uses PortConfigEntry;
+    }
+  }
+}

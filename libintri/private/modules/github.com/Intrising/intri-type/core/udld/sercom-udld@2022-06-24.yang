@@ -1,0 +1,307 @@
+module sercom-udld {
+
+  namespace "sercom:sercom-udld";
+  prefix "sercom-udld";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_NORMAL {
+        description "[Normal] UDLD detects the unidirectional link, the state will change to `undetermined` and send event.";
+        value 0;
+      }
+      enum MODE_TYPE_AGGRESSIVE {
+        description "[Aggressive] UDLD detects the unidirectional link, and sends the `UDLD probe message` for `N` seconds continually, if has no receives the `UDLD echo message`, the state will change to `err-disable` to drop all packets.";
+        value 1;
+      }
+    }
+  }
+  typedef PortStateTypeOptions {
+    type enumeration {
+      enum PORT_STATE_TYPE_NONE {
+        description "[None] the UDLD is not enabled.";
+        value 0;
+      }
+      enum PORT_STATE_TYPE_DETECTION {
+        description "[Detection] the UDLD is detecting the link.";
+        value 1;
+      }
+      enum PORT_STATE_TYPE_BIDIRECTIONALITY {
+        description "[Bidirectionality] the UDLD detects bidirectional link.";
+        value 2;
+      }
+      enum PORT_STATE_TYPE_UNDETERMINED {
+        description "[Undetermined] the UDLD detects unidirectional link, will send event.";
+        value 3;
+      }
+      enum PORT_STATE_TYPE_ERROR_DISABLED {
+        description "[Error-Disabled] the UDLD detects unidirectional link, will drop all packet.";
+        value 4;
+      }
+    }
+  }
+  typedef PortFaultTypeOptions {
+    type enumeration {
+      enum PORT_FAULT_TYPE_NONE {
+        description "[None] failed get state";
+        value 0;
+      }
+      enum PORT_FAULT_TYPE_TX {
+        description "[Tx] the port is tx only";
+        value 1;
+      }
+      enum PORT_FAULT_TYPE_RX {
+        description "[Rx] the port is rx only";
+        value 2;
+      }
+      enum PORT_FAULT_TYPE_BOTH {
+        description "[Both] the port is tx+rx";
+        value 3;
+      }
+    }
+  }
+  typedef PacketOpcodeTypeOptions {
+    type enumeration {
+      enum PACKET_OPCODE_TYPE_OPTIONS_RESERVED {
+        description "[Reserved] Reserved, the hex is 0x00";
+        value 0;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_PROBE {
+        description "[Probe] Probe message, the hex is 0x01";
+        value 1;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_ECHO {
+        description "[Echo] Echo message, the hex is 0x02";
+        value 2;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_FLUSH {
+        description "[Flush] Flush message, the hex is 0x03";
+        value 3;
+      }
+    }
+  }
+  grouping Config {
+    container BasicConfig {
+      uses BasicConfig;
+    }
+    container PortConfig {
+      uses PortConfig;
+    }
+  }
+  grouping BasicConfig {
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf ModeOption {
+      mandatory "true";
+      type ModeTypeOptions;
+    }
+    leaf MessageIntervalSeconds {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PortConfig {
+    container List {
+      list List_Entry {
+        uses PortConfigEntry;
+      }
+    }
+  }
+  grouping PortConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf ModeOption {
+      mandatory "true";
+      type ModeTypeOptions;
+    }
+  }
+  grouping Status {
+    container PortStatus {
+      uses PortStatus;
+    }
+    container NeighborStatus {
+      uses NeighborStatus;
+    }
+  }
+  grouping PortStatus {
+    container List {
+      list List_Entry {
+        uses PortStatusEntry;
+      }
+    }
+  }
+  grouping PortStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf PortLinkUp {
+      mandatory "true";
+      type boolean;
+    }
+    leaf FaultOption {
+      mandatory "true";
+      type PortFaultTypeOptions;
+    }
+    leaf StateOption {
+      mandatory "true";
+      type PortStateTypeOptions;
+    }
+    leaf ModeOption {
+      mandatory "true";
+      type ModeTypeOptions;
+    }
+  }
+  grouping NeighborStatus {
+    container List {
+      list List_Entry {
+        uses NeighborStatusEntry;
+      }
+    }
+  }
+  grouping NeighborStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf DeviceID {
+      mandatory "true";
+      type string;
+    }
+    leaf PortID {
+      mandatory "true";
+      type string;
+    }
+    leaf MacAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf DeviceName {
+      mandatory "true";
+      type string;
+    }
+    leaf StateOption {
+      mandatory "true";
+      type PortStateTypeOptions;
+    }
+    leaf ExpirationTimeSeconds {
+      mandatory "true";
+      type int32;
+    }
+    leaf MessageTimeSeconds {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping Statistics {
+    container Total {
+      uses PacketStatistics;
+    }
+    container Port {
+      uses PortStatistics;
+    }
+  }
+  grouping PortStatistics {
+    container List {
+      list List_Entry {
+        uses PortStatisticsEntry;
+      }
+    }
+  }
+  grouping PortStatisticsEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container Statistics {
+      uses PacketStatistics;
+    }
+  }
+  grouping PacketStatistics {
+    container List {
+      list List_Entry {
+        uses PacketStatisticsEntry;
+      }
+    }
+  }
+  grouping PacketStatisticsEntry {
+    leaf OpcodeOption {
+      mandatory "true";
+      type PacketOpcodeTypeOptions;
+    }
+    leaf Count {
+      mandatory "true";
+      type uint64;
+    }
+  }
+  rpc sercom-udld-UDLD-GetStatus {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-udld-UDLD-RunRestorePortStatus {
+    input {
+      uses sercom-device:PortList;
+    }
+  }
+  rpc sercom-udld-UDLD-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-udld-UDLD-GetBasicConfig {
+    output {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-udld-UDLD-UpdateBasicConfig {
+    input {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-udld-UDLD-GetPortConfig {
+    output {
+      uses PortConfig;
+    }
+  }
+  rpc sercom-udld-UDLD-UpdatePortConfig {
+    input {
+      uses PortConfig;
+    }
+  }
+  rpc sercom-udld-UDLD-UpdatePortConfigEntry {
+    input {
+      uses PortConfigEntry;
+    }
+  }
+  rpc sercom-udld-UDLD-GetStatistics {
+    output {
+      uses Statistics;
+    }
+  }
+  rpc sercom-udld-UDLD-RunClearStatistics {
+    input {
+      uses sercom-device:PortList;
+    }
+  }
+}

@@ -1,0 +1,274 @@
+module sercom-port {
+
+  namespace "sercom:sercom-port";
+  prefix "sercom-port";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-event {
+    prefix sercom-event;
+  }
+  import sercom-stp {
+    prefix sercom-stp;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef LinkStateTypeOptions {
+    type enumeration {
+      enum LINK_STATE_TYPE_LINK_DOWN {
+        description "[Link Down] Link is not established. No communication. Ethernet LED is off";
+        value 0;
+      }
+      enum LINK_STATE_TYPE_BLOCKING {
+        description "[Blocking] Port is blocked. No communication. Ethernet LED indicates yellow.";
+        value 1;
+      }
+      enum LINK_STATE_TYPE_LEARNING {
+        description "[Learning] Port is learning MAC addresses. No communication. Ethernet LED indicates yellow.";
+        value 2;
+      }
+      enum LINK_STATE_TYPE_FORWARDING {
+        description "[Forwarding] Port is forwarding data. Ethernet LED indicates green.";
+        value 3;
+      }
+      enum LINK_STATE_TYPE_UNAUTH_VLAN {
+        description "[Unauth VLAN] Port is forwarding data on the unauthorized_vlan only. Ethernet LED indicates green.";
+        value 4;
+      }
+    }
+  }
+  grouping ConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Alias {
+      mandatory "true";
+      type string;
+    }
+    leaf PortOperation {
+      mandatory "true";
+      type boolean;
+    }
+    leaf SpeedDuplex {
+      mandatory "true";
+      type sercom-event:PortSpeedDuplexTypeOptions;
+    }
+    leaf FlowControl {
+      mandatory "true";
+      type boolean;
+    }
+    leaf EnergyEfficiency {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping Config {
+    container List {
+      list List_Entry {
+        uses ConfigEntry;
+      }
+    }
+  }
+  grouping AliasEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Alias {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping AliasConfig {
+    container List {
+      list List_Entry {
+        uses AliasEntry;
+      }
+    }
+  }
+  grouping OperationEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf PortOperation {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping OperationConfig {
+    container List {
+      list List_Entry {
+        uses OperationEntry;
+      }
+    }
+  }
+  grouping SpeedDuplexEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf SpeedDuplex {
+      mandatory "true";
+      type sercom-event:PortSpeedDuplexTypeOptions;
+    }
+  }
+  grouping SpeedDuplexConfig {
+    container List {
+      list List_Entry {
+        uses SpeedDuplexEntry;
+      }
+    }
+  }
+  grouping FlowControlEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf FlowControl {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping FlowControlConfig {
+    container List {
+      list List_Entry {
+        uses FlowControlEntry;
+      }
+    }
+  }
+  grouping EnergyEfficiencyEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf EnergyEfficiency {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping EnergyEfficiencyConfig {
+    container List {
+      list List_Entry {
+        uses EnergyEfficiencyEntry;
+      }
+    }
+  }
+  grouping StatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf LinkUp {
+      mandatory "true";
+      type boolean;
+    }
+    leaf LastLinkChange {
+      mandatory "true";
+      type string;
+    }
+    leaf SpeedDuplexUsed {
+      mandatory "true";
+      type sercom-event:PortSpeedDuplexTypeOptions;
+    }
+    leaf FlowControlUsed {
+      mandatory "true";
+      type boolean;
+    }
+    leaf EEEActive {
+      mandatory "true";
+      type boolean;
+    }
+    leaf LinkState {
+      mandatory "true";
+      type sercom-stp:PortStatusStateTypeOptions;
+    }
+  }
+  grouping Status {
+    container List {
+      list List_Entry {
+        uses StatusEntry;
+      }
+    }
+  }
+  grouping LgPortStatusEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf LinkUp {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Existed {
+      mandatory "true";
+      type boolean;
+    }
+    container ActiveNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container Members {
+      list Members_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping LgPortStatus {
+    container List {
+      list List_Entry {
+        uses LgPortStatusEntry;
+      }
+    }
+  }
+  rpc sercom-port-Port-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-port-Port-UpdateAliasConfig {
+    input {
+      uses AliasConfig;
+    }
+  }
+  rpc sercom-port-Port-UpdateOperationConfig {
+    input {
+      uses OperationConfig;
+    }
+  }
+  rpc sercom-port-Port-UpdateSpeedDuplexConfig {
+    input {
+      uses SpeedDuplexConfig;
+    }
+  }
+  rpc sercom-port-Port-UpdateFlowControlConfig {
+    input {
+      uses FlowControlConfig;
+    }
+  }
+  rpc sercom-port-Port-UpdateEnergyEfficiencyConfig {
+    input {
+      uses EnergyEfficiencyConfig;
+    }
+  }
+  rpc sercom-port-Port-GetStatus {
+    output {
+      uses Status;
+    }
+  }
+  rpc sercom-port-Port-RunRestartPorts {
+    input {
+      uses sercom-device:PortList;
+    }
+  }
+  rpc sercom-port-Port-GetLgStatus {
+    output {
+      uses LgPortStatus;
+    }
+  }
+}

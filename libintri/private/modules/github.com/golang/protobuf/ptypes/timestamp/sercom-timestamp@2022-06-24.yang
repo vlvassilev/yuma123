@@ -1,0 +1,23 @@
+module sercom-timestamp {
+
+  namespace "sercom:sercom-timestamp";
+  prefix "sercom-timestamp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  grouping Timestamp {
+    leaf Seconds {
+      mandatory "true";
+      type int64;
+    }
+    leaf Nanos {
+      mandatory "true";
+      type int32;
+    }
+  }
+}

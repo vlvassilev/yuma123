@@ -1,0 +1,713 @@
+module sercom-vlan {
+
+  namespace "sercom:sercom-vlan";
+  prefix "sercom-vlan";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef StatusUsedTypeOptions {
+    type enumeration {
+      enum STATUS_USED_TYPE_CONFIG {
+        description "[Config Usage] the VLAN is using by configuration";
+        value 0;
+      }
+      enum STATUS_USED_TYPE_GVRP {
+        description "[GVRP Usage] the VLAN is using by GVRP";
+        value 1;
+      }
+      enum STATUS_USED_TYPE_VIA_MAC_TABLE {
+        description "[Via MAC Table]";
+        value 2;
+      }
+      enum STATUS_USED_TYPE_MAC_VIA_RADIUS {
+        description "[MAC Via Radius]";
+        value 3;
+      }
+      enum STATUS_USED_TYPE_802_1X_VIA_RADIUS {
+        description "[802.1x Via Radius]";
+        value 4;
+      }
+      enum STATUS_USED_TYPE_UNAUTHORIZED {
+        description "[UnAuthorized]";
+        value 5;
+      }
+    }
+  }
+  typedef PortConfigVLANModeTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_VLAN_MODE_TYPE_ACCESS {
+        description "[Access] the port interface is untagged port";
+        value 0;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_HYBRID {
+        description "[Hybrid] the port interface is tagged/untagged port";
+        value 1;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_TRUNK {
+        description "[Trunk] the port interface is tagged port";
+        value 2;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_QINQ_CUSTOMER {
+        description "[Q-in-Q Customer] the port interface is tagged port, the overlapping VLAN IDs will be allow in Layer 2 Ethernet connection";
+        value 3;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_QINQ_PROVIDER {
+        description "[Q-in-Q Provider] the port interface is tagged port, the overlapping VLAN IDs will be allow in Layer 2 Ethernet connection";
+        value 4;
+      }
+    }
+  }
+  typedef PortConfigQinQEtherTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_8100 {
+        description "[0x8100] Normal VLAN tag usually not used for double tagged application. (801.1q)";
+        value 0;
+      }
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_88A8 {
+        description "[0x88A8] Standard value for 802.1ad";
+        value 1;
+      }
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_9100 {
+        description "[0x9100] Cisco standard value for 802.1ad";
+        value 2;
+      }
+    }
+  }
+  typedef ProtocolBasedEncapsulationTypeOptions {
+    type enumeration {
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_ETHERNET_V2 {
+        description "[Ethernet V2]";
+        value 0;
+      }
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_LLC {
+        description "[LLC]";
+        value 1;
+      }
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_LLCSNAP {
+        description "[LLC SNAP]";
+        value 2;
+      }
+    }
+  }
+  typedef IPVersionTypeOptions {
+    type enumeration {
+      enum IP_VERSION_TYPE_V4 {
+        description "[IPv4]";
+        value 0;
+      }
+      enum IP_VERSION_TYPE_V6 {
+        description "[IPv6]";
+        value 1;
+      }
+    }
+  }
+  typedef AcceptFrameTypeOptions {
+    type enumeration {
+      enum ACCEPT_FRAME_TYPE_ALL {
+        description "[ALL]";
+        value 0;
+      }
+      enum ACCEPT_FRAME_TYPE_UNTAGGED_ONLY {
+        description "[Untagged Only]";
+        value 1;
+      }
+      enum ACCEPT_FRAME_TYPE_TAGGED_ONLY {
+        description "[Tagged Only]";
+        value 2;
+      }
+    }
+  }
+  grouping MACBasedGroupEntry {
+    leaf MACAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf MACAddressMask {
+      mandatory "true";
+      type string;
+    }
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping MACBasedGroupMemberEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyList {
+      list IdentifyList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping MACBasedConfig {
+    container GroupList {
+      list GroupList_Entry {
+        uses MACBasedGroupEntry;
+      }
+    }
+    container GroupMemberList {
+      list GroupMemberList_Entry {
+        uses MACBasedGroupMemberEntry;
+      }
+    }
+  }
+  grouping ProtocolBasedGroupEntry {
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Encapsulation {
+      mandatory "true";
+      type ProtocolBasedEncapsulationTypeOptions;
+    }
+    leaf Protocol {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping ProtocolBasedGroupMemberEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyList {
+      list IdentifyList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping ProtocolBasedConfig {
+    container GroupList {
+      list GroupList_Entry {
+        uses ProtocolBasedGroupEntry;
+      }
+    }
+    container GroupMemberList {
+      list GroupMemberList_Entry {
+        uses ProtocolBasedGroupMemberEntry;
+      }
+    }
+  }
+  grouping SelectiveQinQConfig {
+    container List {
+      list List_Entry {
+        uses SelectiveQinQTranslatedEntry;
+      }
+    }
+  }
+  grouping SelectiveQinQTranslatedEntry {
+    leaf SourceVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf TranslatedVlanID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping SubnetBasedGroupEntry {
+    leaf IPAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf IPAddressMask {
+      mandatory "true";
+      type string;
+    }
+    leaf IPVersion {
+      mandatory "true";
+      type IPVersionTypeOptions;
+    }
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping SubnetBasedGroupMemberEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf GroupID {
+      mandatory "true";
+      type int32;
+    }
+    container IdentifyList {
+      list IdentifyList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping SubnetBasedConfig {
+    container GroupList {
+      list GroupList_Entry {
+        uses SubnetBasedGroupEntry;
+      }
+    }
+    container GroupMemberList {
+      list GroupMemberList_Entry {
+        uses SubnetBasedGroupMemberEntry;
+      }
+    }
+  }
+  grouping MappingPort {
+    container List {
+      list List_Entry {
+        uses MappingPortEntry;
+      }
+    }
+  }
+  grouping MappingPortEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping MappingConfig {
+    container List {
+      list List_Entry {
+        uses MappingEntry;
+      }
+    }
+    container PortList {
+      list PortList_Entry {
+        uses MappingPortEntry;
+      }
+    }
+  }
+  grouping MappingEntry {
+    leaf SourceVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf TranslatedVlanID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping Config {
+    container Management {
+      uses ManagementConfig;
+    }
+    container Voice {
+      uses VoiceConfig;
+    }
+    container Ports {
+      uses PortsConfig;
+    }
+    container Filters {
+      uses FiltersConfig;
+    }
+    container MACBased {
+      uses MACBasedConfig;
+    }
+    container SubnetBased {
+      uses SubnetBasedConfig;
+    }
+    container ProtocolBased {
+      uses ProtocolBasedConfig;
+    }
+    container Translation {
+      uses MappingConfig;
+    }
+    container SelectiveQinQ {
+      uses SelectiveQinQConfig;
+    }
+  }
+  grouping ManagementConfig {
+    leaf ManagementVlanID {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping VoiceConfig {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Prio {
+      mandatory "true";
+      type int32;
+    }
+    leaf SignalPrio {
+      mandatory "true";
+      type int32;
+    }
+    leaf DSCP {
+      mandatory "true";
+      type int32;
+    }
+    leaf SignalDSCP {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PortsConfig {
+    container List {
+      list List_Entry {
+        uses PortEntry;
+      }
+    }
+  }
+  grouping PortEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf Mode {
+      mandatory "true";
+      type PortConfigVLANModeTypeOptions;
+    }
+    leaf DefaultVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf UnauthorizedVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf FallBackVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf QinQEthertype {
+      mandatory "true";
+      type PortConfigQinQEtherTypeOptions;
+    }
+    leaf AcceptableFrametype {
+      mandatory "true";
+      type AcceptFrameTypeOptions;
+    }
+    container TaggedList {
+      leaf-list TaggedList_Entry {
+        type int32;
+      }
+    }
+    container UntaggedList {
+      leaf-list UntaggedList_Entry {
+        type int32;
+      }
+    }
+  }
+  grouping FiltersConfig {
+    container List {
+      list List_Entry {
+        uses FilterEntry;
+      }
+    }
+  }
+  grouping FilterEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Enabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping Used {
+    leaf Used {
+      mandatory "true";
+      type StatusUsedTypeOptions;
+    }
+  }
+  grouping VlanPortVlanEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf Used {
+      mandatory "true";
+      type StatusUsedTypeOptions;
+    }
+  }
+  grouping DefaultPortVlanEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf DefaultVlanID {
+      mandatory "true";
+      type int32;
+    }
+    leaf LastUpdateMethod {
+      mandatory "true";
+      type StatusUsedTypeOptions;
+    }
+  }
+  grouping StatusEntry {
+    leaf VlanID {
+      mandatory "true";
+      type int32;
+    }
+    container TaggedList {
+      list TaggedList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+    container UntaggedList {
+      list UntaggedList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping StatusMapping {
+    container Mapping {
+      list Mapping_Entry {
+        key "Key";
+        unique "Key";
+        leaf Key {
+          mandatory "true";
+          type int32;
+        }
+        container Value {
+          uses StatusEntry;
+        }
+      }
+    }
+  }
+  rpc sercom-vlan-VLAN-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetStatus {
+    input {
+      uses Used;
+    }
+    output {
+      uses StatusMapping;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetManagementConfig {
+    output {
+      uses ManagementConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateManagementConfig {
+    input {
+      uses ManagementConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetVoiceConfig {
+    output {
+      uses VoiceConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateVoiceConfig {
+    input {
+      uses VoiceConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetFiltersConfig {
+    output {
+      uses FiltersConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddFilter {
+    input {
+      uses FilterEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateFilter {
+    input {
+      uses FilterEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteFilter {
+    input {
+      uses FilterEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetPortsConfig {
+    output {
+      uses PortsConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdatePortsConfig {
+    input {
+      uses PortsConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetMappingConfig {
+    output {
+      uses MappingConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddMapping {
+    input {
+      uses MappingEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteMapping {
+    input {
+      uses MappingEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateMappingPortEntry {
+    input {
+      uses MappingPortEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetSelectiveQinQConfig {
+    output {
+      uses SelectiveQinQConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddSelectiveQinQ {
+    input {
+      uses SelectiveQinQTranslatedEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateSelectiveQinQ {
+    input {
+      uses SelectiveQinQTranslatedEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteSelectiveQinQ {
+    input {
+      uses SelectiveQinQTranslatedEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetProtocolBasedConfig {
+    output {
+      uses ProtocolBasedConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddProtocolBasedGroup {
+    input {
+      uses ProtocolBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateProtocolBasedGroup {
+    input {
+      uses ProtocolBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteProtocolBasedGroup {
+    input {
+      uses ProtocolBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddProtocolBasedGroupMember {
+    input {
+      uses ProtocolBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateProtocolBasedGroupMember {
+    input {
+      uses ProtocolBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteProtocolBasedGroupMember {
+    input {
+      uses ProtocolBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetMACBasedConfig {
+    output {
+      uses MACBasedConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddMACBasedGroup {
+    input {
+      uses MACBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateMACBasedGroup {
+    input {
+      uses MACBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteMACBasedGroup {
+    input {
+      uses MACBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddMACBasedGroupMember {
+    input {
+      uses MACBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateMACBasedGroupMember {
+    input {
+      uses MACBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteMACBasedGroupMember {
+    input {
+      uses MACBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetSubnetBasedConfig {
+    output {
+      uses SubnetBasedConfig;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddSubnetBasedGroup {
+    input {
+      uses SubnetBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateSubnetBasedGroup {
+    input {
+      uses SubnetBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteSubnetBasedGroup {
+    input {
+      uses SubnetBasedGroupEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-AddSubnetBasedGroupMember {
+    input {
+      uses SubnetBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-UpdateSubnetBasedGroupMember {
+    input {
+      uses SubnetBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-DeleteSubnetBasedGroupMember {
+    input {
+      uses SubnetBasedGroupMemberEntry;
+    }
+  }
+  rpc sercom-vlan-VLAN-GetManagementVlanPorts {
+    output {
+      uses sercom-device:PortList;
+    }
+  }
+}

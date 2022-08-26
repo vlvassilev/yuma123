@@ -1,0 +1,228 @@
+module sercom-log {
+
+  namespace "sercom:sercom-log";
+  prefix "sercom-log";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-event {
+    prefix sercom-event;
+  }
+  import sercom-timestamp {
+    prefix sercom-timestamp;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef StorageTypeOptions {
+    type enumeration {
+      enum STORAGE_TYPE_FLASH {
+        description "[Flash] Log file is stored in flash";
+        value 0;
+      }
+      enum STORAGE_TYPE_RAM_DISK {
+        description "[Ram Disk] Log file is stored in ram disk";
+        value 1;
+      }
+    }
+  }
+  grouping Config {
+    container BasicConfig {
+      uses BasicConfig;
+    }
+    container TargetConfig {
+      uses TargetConfig;
+    }
+    container ActionConfig {
+      uses ActionConfig;
+    }
+  }
+  grouping BasicConfig {
+    leaf StorageOption {
+      mandatory "true";
+      type StorageTypeOptions;
+    }
+  }
+  grouping TargetConfig {
+    container List {
+      list List_Entry {
+        uses TargetConfigEntry;
+      }
+    }
+  }
+  grouping TargetConfigEntry {
+    leaf Name {
+      mandatory "true";
+      type string;
+    }
+    leaf HostAddress {
+      mandatory "true";
+      type string;
+    }
+    leaf TargetLogType {
+      mandatory "true";
+      type sercom-event:TargetLogTypeOptions;
+    }
+    leaf LoggingSeverityType {
+      mandatory "true";
+      type sercom-event:LoggingSeverityTypeOptions;
+    }
+    leaf LogConfigChanges {
+      mandatory "true";
+      type boolean;
+    }
+    leaf LogDebugEventOnly {
+      mandatory "true";
+      type boolean;
+    }
+    leaf SnmpV3Username {
+      mandatory "true";
+      type string;
+    }
+    leaf SnmpTrapCommunity {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping ActionConfig {
+    container List {
+      list List_Entry {
+        uses ActionConfigEntry;
+      }
+    }
+  }
+  grouping ActionConfigEntry {
+    leaf LoggingType {
+      mandatory "true";
+      type sercom-event:LoggingTypeOptions;
+    }
+    leaf LoggingSeverityType {
+      mandatory "true";
+      type sercom-event:LoggingSeverityTypeOptions;
+    }
+  }
+  grouping Statistics {
+    leaf NumberOfTargets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf SyslogCounter {
+      mandatory "true";
+      type int32;
+    }
+    leaf SnmpTrapCounter {
+      mandatory "true";
+      type int32;
+    }
+    leaf SnmpInfoCounter {
+      mandatory "true";
+      type int32;
+    }
+    leaf DisplayInCliCounter {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping LogFileEntry {
+    leaf LogID {
+      mandatory "true";
+      type uint64;
+    }
+    container Ts {
+      uses sercom-timestamp:Timestamp;
+    }
+    leaf LoggingType {
+      mandatory "true";
+      type sercom-event:LoggingTypeOptions;
+    }
+    leaf LoggingSeverityType {
+      mandatory "true";
+      type sercom-event:LoggingSeverityTypeOptions;
+    }
+    leaf Message {
+      mandatory "true";
+      type string;
+    }
+  }
+  grouping LogFiles {
+    container List {
+      list List_Entry {
+        uses LogFileEntry;
+      }
+    }
+  }
+  rpc sercom-log-Log-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-log-Log-GetBasicConfig {
+    output {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-log-Log-UpdateBasicConfig {
+    input {
+      uses BasicConfig;
+    }
+  }
+  rpc sercom-log-Log-GetTargetConfig {
+    output {
+      uses TargetConfig;
+    }
+  }
+  rpc sercom-log-Log-AddTargetConfigEntry {
+    input {
+      uses TargetConfigEntry;
+    }
+  }
+  rpc sercom-log-Log-UpdateTargetConfigEntry {
+    input {
+      uses TargetConfigEntry;
+    }
+  }
+  rpc sercom-log-Log-DeleteTargetConfigEntry {
+    input {
+      uses TargetConfigEntry;
+    }
+  }
+  rpc sercom-log-Log-GetActionConfig {
+    output {
+      uses ActionConfig;
+    }
+  }
+  rpc sercom-log-Log-UpdateActionConfig {
+    input {
+      uses ActionConfig;
+    }
+  }
+  rpc sercom-log-Log-RunSendTestEvent {
+  }
+  rpc sercom-log-Log-GetStatistics {
+    output {
+      uses Statistics;
+    }
+  }
+  rpc sercom-log-Log-RunCleanStatistics {
+  }
+  rpc sercom-log-Log-GetRecordTargetLogList {
+    output {
+      uses LogFiles;
+    }
+  }
+  rpc sercom-log-Log-RunCleanRecordTargetLogList {
+  }
+  rpc sercom-log-Log-RunSaveLogToYAML {
+    input {
+      uses sercom-common:Path;
+    }
+  }
+}

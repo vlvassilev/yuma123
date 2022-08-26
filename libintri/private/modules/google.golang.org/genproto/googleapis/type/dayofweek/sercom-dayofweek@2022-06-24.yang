@@ -1,0 +1,49 @@
+module sercom-dayofweek {
+
+  namespace "sercom:sercom-dayofweek";
+  prefix "sercom-dayofweek";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  typedef DayOfWeek {
+    type enumeration {
+      enum DAY_OF_WEEK_UNSPECIFIED {
+        description "The day of the week is unspecified.";
+        value 0;
+      }
+      enum MONDAY {
+        description "Monday";
+        value 1;
+      }
+      enum TUESDAY {
+        description "Tuesday";
+        value 2;
+      }
+      enum WEDNESDAY {
+        description "Wednesday";
+        value 3;
+      }
+      enum THURSDAY {
+        description "Thursday";
+        value 4;
+      }
+      enum FRIDAY {
+        description "Friday";
+        value 5;
+      }
+      enum SATURDAY {
+        description "Saturday";
+        value 6;
+      }
+      enum SUNDAY {
+        description "Sunday";
+        value 7;
+      }
+    }
+  }
+}

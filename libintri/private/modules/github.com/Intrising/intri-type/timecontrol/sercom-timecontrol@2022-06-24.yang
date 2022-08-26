@@ -1,0 +1,596 @@
+module sercom-timecontrol {
+
+  namespace "sercom:sercom-timecontrol";
+  prefix "sercom-timecontrol";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-timestamp {
+    prefix sercom-timestamp;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef StatusInputBitTypeOptions {
+    type enumeration {
+      enum STATUS_INPUT_BIT_TYPE_LOS_LIVE {
+        description "[Los Live] Status input bit type los live";
+        value 0;
+      }
+      enum STATUS_INPUT_BIT_TYPE_NO_ACTIVITY_LIVE {
+        description "[No Activity Live] Status input bit type no activity live";
+        value 1;
+      }
+      enum STATUS_INPUT_BIT_TYPE_REQ_OFFS_LIM_LIVE {
+        description "[Req Offs Lim Live] Status input bit type req offs lim live";
+        value 2;
+      }
+      enum STATUS_INPUT_BIT_TYPE_TRANS_DETECT_LIVE {
+        description "[Trans Detect Live] Status input bit type trans detect live";
+        value 3;
+      }
+    }
+  }
+  typedef DPLLManageIndexTypeOptions {
+    type enumeration {
+      enum DPLL_MANAGE_INDEX_0 {
+        description "[Index 0] Manage index 0";
+        value 0;
+      }
+      enum DPLL_MANAGE_INDEX_1 {
+        description "[Index 1] Manage index 1";
+        value 1;
+      }
+      enum DPLL_MANAGE_INDEX_2 {
+        description "[Index 2] Manage index 2";
+        value 2;
+      }
+      enum DPLL_MANAGE_INDEX_3 {
+        description "[Index 3] Manage index 3";
+        value 3;
+      }
+      enum DPLL_MANAGE_INDEX_4 {
+        description "[Index 4] Manage index 4";
+        value 4;
+      }
+      enum DPLL_MANAGE_INDEX_5 {
+        description "[Index 5] Manage index 5";
+        value 5;
+      }
+      enum DPLL_MANAGE_INDEX_6 {
+        description "[Index 6] Manage index 6";
+        value 6;
+      }
+      enum DPLL_MANAGE_INDEX_7 {
+        description "[Index 7] Manage index 7";
+        value 7;
+      }
+    }
+  }
+  typedef DPLLStatusBitTypeOptions {
+    type enumeration {
+      enum DPLL_STATUS_BIT_TYPE_FREERUN {
+        description "[Freerun] Freerun";
+        value 0;
+      }
+      enum DPLL_STATUS_BIT_TYPE_LOCKACQ {
+        description "[Lockacq] Lockacq";
+        value 1;
+      }
+      enum DPLL_STATUS_BIT_TYPE_LOCKREC {
+        description "[Lockrec] Lockrec";
+        value 2;
+      }
+      enum DPLL_STATUS_BIT_TYPE_LOCKED {
+        description "[Locked] Locked";
+        value 3;
+      }
+      enum DPLL_STATUS_BIT_TYPE_HOLDOVER {
+        description "[Holdover] Holdover";
+        value 4;
+      }
+      enum DPLL_STATUS_BIT_TYPE_OPENLOOP {
+        description "[Openloop] Openloop";
+        value 5;
+      }
+      enum DPLL_STATUS_BIT_TYPE_DISABLED {
+        description "[Disabled] Disabled";
+        value 6;
+      }
+    }
+  }
+  typedef DPLLRefPriorityBitTypeOptions {
+    type enumeration {
+      enum DPLL_REF_PRIORITY_BIT_TYPE_0 {
+        description "[Priority 0] Dpll ref priority bit type 0";
+        value 0;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_1 {
+        description "[Priority 1] Dpll ref priority bit type 1";
+        value 1;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_2 {
+        description "[Priority 2] Dpll ref priority bit type 2";
+        value 2;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_3 {
+        description "[Priority 3] Dpll ref priority bit type 3";
+        value 3;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_4 {
+        description "[Priority 4] Dpll ref priority bit type 4";
+        value 4;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_5 {
+        description "[Priority 5] Dpll ref priority bit type 5";
+        value 5;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_6 {
+        description "[Priority 6] Dpll ref priority bit type 6";
+        value 6;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_7 {
+        description "[Priority 7] Dpll ref priority bit type 7";
+        value 7;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_8 {
+        description "[Priority 8] Dpll ref priority bit type 8";
+        value 8;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_9 {
+        description "[Priority 9] Dpll ref priority bit type 9";
+        value 9;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_10 {
+        description "[Priority 10] Dpll ref priority bit type 10";
+        value 10;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_11 {
+        description "[Priority 11] Dpll ref priority bit type 11";
+        value 11;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_12 {
+        description "[Priority 12] Dpll ref priority bit type 12";
+        value 12;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_13 {
+        description "[Priority 13] Dpll ref priority bit type 13";
+        value 13;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_14 {
+        description "[Priority 14] Dpll ref priority bit type 14";
+        value 14;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_15 {
+        description "[Priority 15] Dpll ref priority bit type 15";
+        value 15;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_16 {
+        description "[Priority 16] Dpll ref priority bit type 16";
+        value 16;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_17 {
+        description "[Priority 17] Dpll ref priority bit type 17";
+        value 17;
+      }
+      enum DPLL_REF_PRIORITY_BIT_TYPE_18 {
+        description "[Priority 18] Dpll ref priority bit type 18";
+        value 18;
+      }
+    }
+  }
+  typedef ToDSourceTypeOptions {
+    type enumeration {
+      enum SYSTEM {
+        description "[SYSTEM] Source system";
+        value 0;
+      }
+      enum TIME_CONTROL {
+        description "[TIME_CONTROL] Source time_control";
+        value 1;
+      }
+      enum RTC {
+        description "[RTC] Source rtc";
+        value 2;
+      }
+      enum GPS {
+        description "[GPS] Source gps";
+        value 3;
+      }
+    }
+  }
+  typedef DPLLToDTypeOptions {
+    type enumeration {
+      enum DPLL_MANAGE_TOD_0 {
+        description "[ToD 0] ToD 0";
+        value 0;
+      }
+      enum DPLL_MANAGE_TOD_1 {
+        description "[ToD 1] ToD 1";
+        value 1;
+      }
+      enum DPLL_MANAGE_TOD_2 {
+        description "[ToD 2] ToD 2";
+        value 2;
+      }
+      enum DPLL_MANAGE_TOD_3 {
+        description "[ToD 3] ToD 3";
+        value 3;
+      }
+    }
+  }
+  grouping InputClockManage {
+    container List {
+      list List_Entry {
+        uses InputClockManageEntry;
+      }
+    }
+  }
+  grouping InputClockManageEntry {
+    leaf InputCLK {
+      mandatory "true";
+      type sercom-device:InputClockTypeOptions;
+    }
+  }
+  grouping MonitorStatus {
+    container List {
+      list List_Entry {
+        uses MonitorStatusEntry;
+      }
+    }
+  }
+  grouping MonitorStatusEntry {
+    leaf InputCLK {
+      mandatory "true";
+      type sercom-device:InputClockTypeOptions;
+    }
+    container StatusList {
+      list StatusList_Entry {
+        uses StatusInputBit;
+      }
+    }
+    leaf Valid {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping StatusInputBit {
+    leaf Type {
+      mandatory "true";
+      type StatusInputBitTypeOptions;
+    }
+    leaf Valid {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  grouping DPLLManage {
+    container List {
+      list List_Entry {
+        uses DPLLManageEntry;
+      }
+    }
+  }
+  grouping DPLLManageEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+  }
+  grouping DPLLStatus {
+    container List {
+      list List_Entry {
+        uses DPLLStatusEntry;
+      }
+    }
+  }
+  grouping DPLLStatusEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    leaf StatusType {
+      mandatory "true";
+      type DPLLStatusBitTypeOptions;
+    }
+    leaf InputCLK {
+      mandatory "true";
+      type sercom-device:InputClockTypeOptions;
+    }
+  }
+  grouping DPLLRefPriorityManage {
+    container List {
+      list List_Entry {
+        uses DPLLRefPriorityManageEntry;
+      }
+    }
+  }
+  grouping DPLLRefPriorityManageEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    container PriorityList {
+      leaf-list PriorityList_Entry {
+        type DPLLRefPriorityBitTypeOptions;
+      }
+    }
+  }
+  grouping DPLLRefPriority {
+    container List {
+      list List_Entry {
+        uses DPLLRefPriorityEntry;
+      }
+    }
+  }
+  grouping DPLLRefPriorityEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    container PrioritList {
+      list PrioritList_Entry {
+        uses PriorityList;
+      }
+    }
+  }
+  grouping PriorityList {
+    leaf Priority {
+      mandatory "true";
+      type DPLLRefPriorityBitTypeOptions;
+    }
+    leaf InputCLK {
+      mandatory "true";
+      type sercom-device:InputClockTypeOptions;
+    }
+  }
+  grouping SyncEInputClockSpeed {
+    container List {
+      list List_Entry {
+        uses SyncEInputClockSpeedEntry;
+      }
+    }
+  }
+  grouping SyncEInputClockSpeedEntry {
+    leaf InputCLK {
+      mandatory "true";
+      type sercom-device:InputClockTypeOptions;
+    }
+    leaf Speed {
+      mandatory "true";
+      type sercom-device:PortPropertyTypeOptions;
+    }
+  }
+  grouping ToDSource {
+    leaf Enable {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Source {
+      mandatory "true";
+      type ToDSourceTypeOptions;
+    }
+  }
+  grouping DPLLToDManage {
+    container List {
+      list List_Entry {
+        uses DPLLToDManageEntry;
+      }
+    }
+  }
+  grouping DPLLToDManageEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLToDTypeOptions;
+    }
+  }
+  grouping ToDTime {
+    container List {
+      list List_Entry {
+        uses ToDTimeEntry;
+      }
+    }
+  }
+  grouping ToDTimeEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLToDTypeOptions;
+    }
+    container DateTime {
+      uses sercom-timestamp:Timestamp;
+    }
+  }
+  grouping DPLLFrequencyControl {
+    container List {
+      list List_Entry {
+        uses DPLLFrequencyControlEntry;
+      }
+    }
+  }
+  grouping DPLLFrequencyControlEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    leaf FreqOffset {
+      mandatory "true";
+      type int64;
+    }
+  }
+  grouping DPLLPhaseControl {
+    container List {
+      list List_Entry {
+        uses DPLLPhaseControlEntry;
+      }
+    }
+  }
+  grouping DPLLPhaseControlEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    leaf PhOffset {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping DPLLPhaseSlopeLimit {
+    container List {
+      list List_Entry {
+        uses DPLLPhaseSlopeLimitEntry;
+      }
+    }
+  }
+  grouping DPLLPhaseSlopeLimitEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    leaf Limit {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping DPLLPhaseControlTimer {
+    container List {
+      list List_Entry {
+        uses DPLLPhaseControlTimerEntry;
+      }
+    }
+  }
+  grouping DPLLPhaseControlTimerEntry {
+    leaf Index {
+      mandatory "true";
+      type DPLLManageIndexTypeOptions;
+    }
+    leaf Timeout {
+      mandatory "true";
+      type int32;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetInputMonitorStatus {
+    input {
+      uses InputClockManage;
+    }
+    output {
+      uses MonitorStatus;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetDPLLStatus {
+    input {
+      uses DPLLManage;
+    }
+    output {
+      uses DPLLStatus;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetDPLLRefPriority {
+    input {
+      uses DPLLRefPriority;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetDPLLRefPriority {
+    input {
+      uses DPLLRefPriorityManage;
+    }
+    output {
+      uses DPLLRefPriority;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetInputClockFreq {
+    input {
+      uses SyncEInputClockSpeed;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetInputClockFreq {
+    input {
+      uses InputClockManage;
+    }
+    output {
+      uses SyncEInputClockSpeed;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetToDSource {
+    input {
+      uses ToDSource;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetToDSource {
+    output {
+      uses ToDSource;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetToD {
+    input {
+      uses ToDTime;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetToD {
+    input {
+      uses DPLLToDManage;
+    }
+    output {
+      uses ToDTime;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetFrequencyControl {
+    input {
+      uses DPLLFrequencyControl;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetFrequencyControl {
+    input {
+      uses DPLLManage;
+    }
+    output {
+      uses DPLLFrequencyControl;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetPhaseControl {
+    input {
+      uses DPLLPhaseControl;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetPhaseControl {
+    input {
+      uses DPLLManage;
+    }
+    output {
+      uses DPLLPhaseControl;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetPhaseSlopeLimit {
+    input {
+      uses DPLLPhaseSlopeLimit;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetPhaseSlopeLimit {
+    input {
+      uses DPLLManage;
+    }
+    output {
+      uses DPLLPhaseSlopeLimit;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-SetPhaseControlTimer {
+    input {
+      uses DPLLPhaseControlTimer;
+    }
+  }
+  rpc sercom-timecontrol-TimeControl-GetPhaseControlTimer {
+    input {
+      uses DPLLManage;
+    }
+    output {
+      uses DPLLPhaseControlTimer;
+    }
+  }
+}

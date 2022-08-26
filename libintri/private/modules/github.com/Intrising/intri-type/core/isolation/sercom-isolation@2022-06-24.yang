@@ -1,0 +1,46 @@
+module sercom-isolation {
+
+  namespace "sercom:sercom-isolation";
+  prefix "sercom-isolation";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping ConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container AllowOutgoingList {
+      list AllowOutgoingList_Entry {
+        uses sercom-device:InterfaceIdentify;
+      }
+    }
+  }
+  grouping Config {
+    container List {
+      list List_Entry {
+        uses ConfigEntry;
+      }
+    }
+  }
+  rpc sercom-isolation-Isolation-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-isolation-Isolation-SetAllowOutgoingConfig {
+    input {
+      uses ConfigEntry;
+    }
+  }
+}

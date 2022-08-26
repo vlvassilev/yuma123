@@ -1,0 +1,39 @@
+module sercom-cli {
+
+  namespace "sercom:sercom-cli";
+  prefix "sercom-cli";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  grouping ScriptAction {
+    leaf Token {
+      mandatory "true";
+      type string;
+    }
+    leaf FileURL {
+      mandatory "true";
+      type string;
+    }
+    leaf IsFTPS {
+      mandatory "true";
+      type boolean;
+    }
+    leaf ForceTFTP {
+      mandatory "true";
+      type boolean;
+    }
+  }
+  rpc sercom-cli-CLI-RunScript {
+    input {
+      uses ScriptAction;
+    }
+  }
+}

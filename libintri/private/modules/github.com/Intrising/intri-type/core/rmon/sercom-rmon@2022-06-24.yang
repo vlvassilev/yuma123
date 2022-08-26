@@ -1,0 +1,277 @@
+module sercom-rmon {
+
+  namespace "sercom:sercom-rmon";
+  prefix "sercom-rmon";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  typedef UtilizationIntervalTypeOptions {
+    type enumeration {
+      enum UTILIZATION_INTERVAL_TYPE_NOW {
+        description "[Now]";
+        value 0;
+      }
+      enum UTILIZATION_INTERVAL_TYPE_30_SECONDS {
+        description "[30s]";
+        value 1;
+      }
+      enum UTILIZATION_INTERVAL_TYPE_5_MINUTES {
+        description "[5min]";
+        value 2;
+      }
+    }
+  }
+  grouping IngressEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf InGoodOctets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InBadOctets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InTotalPackets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InUnicasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InNonUnicasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InBroadcasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InMulticasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InPause {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InTotalReceiveErrors {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InUndersize {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InOversize {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InFragments {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InJabber {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InFcsErrors {
+      mandatory "true";
+      type uint64;
+    }
+    leaf InDiscarded {
+      mandatory "true";
+      type uint64;
+    }
+  }
+  grouping Ingress {
+    container List {
+      list List_Entry {
+        uses IngressEntry;
+      }
+    }
+  }
+  grouping EgressEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf OutGoodOctets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutUnicasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutNonUnicasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutBroadcasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutMulticasts {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutPause {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutDeferred {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutTotalCollisions {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutTotalPackets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutExcessiveCollisions {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutLateCollisions {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutFcsErrors {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutDroppedPackets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf OutMultipleCollisions {
+      mandatory "true";
+      type uint64;
+    }
+  }
+  grouping Egress {
+    container List {
+      list List_Entry {
+        uses EgressEntry;
+      }
+    }
+  }
+  grouping HistogramEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf In_64Octets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf In_65To_127Octets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf In_128To_255Octets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf In_256To_511Octets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf In_512To_1023Octets {
+      mandatory "true";
+      type uint64;
+    }
+    leaf In_1024ToMaxOctets {
+      mandatory "true";
+      type uint64;
+    }
+  }
+  grouping Histogram {
+    container List {
+      list List_Entry {
+        uses HistogramEntry;
+      }
+    }
+  }
+  grouping UtilizationRate {
+    leaf Type {
+      mandatory "true";
+      type UtilizationIntervalTypeOptions;
+    }
+    leaf Rate {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping UtilizationEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    container Ingress {
+      list Ingress_Entry {
+        uses UtilizationRate;
+      }
+    }
+    container Egress {
+      list Egress_Entry {
+        uses UtilizationRate;
+      }
+    }
+  }
+  grouping Utilization {
+    container List {
+      list List_Entry {
+        uses UtilizationEntry;
+      }
+    }
+  }
+  rpc sercom-rmon-RMON-RunClearAllCounter {
+  }
+  rpc sercom-rmon-RMON-GetIngress {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses Ingress;
+    }
+  }
+  rpc sercom-rmon-RMON-GetEgress {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses Egress;
+    }
+  }
+  rpc sercom-rmon-RMON-GetHistogram {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses Histogram;
+    }
+  }
+  rpc sercom-rmon-RMON-GetUtilization {
+    input {
+      uses sercom-device:PortList;
+    }
+    output {
+      uses Utilization;
+    }
+  }
+}

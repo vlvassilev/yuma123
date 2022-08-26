@@ -1,0 +1,113 @@
+module sercom-gvrp {
+
+  namespace "sercom:sercom-gvrp";
+  prefix "sercom-gvrp";
+  organization "
+    Sercomm Inc.";
+  contact "
+    sercomm@sercomm.com.tw";
+  revision 2022-06-24 {
+    description "Build date.";
+  }
+
+  import sercom-device {
+    prefix sercom-device;
+  }
+  import sercom-empty {
+    prefix sercom-empty;
+  }
+  import sercom-common {
+    prefix sercom-common;
+  }
+  typedef PortModeTypeOptions {
+    type enumeration {
+      enum PORT_MODE_NORMAL {
+        description "[Normal] this mode can register/deregister static/dynamic VLAN dynamically";
+        value 0;
+      }
+      enum PORT_MODE_FIXED {
+        description "[Fixed] this mode cannot register/deregister VLAN dynamically, only share static VLAN information";
+        value 1;
+      }
+      enum PORT_MODE_FORBIDDEN {
+        description "[Forbidden] this mode cannot register/deregister VLAN dynamically, onle share default VLAN information";
+        value 2;
+      }
+    }
+  }
+  grouping PortConfigEntry {
+    container IdentifyNo {
+      uses sercom-device:InterfaceIdentify;
+    }
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    leaf Mode {
+      mandatory "true";
+      type PortModeTypeOptions;
+    }
+    leaf LeaveAllTimerInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf JoinTimerInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf HoldTimerInterval {
+      mandatory "true";
+      type int32;
+    }
+    leaf LeaveTimerInterval {
+      mandatory "true";
+      type int32;
+    }
+  }
+  grouping PortsConfig {
+    container List {
+      list List_Entry {
+        uses PortConfigEntry;
+      }
+    }
+  }
+  grouping Config {
+    leaf IsEnabled {
+      mandatory "true";
+      type boolean;
+    }
+    container PortsConfig {
+      uses PortsConfig;
+    }
+  }
+  rpc sercom-gvrp-GVRP-GetConfig {
+    output {
+      uses Config;
+    }
+  }
+  rpc sercom-gvrp-GVRP-SetGVRPEnabled {
+    input {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-gvrp-GVRP-GetGVRPEnabled {
+    output {
+      uses sercom-common:Enabled;
+    }
+  }
+  rpc sercom-gvrp-GVRP-GetPortsConfig {
+    output {
+      uses PortsConfig;
+    }
+  }
+  rpc sercom-gvrp-GVRP-UpdatePortsConfig {
+    input {
+      uses PortsConfig;
+    }
+  }
+  rpc sercom-gvrp-GVRP-UpdatePortConfigEntry {
+    input {
+      uses PortConfigEntry;
+    }
+  }
+}

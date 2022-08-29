@@ -30,10 +30,10 @@
 #include "sercom-log@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-#include "../../../../../realize/github.com/Intrising/intri-type/common/intri-common@2022-06-24.h"
-#include "../../../../../realize/github.com/Intrising/intri-type/event/intri-event@2022-06-24.h"
-#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
-#include "../../../../../realize/github.com/golang/protobuf/ptypes/timestamp/intri-timestamp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/common/sercom-common@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/event/sercom-event@2022-06-24.h"
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/sercom-empty@2022-06-24.h"
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/timestamp/sercom-timestamp@2022-06-24.h"
 
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/event/intri-event-trans.h"

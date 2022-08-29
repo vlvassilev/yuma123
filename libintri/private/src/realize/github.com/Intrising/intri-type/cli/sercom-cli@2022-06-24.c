@@ -30,8 +30,8 @@
 #include "sercom-cli@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-#include "../../../../../realize/github.com/Intrising/intri-type/core/userinterface/intri-userinterface@2022-06-24.h"
-#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/userinterface/sercom-userinterface@2022-06-24.h"
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/sercom-empty@2022-06-24.h"
 
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/cli/intri-cli-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/core/userinterface/intri-userinterface-trans.h"

@@ -30,11 +30,11 @@
 #include "sercom-timerange@2022-06-24.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-#include "../../../../../../realize/github.com/Intrising/intri-type/common/intri-common@2022-06-24.h"
-#include "../../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
-#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/date/intri-date@2022-06-24.h"
-#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/dayofweek/intri-dayofweek@2022-06-24.h"
-#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/timeofday/intri-timeofday@2022-06-24.h"
+#include "../../../../../../realize/github.com/Intrising/intri-type/common/sercom-common@2022-06-24.h"
+#include "../../../../../../realize/github.com/golang/protobuf/ptypes/empty/sercom-empty@2022-06-24.h"
+#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/date/sercom-date@2022-06-24.h"
+#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/dayofweek/sercom-dayofweek@2022-06-24.h"
+#include "../../../../../../realize/google.golang.org/genproto/googleapis/type/timeofday/sercom-timeofday@2022-06-24.h"
 
 #include "../../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../../genc-trans/github.com/Intrising/intri-type/core/timerange/intri-timerange-trans.h"

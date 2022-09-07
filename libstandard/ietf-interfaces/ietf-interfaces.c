@@ -114,24 +114,48 @@ update_port_operation(
 {
     status_t res = NO_ERR;
 
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
-    struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
-    port_Port_GetConfig(in, port_cfg);
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*epty));
 
-    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
     struct portpb_OperationConfig *operation_cfg = malloc(sizeof(*(operation_cfg)));
     struct portpb_OperationEntry *operation_entry = malloc(sizeof(*(operation_entry)));
+
+    errstr->n = 0;
+    port_Port_GetConfig(epty, port_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(update_port_operation - port_Port_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(operation_cfg);
+        free(operation_entry);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
     operation_entry->PortOperation = VAL_BOOL(operationval);
     operation_entry->IdentifyNo = port_cfg->List[entry_index]->IdentifyNo;
     operation_cfg->List = malloc(sizeof(*(operation_cfg->List)));
     operation_cfg->List_Len = 1;
     operation_cfg->List[0] = operation_entry;
-    port_Port_UpdateOperationConfig(operation_cfg, in2);
+    errstr->n = 0;
+    port_Port_UpdateOperationConfig(operation_cfg, epty, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(update_port_operation - port_Port_UpdateOperationConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(operation_cfg);
+        free(operation_entry);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
     log_debug("\n========================");
     log_debug("\nport_Port_UpdateOperationConfig Applied!!");
     log_debug("\n========================");
-    free(in);
-    free(in2);
+    free(errstr);
+    free(epty);
     free(port_cfg);
     free(operation_cfg);
     free(operation_entry);
@@ -144,25 +168,52 @@ update_port_description(
     val_value_t *descriptionval)
 {
     status_t res = NO_ERR;
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
-    struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
-    port_Port_GetConfig(in, port_cfg);
 
-    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*epty));
+
+    struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
     struct portpb_AliasConfig *alias_cfg = malloc(sizeof(*(alias_cfg)));
     struct portpb_AliasEntry *alias_entry = malloc(sizeof(*(alias_entry)));
+
+    errstr->n = 0;
+    port_Port_GetConfig(epty, port_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(update_port_description - port_Port_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(alias_cfg);
+        free(alias_entry);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
     alias_entry->Alias = VAL_STRING(descriptionval);
     alias_entry->IdentifyNo = port_cfg->List[entry_index]->IdentifyNo;
     alias_cfg->List = malloc(sizeof(*(alias_cfg->List)));
     alias_cfg->List_Len = 1;
     alias_cfg->List[0] = alias_entry;
-    port_Port_UpdateAliasConfig(alias_cfg, in2);
+
+    errstr->n = 0;
+    port_Port_UpdateAliasConfig(alias_cfg, epty, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(update_port_description - port_Port_UpdateAliasConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(alias_cfg);
+        free(alias_entry);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
     log_debug("\n========================");
     log_debug("\nport_Port_UpdateAliasConfig Applied!!");
     log_debug("\n========================");
 
-    free(in);
-    free(in2);
+    free(errstr);
+    free(epty);
     free(port_cfg);
     free(alias_cfg);
     free(alias_entry);
@@ -172,9 +223,21 @@ update_port_description(
 int find_port_index_by_name(
     val_value_t *if_name_val)
 {
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*epty));
+
     struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
-    port_Port_GetConfig(in, port_cfg);
+
+    errstr->n = 0;
+    port_Port_GetConfig(epty, port_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(find_port_index_by_name - port_Port_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
 
     int target_idx = -1;
     log_debug("\nwalter: if_name_val is %s", VAL_STRING(if_name_val));
@@ -189,7 +252,8 @@ int find_port_index_by_name(
             break;
         }
     }
-    free(in);
+    free(errstr);
+    free(epty);
     free(port_cfg);
     return target_idx;
 }
@@ -314,15 +378,37 @@ ietf_interfaces_interface_edit_handler(
 
 void update_network(int which, char *target, int32 int_target, boolean bool_target)
 {
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
-    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*epty));
+
     struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
-    network_Network_GetConfig(in, network_cfg);
+
+    errstr->n = 0;
+    network_Network_GetConfig(epty, network_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(update_network - network_Network_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
     switch (which)
     {
     case update_ipv4_field_indicator_mtu:
         network_cfg->Basic->LocalMTU = int_target;
-        network_Network_SetBasicConfig(network_cfg->Basic, in2);
+
+        errstr->n = 0;
+        network_Network_SetBasicConfig(network_cfg->Basic, epty, errstr);
+        if (errstr->n > 0)
+        {
+            log_debug("(update_network - network_Network_SetBasicConfig) err: %s\n", errstr->p);
+            free(errstr);
+            free(epty);
+            free(network_cfg);
+            return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        }
+
         log_debug("\n========================");
         log_debug("\network_Network_SetBasicConfig Applied!!");
         log_debug("\n========================");
@@ -338,7 +424,18 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
             network_cfg->IP->V4->Static->SubnetMask = target;
             break;
         }
-        network_Network_SetIPv4Config(network_cfg->IP->V4, in2);
+
+        errstr->n = 0;
+        network_Network_SetIPv4Config(network_cfg->IP->V4, epty, errstr);
+        if (errstr->n > 0)
+        {
+            log_debug("(update_network - network_Network_SetIPv4Config) err: %s\n", errstr->p);
+            free(errstr);
+            free(epty);
+            free(network_cfg);
+            return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        }
+
         log_debug("\n========================");
         log_debug("\network_Network_SetIPv4Config Applied!!");
         log_debug("\n========================");
@@ -350,7 +447,18 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
         {
         case update_ipv6_field_indicator_enabled:
             network_cfg->IP->V6->Enabled = bool_target;
-            network_Network_SetIPv6Config(network_cfg->IP->V6, in2);
+
+            errstr->n = 0;
+            network_Network_SetIPv6Config(network_cfg->IP->V6, epty, errstr);
+            if (errstr->n > 0)
+            {
+                log_debug("(update_network - network_Network_SetIPv6Config) err: %s\n", errstr->p);
+                free(errstr);
+                free(epty);
+                free(network_cfg);
+                return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+            }
+
             log_debug("\n========================");
             log_debug("\network_Network_SetIPv6Config Applied!!");
             log_debug("\n========================");
@@ -391,7 +499,18 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
             strcat(result, prefix_len);
 
             network_cfg->IP->V6->Static->IPAddress = result;
-            network_Network_SetIPv6Config(network_cfg->IP->V6, in2);
+
+            errstr->n = 0;
+            network_Network_SetIPv6Config(network_cfg->IP->V6, epty, errstr);
+            if (errstr->n > 0)
+            {
+                log_debug("(update_network - network_Network_SetIPv6Config) err: %s\n", errstr->p);
+                free(errstr);
+                free(epty);
+                free(network_cfg);
+                return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+            }
+
             log_debug("\n========================");
             log_debug("\network_Network_SetIPv6Config Applied!!");
             log_debug("\n========================");
@@ -400,8 +519,8 @@ void update_network(int which, char *target, int32 int_target, boolean bool_targ
         break;
     }
 
-    free(in);
-    free(in2);
+    free(errstr);
+    free(epty);
     free(network_cfg);
 }
 
@@ -2142,23 +2261,71 @@ ietf_interfaces_list_get(
         log_debug("\nEnter intri_device_intri_device_port_list_get");
     }
 
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
-    struct portpb_Config *out = malloc(sizeof(*(out)));
-    port_Port_GetConfig(in, out);
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
 
-    struct emptypb_Empty *in6 = malloc(sizeof(*(in6)));
+    struct portpb_Config *port_cfg = malloc(sizeof(*(port_cfg)));
     struct networkpb_IPv4Status *network_v4_status = malloc(sizeof(*(network_v4_status)));
-    network_Network_GetV4Status(in6, network_v4_status);
-
-    struct emptypb_Empty *in7 = malloc(sizeof(*(in7)));
     struct networkpb_IPv6Status *network_v6_status = malloc(sizeof(*(network_v6_status)));
-    network_Network_GetV6Status(in7, network_v6_status);
-
-    struct emptypb_Empty *in8 = malloc(sizeof(*(in8)));
     struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
-    network_Network_GetConfig(in8, network_cfg);
 
-    for (int i = 0; i < out->List_Len; i++)
+    errstr->n = 0;
+    port_Port_GetConfig(epty, port_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_list_get - port_Port_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
+    errstr->n = 0;
+    network_Network_GetV4Status(epty, network_v4_status, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_list_get - network_Network_GetV4Status) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
+    errstr->n = 0;
+    network_Network_GetV6Status(epty, network_v6_status, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_list_get - network_Network_GetV6Status) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
+    errstr->n = 0;
+    network_Network_GetConfig(epty, network_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_list_get - network_Network_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+
+    for (int i = 0; i < port_cfg->List_Len; i++)
     {
         val_value_t *entry_val = NULL;
         entry_val = agt_make_list(
@@ -2175,7 +2342,7 @@ ietf_interfaces_list_get(
         }
         res = add_interface_entry(
             entry_val,
-            out->List[i],
+            port_cfg->List[i],
             network_cfg,
             network_v4_status,
             network_v6_status);
@@ -2185,11 +2352,9 @@ ietf_interfaces_list_get(
             return SET_ERROR(res);
         }
     }
-    free(in);
-    free(in6);
-    free(in7);
-    free(in8);
-    free(out);
+    free(errstr);
+    free(epty);
+    free(port_cfg);
     free(network_v4_status);
     free(network_v6_status);
     free(network_cfg);
@@ -2210,62 +2375,187 @@ ietf_interfaces_state_list_get(
         log_debug("\nEnter ietf_interfaces_state_list_get");
     }
 
-    struct emptypb_Empty *in = malloc(sizeof(*(in)));
-    struct portpb_Config *out = malloc(sizeof(*(out)));
-    port_Port_GetConfig(in, out);
+    GoString *errstr = malloc(sizeof(*errstr));
+    struct emptypb_Empty *epty = malloc(sizeof(*epty));
 
-    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
-    struct portpb_Status *status_out = malloc(sizeof(*(status_out)));
-    port_Port_GetStatus(in2, status_out);
+    struct portpb_Config *port_cfg = malloc(sizeof(*port_cfg));
+    struct portpb_Status *port_sts = malloc(sizeof(*port_sts));
+    struct devicepb_Info *device_info = malloc(sizeof(*device_info));
+    struct devicepb_PortList *device_phy_port_list = malloc(sizeof(*device_phy_port_list));
+    struct rmonpb_Ingress *ingress_out = malloc(sizeof(*ingress_out));
+    struct rmonpb_Egress *egress_out = malloc(sizeof(*egress_out));
+    struct networkpb_IPv4Status *network_v4_status = malloc(sizeof(*network_v4_status));
+    struct networkpb_IPv6Status *network_v6_status = malloc(sizeof(*network_v6_status));
+    struct networkpb_Config *network_cfg = malloc(sizeof(*network_cfg));
 
-    struct emptypb_Empty *in3 = malloc(sizeof(*(in3)));
-    struct devicepb_Info *device_out = malloc(sizeof(*(device_out)));
-    device_Device_GetDeviceInfo(in3, device_out);
-
-    struct devicepb_PortList *in4 = malloc(sizeof(*(in4)));
-    struct rmonpb_Ingress *ingress_out = malloc(sizeof(*(ingress_out)));
-    struct devicepb_PortList *in5 = malloc(sizeof(*(in5)));
-    struct rmonpb_Egress *egress_out = malloc(sizeof(*(egress_out)));
-
-    struct emptypb_Empty *in6 = malloc(sizeof(*(in6)));
-    struct networkpb_IPv4Status *network_v4_status = malloc(sizeof(*(network_v4_status)));
-    network_Network_GetV4Status(in6, network_v4_status);
-
-    struct emptypb_Empty *in7 = malloc(sizeof(*(in7)));
-    struct networkpb_IPv6Status *network_v6_status = malloc(sizeof(*(network_v6_status)));
-    network_Network_GetV6Status(in7, network_v6_status);
-
-    struct emptypb_Empty *in8 = malloc(sizeof(*(in8)));
-    struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
-    network_Network_GetConfig(in8, network_cfg);
-
-    in4->List_Len = 30;
-    in5->List_Len = 30;
-    in4->List = malloc(in4->List_Len * sizeof(*(in4->List)));
-    in5->List = malloc(in5->List_Len * sizeof(*(in5->List)));
+    errstr->n = 0;
+    port_Port_GetConfig(epty, port_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - port_Port_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    port_Port_GetStatus(epty, port_sts, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - port_Port_GetStatus) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    device_Device_GetDeviceInfo(epty, device_info, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - device_Device_GetDeviceInfo) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    network_Network_GetV4Status(epty, network_v4_status, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - network_Network_GetV4Status) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    network_Network_GetV6Status(epty, network_v6_status, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - network_Network_GetV6Status) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    network_Network_GetConfig(epty, network_cfg, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - network_Network_GetConfig) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    device_Device_GetPortLists(epty, device_phy_port_list, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - device_Device_GetPortLists) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    rmon_RMON_GetIngress(device_phy_port_list, ingress_out, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - rmon_RMON_GetIngress) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
+    errstr->n = 0;
+    rmon_RMON_GetEgress(device_phy_port_list, egress_out, errstr);
+    if (errstr->n > 0)
+    {
+        log_debug("(ietf_interfaces_state_list_get - rmon_RMON_GetEgress) err: %s\n", errstr->p);
+        free(errstr);
+        free(epty);
+        free(port_cfg);
+        free(port_sts);
+        free(device_info);
+        free(device_phy_port_list);
+        free(ingress_out);
+        free(egress_out);
+        free(network_v4_status);
+        free(network_v6_status);
+        free(network_cfg);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+    }
 
     log_debug("\nEnter ietf_interfaces_state_list_get4\n");
-
-    for (int i = 0; i <= 29; i++)
-    {
-        in4->List[i] = malloc(sizeof(*(in4->List[i])));
-        in4->List[i]->PortNo = i + 1;
-        in4->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
-        in4->List[i]->DeviceID = 0;
-
-        in5->List[i] = malloc(sizeof(*(in5->List[i])));
-        ;
-        in5->List[i]->PortNo = i + 1;
-        in5->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
-        in5->List[i]->DeviceID = 0;
-    }
     log_debug("\nEnter ietf_interfaces_state_list_get5\n");
-
-    rmon_RMON_GetIngress(in4, ingress_out);
-    rmon_RMON_GetEgress(in5, egress_out);
     log_debug("\nEnter ietf_interfaces_state_list_get6\n");
 
-    for (int i = 0; i < out->List_Len; i++)
+    for (int i = 0; i < port_cfg->List_Len; i++)
     {
         val_value_t *entry_val = NULL;
         log_debug("\nEnter ietf_interfaces_state_list_get6.1, index is %d", i);
@@ -2282,12 +2572,12 @@ ietf_interfaces_state_list_get(
             return SET_ERROR(res);
         }
         log_debug("\nEnter ietf_interfaces_state_list_get6.5, entry_val is %s", entry_val->name);
-        log_debug("\nEnter ietf_interfaces_state_list_get6.5, out->List[i] is %d", out->List[i]->IdentifyNo->PortNo);
+        log_debug("\nEnter ietf_interfaces_state_list_get6.5, out->List[i] is %d", port_cfg->List[i]->IdentifyNo->PortNo);
         res = add_interface_state_entry(
             entry_val,
-            out->List[i],
-            status_out->List[i],
-            device_out,
+            port_cfg->List[i],
+            port_sts->List[i],
+            device_info,
             ingress_out->List[i],
             egress_out->List[i],
             network_cfg,
@@ -2301,23 +2591,17 @@ ietf_interfaces_state_list_get(
     }
     log_debug("\nEnter ietf_interfaces_state_list_get7\n");
 
-    free(out);
-    free(status_out);
-    free(device_out);
+    free(errstr);
+    free(epty);
+    free(port_cfg);
+    free(port_sts);
+    free(device_info);
+    free(device_phy_port_list);
     free(ingress_out);
     free(egress_out);
     free(network_v4_status);
     free(network_v6_status);
     free(network_cfg);
-
-    free(in);
-    free(in2);
-    free(in3);
-    free(in4);
-    free(in5);
-    free(in6);
-    free(in7);
-    free(in8);
     return res;
 }
 

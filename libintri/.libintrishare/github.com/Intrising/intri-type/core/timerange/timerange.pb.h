@@ -14,6 +14,9 @@
 #include "../../../../../google.golang.org/genproto/googleapis/type/timeofday/timeofday.pb.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *

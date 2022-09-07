@@ -48,8 +48,33 @@ static status_t intri_stormcontrol_StormControl_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stormcontrolpb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stormcontrol_StormControl_GetConfig(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -62,6 +87,7 @@ static status_t intri_stormcontrol_StormControl_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -76,6 +102,7 @@ static status_t intri_stormcontrol_StormControl_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stormcontrol_StormControl_SetEnabled_invoke(
@@ -85,18 +112,69 @@ static status_t intri_stormcontrol_StormControl_SetEnabled_invoke(
   status_t res = NO_ERR;
   struct commonpb_Enabled *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stormcontrol_StormControl_GetEnabled(out, in);
+  errstr->n = 0;
+  stormcontrol_StormControl_GetEnabled(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_common_Enabled(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stormcontrol_StormControl_SetEnabled(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_SetEnabled(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stormcontrol_StormControl_GetEnabled_invoke(
@@ -106,8 +184,33 @@ static status_t intri_stormcontrol_StormControl_GetEnabled_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct commonpb_Enabled *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stormcontrol_StormControl_GetEnabled(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_GetEnabled(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -120,6 +223,7 @@ static status_t intri_stormcontrol_StormControl_GetEnabled_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -134,6 +238,7 @@ static status_t intri_stormcontrol_StormControl_GetEnabled_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stormcontrol_StormControl_GetPortConfig_invoke(
@@ -143,8 +248,33 @@ static status_t intri_stormcontrol_StormControl_GetPortConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stormcontrolpb_PortConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stormcontrol_StormControl_GetPortConfig(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_GetPortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -157,6 +287,7 @@ static status_t intri_stormcontrol_StormControl_GetPortConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -171,6 +302,7 @@ static status_t intri_stormcontrol_StormControl_GetPortConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stormcontrol_StormControl_UpdatePortConfigEntry_invoke(
@@ -180,18 +312,45 @@ static status_t intri_stormcontrol_StormControl_UpdatePortConfigEntry_invoke(
   status_t res = NO_ERR;
   struct stormcontrolpb_PortConfigEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_stormcontrol_PortConfigEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stormcontrol_StormControl_UpdatePortConfigEntry(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_UpdatePortConfigEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stormcontrol_StormControl_UpdatePortConfig_invoke(
@@ -201,18 +360,69 @@ static status_t intri_stormcontrol_StormControl_UpdatePortConfig_invoke(
   status_t res = NO_ERR;
   struct stormcontrolpb_PortConfig *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stormcontrol_StormControl_GetPortConfig(out, in);
+  errstr->n = 0;
+  stormcontrol_StormControl_GetPortConfig(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stormcontrol_PortConfig(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stormcontrol_StormControl_UpdatePortConfig(in, out);
+  errstr->n = 0;
+  stormcontrol_StormControl_UpdatePortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

@@ -48,8 +48,33 @@ static status_t intri_access_Access_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetConfig(in, out);
+  errstr->n = 0;
+  access_Access_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -62,6 +87,7 @@ static status_t intri_access_Access_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -76,6 +102,7 @@ static status_t intri_access_Access_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_GetAuthenticationConfig_invoke(
@@ -85,8 +112,33 @@ static status_t intri_access_Access_GetAuthenticationConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_AuthenticationConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetAuthenticationConfig(in, out);
+  errstr->n = 0;
+  access_Access_GetAuthenticationConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -99,6 +151,7 @@ static status_t intri_access_Access_GetAuthenticationConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -113,6 +166,7 @@ static status_t intri_access_Access_GetAuthenticationConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_SetAuthenticationConfig_invoke(
@@ -122,18 +176,69 @@ static status_t intri_access_Access_SetAuthenticationConfig_invoke(
   status_t res = NO_ERR;
   struct accesspb_AuthenticationConfig *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetAuthenticationConfig(out, in);
+  errstr->n = 0;
+  access_Access_GetAuthenticationConfig(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_access_AuthenticationConfig(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_SetAuthenticationConfig(in, out);
+  errstr->n = 0;
+  access_Access_SetAuthenticationConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_Login_invoke(
@@ -143,15 +248,41 @@ static status_t intri_access_Access_Login_invoke(
   status_t res = NO_ERR;
   struct accesspb_LoginRequest *in = malloc(sizeof(*in));
   struct accesspb_Token *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_LoginRequest(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_Login(in, out);
+  errstr->n = 0;
+  access_Access_Login(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -164,6 +295,7 @@ static status_t intri_access_Access_Login_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -178,6 +310,7 @@ static status_t intri_access_Access_Login_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_Logout_invoke(
@@ -187,11 +320,37 @@ static status_t intri_access_Access_Logout_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_Logout(in, out);
+  errstr->n = 0;
+  access_Access_Logout(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_PAMLogin_invoke(
@@ -201,15 +360,41 @@ static status_t intri_access_Access_PAMLogin_invoke(
   status_t res = NO_ERR;
   struct accesspb_LoginRequest *in = malloc(sizeof(*in));
   struct eventpb_LoginParameter *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_LoginRequest(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_PAMLogin(in, out);
+  errstr->n = 0;
+  access_Access_PAMLogin(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -222,6 +407,7 @@ static status_t intri_access_Access_PAMLogin_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -236,6 +422,7 @@ static status_t intri_access_Access_PAMLogin_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_GetUsers_invoke(
@@ -245,8 +432,33 @@ static status_t intri_access_Access_GetUsers_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_UsersConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetUsers(in, out);
+  errstr->n = 0;
+  access_Access_GetUsers(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -259,6 +471,7 @@ static status_t intri_access_Access_GetUsers_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -273,6 +486,7 @@ static status_t intri_access_Access_GetUsers_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_AddUser_invoke(
@@ -282,18 +496,45 @@ static status_t intri_access_Access_AddUser_invoke(
   status_t res = NO_ERR;
   struct accesspb_UserEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_UserEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_AddUser(in, out);
+  errstr->n = 0;
+  access_Access_AddUser(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_DeleteUser_invoke(
@@ -303,18 +544,45 @@ static status_t intri_access_Access_DeleteUser_invoke(
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_DeleteUser(in, out);
+  errstr->n = 0;
+  access_Access_DeleteUser(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_UpdateUser_invoke(
@@ -324,18 +592,45 @@ static status_t intri_access_Access_UpdateUser_invoke(
   status_t res = NO_ERR;
   struct accesspb_UserEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_access_UserEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_UpdateUser(in, out);
+  errstr->n = 0;
+  access_Access_UpdateUser(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_RunEncryptPassword_invoke(
@@ -345,15 +640,41 @@ static status_t intri_access_Access_RunEncryptPassword_invoke(
   status_t res = NO_ERR;
   struct accesspb_Password *in = malloc(sizeof(*in));
   struct accesspb_EncryptedPassword *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_Password(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_RunEncryptPassword(in, out);
+  errstr->n = 0;
+  access_Access_RunEncryptPassword(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -366,6 +687,7 @@ static status_t intri_access_Access_RunEncryptPassword_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -380,6 +702,7 @@ static status_t intri_access_Access_RunEncryptPassword_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_RunUserEnterPassword_invoke(
@@ -389,18 +712,45 @@ static status_t intri_access_Access_RunUserEnterPassword_invoke(
   status_t res = NO_ERR;
   struct accesspb_UserPassword *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_UserPassword(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_RunUserEnterPassword(in, out);
+  errstr->n = 0;
+  access_Access_RunUserEnterPassword(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_RunUserEnterSNMPV3AuthPassword_invoke(
@@ -410,18 +760,45 @@ static status_t intri_access_Access_RunUserEnterSNMPV3AuthPassword_invoke(
   status_t res = NO_ERR;
   struct accesspb_UserPassword *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_UserPassword(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_RunUserEnterSNMPV3AuthPassword(in, out);
+  errstr->n = 0;
+  access_Access_RunUserEnterSNMPV3AuthPassword(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_RunUserEnterSNMPV3PrivacyPassword_invoke(
@@ -431,18 +808,45 @@ static status_t intri_access_Access_RunUserEnterSNMPV3PrivacyPassword_invoke(
   status_t res = NO_ERR;
   struct accesspb_UserPassword *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_UserPassword(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_RunUserEnterSNMPV3PrivacyPassword(in, out);
+  errstr->n = 0;
+  access_Access_RunUserEnterSNMPV3PrivacyPassword(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_GetGroups_invoke(
@@ -452,8 +856,33 @@ static status_t intri_access_Access_GetGroups_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_GroupsConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetGroups(in, out);
+  errstr->n = 0;
+  access_Access_GetGroups(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -466,6 +895,7 @@ static status_t intri_access_Access_GetGroups_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -480,6 +910,7 @@ static status_t intri_access_Access_GetGroups_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_AddGroup_invoke(
@@ -489,18 +920,45 @@ static status_t intri_access_Access_AddGroup_invoke(
   status_t res = NO_ERR;
   struct accesspb_GroupEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_GroupEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_AddGroup(in, out);
+  errstr->n = 0;
+  access_Access_AddGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_DeleteGroup_invoke(
@@ -510,18 +968,45 @@ static status_t intri_access_Access_DeleteGroup_invoke(
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_DeleteGroup(in, out);
+  errstr->n = 0;
+  access_Access_DeleteGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_UpdateGroup_invoke(
@@ -531,18 +1016,45 @@ static status_t intri_access_Access_UpdateGroup_invoke(
   status_t res = NO_ERR;
   struct accesspb_GroupEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_access_GroupEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_UpdateGroup(in, out);
+  errstr->n = 0;
+  access_Access_UpdateGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_GetAuthenticatorServerConfig_invoke(
@@ -552,8 +1064,33 @@ static status_t intri_access_Access_GetAuthenticatorServerConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_AuthenticationServersConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetAuthenticatorServerConfig(in, out);
+  errstr->n = 0;
+  access_Access_GetAuthenticatorServerConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -566,6 +1103,7 @@ static status_t intri_access_Access_GetAuthenticatorServerConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -580,6 +1118,7 @@ static status_t intri_access_Access_GetAuthenticatorServerConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_AddAuthenticatorServerConfig_invoke(
@@ -589,18 +1128,45 @@ static status_t intri_access_Access_AddAuthenticatorServerConfig_invoke(
   status_t res = NO_ERR;
   struct accesspb_AuthenticationServerEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_AuthenticationServerEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_AddAuthenticatorServerConfig(in, out);
+  errstr->n = 0;
+  access_Access_AddAuthenticatorServerConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_DeleteAuthenticatorServerConfig_invoke(
@@ -610,18 +1176,45 @@ static status_t intri_access_Access_DeleteAuthenticatorServerConfig_invoke(
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_DeleteAuthenticatorServerConfig(in, out);
+  errstr->n = 0;
+  access_Access_DeleteAuthenticatorServerConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_UpdateAuthenticatorServerConfig_invoke(
@@ -631,18 +1224,45 @@ static status_t intri_access_Access_UpdateAuthenticatorServerConfig_invoke(
   status_t res = NO_ERR;
   struct accesspb_AuthenticationServerEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_access_AuthenticationServerEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_UpdateAuthenticatorServerConfig(in, out);
+  errstr->n = 0;
+  access_Access_UpdateAuthenticatorServerConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_GetRestrictions_invoke(
@@ -652,8 +1272,33 @@ static status_t intri_access_Access_GetRestrictions_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct accesspb_RestrictionsConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  access_Access_GetRestrictions(in, out);
+  errstr->n = 0;
+  access_Access_GetRestrictions(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -666,6 +1311,7 @@ static status_t intri_access_Access_GetRestrictions_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -680,6 +1326,7 @@ static status_t intri_access_Access_GetRestrictions_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_AddRestriction_invoke(
@@ -689,18 +1336,45 @@ static status_t intri_access_Access_AddRestriction_invoke(
   status_t res = NO_ERR;
   struct accesspb_RestrictionEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_access_RestrictionEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_AddRestriction(in, out);
+  errstr->n = 0;
+  access_Access_AddRestriction(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_DeleteRestriction_invoke(
@@ -710,18 +1384,45 @@ static status_t intri_access_Access_DeleteRestriction_invoke(
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_DeleteRestriction(in, out);
+  errstr->n = 0;
+  access_Access_DeleteRestriction(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_access_Access_UpdateRestriction_invoke(
@@ -731,18 +1432,45 @@ static status_t intri_access_Access_UpdateRestriction_invoke(
   status_t res = NO_ERR;
   struct accesspb_RestrictionEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_access_RestrictionEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  access_Access_UpdateRestriction(in, out);
+  errstr->n = 0;
+  access_Access_UpdateRestriction(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

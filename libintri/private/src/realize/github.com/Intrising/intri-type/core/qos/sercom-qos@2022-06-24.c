@@ -46,8 +46,33 @@ static status_t intri_qos_QoS_GetMode_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_Mode *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetMode(in, out);
+  errstr->n = 0;
+  qos_QoS_GetMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -60,6 +85,7 @@ static status_t intri_qos_QoS_GetMode_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -74,6 +100,7 @@ static status_t intri_qos_QoS_GetMode_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_SetMode_invoke(
@@ -83,18 +110,69 @@ static status_t intri_qos_QoS_SetMode_invoke(
   status_t res = NO_ERR;
   struct qospb_Mode *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetMode(out, in);
+  errstr->n = 0;
+  qos_QoS_GetMode(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_Mode(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_SetMode(in, out);
+  errstr->n = 0;
+  qos_QoS_SetMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_GetTrustMode_invoke(
@@ -104,8 +182,33 @@ static status_t intri_qos_QoS_GetTrustMode_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_TrustMode *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetTrustMode(in, out);
+  errstr->n = 0;
+  qos_QoS_GetTrustMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -118,6 +221,7 @@ static status_t intri_qos_QoS_GetTrustMode_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -132,6 +236,7 @@ static status_t intri_qos_QoS_GetTrustMode_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_SetTrustMode_invoke(
@@ -141,18 +246,69 @@ static status_t intri_qos_QoS_SetTrustMode_invoke(
   status_t res = NO_ERR;
   struct qospb_TrustMode *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetTrustMode(out, in);
+  errstr->n = 0;
+  qos_QoS_GetTrustMode(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_TrustMode(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_SetTrustMode(in, out);
+  errstr->n = 0;
+  qos_QoS_SetTrustMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_GetQueueList_invoke(
@@ -162,8 +318,33 @@ static status_t intri_qos_QoS_GetQueueList_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_QueueList *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetQueueList(in, out);
+  errstr->n = 0;
+  qos_QoS_GetQueueList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -176,6 +357,7 @@ static status_t intri_qos_QoS_GetQueueList_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -190,6 +372,7 @@ static status_t intri_qos_QoS_GetQueueList_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_SetAllQueueListPriorityScheme_invoke(
@@ -199,18 +382,45 @@ static status_t intri_qos_QoS_SetAllQueueListPriorityScheme_invoke(
   status_t res = NO_ERR;
   struct qospb_PriorityScheme *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_qos_PriorityScheme(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_SetAllQueueListPriorityScheme(in, out);
+  errstr->n = 0;
+  qos_QoS_SetAllQueueListPriorityScheme(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateQueueEntry_invoke(
@@ -220,18 +430,45 @@ static status_t intri_qos_QoS_UpdateQueueEntry_invoke(
   status_t res = NO_ERR;
   struct qospb_WeightedFairTrafficRatioQueueEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_qos_WeightedFairTrafficRatioQueueEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateQueueEntry(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateQueueEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateQueueList_invoke(
@@ -241,18 +478,69 @@ static status_t intri_qos_QoS_UpdateQueueList_invoke(
   status_t res = NO_ERR;
   struct qospb_QueueList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetQueueList(out, in);
+  errstr->n = 0;
+  qos_QoS_GetQueueList(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_QueueList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateQueueList(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateQueueList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_GetCoSList_invoke(
@@ -262,8 +550,33 @@ static status_t intri_qos_QoS_GetCoSList_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_CoSList *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetCoSList(in, out);
+  errstr->n = 0;
+  qos_QoS_GetCoSList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -276,6 +589,7 @@ static status_t intri_qos_QoS_GetCoSList_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -290,6 +604,7 @@ static status_t intri_qos_QoS_GetCoSList_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateCoSEntry_invoke(
@@ -299,18 +614,45 @@ static status_t intri_qos_QoS_UpdateCoSEntry_invoke(
   status_t res = NO_ERR;
   struct qospb_MappingCoSDot1PToQueueEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_qos_MappingCoSDot1PToQueueEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateCoSEntry(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateCoSEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateCoSList_invoke(
@@ -320,18 +662,69 @@ static status_t intri_qos_QoS_UpdateCoSList_invoke(
   status_t res = NO_ERR;
   struct qospb_CoSList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetCoSList(out, in);
+  errstr->n = 0;
+  qos_QoS_GetCoSList(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_CoSList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateCoSList(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateCoSList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_GetDSCPList_invoke(
@@ -341,8 +734,33 @@ static status_t intri_qos_QoS_GetDSCPList_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_DSCPList *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetDSCPList(in, out);
+  errstr->n = 0;
+  qos_QoS_GetDSCPList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -355,6 +773,7 @@ static status_t intri_qos_QoS_GetDSCPList_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -369,6 +788,7 @@ static status_t intri_qos_QoS_GetDSCPList_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateDSCPEntry_invoke(
@@ -378,18 +798,45 @@ static status_t intri_qos_QoS_UpdateDSCPEntry_invoke(
   status_t res = NO_ERR;
   struct qospb_MappingDSCPToQueueEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_qos_MappingDSCPToQueueEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateDSCPEntry(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateDSCPEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateDSCPList_invoke(
@@ -399,18 +846,69 @@ static status_t intri_qos_QoS_UpdateDSCPList_invoke(
   status_t res = NO_ERR;
   struct qospb_DSCPList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetDSCPList(out, in);
+  errstr->n = 0;
+  qos_QoS_GetDSCPList(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_DSCPList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateDSCPList(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateDSCPList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_GetInterfaceList_invoke(
@@ -420,8 +918,33 @@ static status_t intri_qos_QoS_GetInterfaceList_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct qospb_InterfaceList *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetInterfaceList(in, out);
+  errstr->n = 0;
+  qos_QoS_GetInterfaceList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -434,6 +957,7 @@ static status_t intri_qos_QoS_GetInterfaceList_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -448,6 +972,7 @@ static status_t intri_qos_QoS_GetInterfaceList_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateInterfaceEntry_invoke(
@@ -457,18 +982,45 @@ static status_t intri_qos_QoS_UpdateInterfaceEntry_invoke(
   status_t res = NO_ERR;
   struct qospb_InterfaceConfigEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_qos_InterfaceConfigEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateInterfaceEntry(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateInterfaceEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_qos_QoS_UpdateInterfaceList_invoke(
@@ -478,18 +1030,69 @@ static status_t intri_qos_QoS_UpdateInterfaceList_invoke(
   status_t res = NO_ERR;
   struct qospb_InterfaceList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  qos_QoS_GetInterfaceList(out, in);
+  errstr->n = 0;
+  qos_QoS_GetInterfaceList(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_qos_InterfaceList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  qos_QoS_UpdateInterfaceList(in, out);
+  errstr->n = 0;
+  qos_QoS_UpdateInterfaceList(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

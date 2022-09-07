@@ -48,8 +48,33 @@ static status_t intri_monitor_Monitor_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetConfig(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -62,6 +87,7 @@ static status_t intri_monitor_Monitor_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -76,6 +102,7 @@ static status_t intri_monitor_Monitor_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetDeviceLimitConfig_invoke(
@@ -85,8 +112,33 @@ static status_t intri_monitor_Monitor_GetDeviceLimitConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_DeviceLimitConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetDeviceLimitConfig(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetDeviceLimitConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -99,6 +151,7 @@ static status_t intri_monitor_Monitor_GetDeviceLimitConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -113,6 +166,7 @@ static status_t intri_monitor_Monitor_GetDeviceLimitConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_UpdateDeviceScorllBarValueEntry_invoke(
@@ -122,18 +176,45 @@ static status_t intri_monitor_Monitor_UpdateDeviceScorllBarValueEntry_invoke(
   status_t res = NO_ERR;
   struct monitorpb_DeviceScorllBarValueEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_monitor_DeviceScorllBarValueEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  monitor_Monitor_UpdateDeviceScorllBarValueEntry(in, out);
+  errstr->n = 0;
+  monitor_Monitor_UpdateDeviceScorllBarValueEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_UpdateDeviceScorllBarValue_invoke(
@@ -143,18 +224,45 @@ static status_t intri_monitor_Monitor_UpdateDeviceScorllBarValue_invoke(
   status_t res = NO_ERR;
   struct monitorpb_DeviceScorllBarValue *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_monitor_DeviceScorllBarValue(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  monitor_Monitor_UpdateDeviceScorllBarValue(in, out);
+  errstr->n = 0;
+  monitor_Monitor_UpdateDeviceScorllBarValue(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetSystemLimitConfig_invoke(
@@ -164,8 +272,33 @@ static status_t intri_monitor_Monitor_GetSystemLimitConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_SystemLimitConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetSystemLimitConfig(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetSystemLimitConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -178,6 +311,7 @@ static status_t intri_monitor_Monitor_GetSystemLimitConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -192,6 +326,7 @@ static status_t intri_monitor_Monitor_GetSystemLimitConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_UpdateSystemScorllBarValueEntry_invoke(
@@ -201,18 +336,45 @@ static status_t intri_monitor_Monitor_UpdateSystemScorllBarValueEntry_invoke(
   status_t res = NO_ERR;
   struct monitorpb_SystemScorllBarValueEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_monitor_SystemScorllBarValueEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  monitor_Monitor_UpdateSystemScorllBarValueEntry(in, out);
+  errstr->n = 0;
+  monitor_Monitor_UpdateSystemScorllBarValueEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_UpdateSystemScorllBarValue_invoke(
@@ -222,18 +384,45 @@ static status_t intri_monitor_Monitor_UpdateSystemScorllBarValue_invoke(
   status_t res = NO_ERR;
   struct monitorpb_SystemScorllBarValue *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_monitor_SystemScorllBarValue(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  monitor_Monitor_UpdateSystemScorllBarValue(in, out);
+  errstr->n = 0;
+  monitor_Monitor_UpdateSystemScorllBarValue(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetStatus_invoke(
@@ -243,8 +432,33 @@ static status_t intri_monitor_Monitor_GetStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_Status *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetStatus(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -257,6 +471,7 @@ static status_t intri_monitor_Monitor_GetStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -271,6 +486,7 @@ static status_t intri_monitor_Monitor_GetStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetDeviceStatus_invoke(
@@ -280,8 +496,33 @@ static status_t intri_monitor_Monitor_GetDeviceStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_DeviceStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetDeviceStatus(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetDeviceStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -294,6 +535,7 @@ static status_t intri_monitor_Monitor_GetDeviceStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -308,6 +550,7 @@ static status_t intri_monitor_Monitor_GetDeviceStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetSystemStatus_invoke(
@@ -317,8 +560,33 @@ static status_t intri_monitor_Monitor_GetSystemStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_SystemStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetSystemStatus(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetSystemStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -331,6 +599,7 @@ static status_t intri_monitor_Monitor_GetSystemStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -345,6 +614,7 @@ static status_t intri_monitor_Monitor_GetSystemStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_monitor_Monitor_GetLEDStatus_invoke(
@@ -354,8 +624,33 @@ static status_t intri_monitor_Monitor_GetLEDStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct monitorpb_LEDStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  monitor_Monitor_GetLEDStatus(in, out);
+  errstr->n = 0;
+  monitor_Monitor_GetLEDStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -368,6 +663,7 @@ static status_t intri_monitor_Monitor_GetLEDStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -382,6 +678,7 @@ static status_t intri_monitor_Monitor_GetLEDStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

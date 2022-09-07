@@ -48,8 +48,33 @@ static status_t intri_loop_Loop_GetStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct looppb_Status *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  loop_Loop_GetStatus(in, out);
+  errstr->n = 0;
+  loop_Loop_GetStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -62,6 +87,7 @@ static status_t intri_loop_Loop_GetStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -76,6 +102,7 @@ static status_t intri_loop_Loop_GetStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_loop_Loop_GetConfig_invoke(
@@ -85,8 +112,33 @@ static status_t intri_loop_Loop_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct looppb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  loop_Loop_GetConfig(in, out);
+  errstr->n = 0;
+  loop_Loop_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -99,6 +151,7 @@ static status_t intri_loop_Loop_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -113,6 +166,7 @@ static status_t intri_loop_Loop_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_loop_Loop_GetPortConfig_invoke(
@@ -122,8 +176,33 @@ static status_t intri_loop_Loop_GetPortConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct looppb_PortConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  loop_Loop_GetPortConfig(in, out);
+  errstr->n = 0;
+  loop_Loop_GetPortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -136,6 +215,7 @@ static status_t intri_loop_Loop_GetPortConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -150,6 +230,7 @@ static status_t intri_loop_Loop_GetPortConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_loop_Loop_UpdatePortConfig_invoke(
@@ -159,18 +240,45 @@ static status_t intri_loop_Loop_UpdatePortConfig_invoke(
   status_t res = NO_ERR;
   struct looppb_PortConfigEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_loop_PortConfigEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  loop_Loop_UpdatePortConfig(in, out);
+  errstr->n = 0;
+  loop_Loop_UpdatePortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

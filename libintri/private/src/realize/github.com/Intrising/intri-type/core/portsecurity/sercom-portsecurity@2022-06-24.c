@@ -46,8 +46,33 @@ static status_t intri_portsecurity_PortSecurity_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portsecuritypb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portsecurity_PortSecurity_GetConfig(in, out);
+  errstr->n = 0;
+  portsecurity_PortSecurity_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -60,6 +85,7 @@ static status_t intri_portsecurity_PortSecurity_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -74,6 +100,7 @@ static status_t intri_portsecurity_PortSecurity_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portsecurity_PortSecurity_UpdatePortSecurityConfig_invoke(
@@ -83,18 +110,45 @@ static status_t intri_portsecurity_PortSecurity_UpdatePortSecurityConfig_invoke(
   status_t res = NO_ERR;
   struct portsecuritypb_PortSecurityConfigEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_portsecurity_PortSecurityConfigEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portsecurity_PortSecurity_UpdatePortSecurityConfig(in, out);
+  errstr->n = 0;
+  portsecurity_PortSecurity_UpdatePortSecurityConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portsecurity_PortSecurity_AddPortSecureEntry_invoke(
@@ -104,18 +158,45 @@ static status_t intri_portsecurity_PortSecurity_AddPortSecureEntry_invoke(
   status_t res = NO_ERR;
   struct portsecuritypb_PortSecureEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_portsecurity_PortSecureEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portsecurity_PortSecurity_AddPortSecureEntry(in, out);
+  errstr->n = 0;
+  portsecurity_PortSecurity_AddPortSecureEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portsecurity_PortSecurity_DeletePortSecureEntry_invoke(
@@ -125,18 +206,45 @@ static status_t intri_portsecurity_PortSecurity_DeletePortSecureEntry_invoke(
   status_t res = NO_ERR;
   struct portsecuritypb_PortSecureEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_portsecurity_PortSecureEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portsecurity_PortSecurity_DeletePortSecureEntry(in, out);
+  errstr->n = 0;
+  portsecurity_PortSecurity_DeletePortSecureEntry(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portsecurity_PortSecurity_GetPortSecurityInfo_invoke(
@@ -146,8 +254,33 @@ static status_t intri_portsecurity_PortSecurity_GetPortSecurityInfo_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portsecuritypb_Status *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portsecurity_PortSecurity_GetPortSecurityInfo(in, out);
+  errstr->n = 0;
+  portsecurity_PortSecurity_GetPortSecurityInfo(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -160,6 +293,7 @@ static status_t intri_portsecurity_PortSecurity_GetPortSecurityInfo_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -174,6 +308,7 @@ static status_t intri_portsecurity_PortSecurity_GetPortSecurityInfo_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

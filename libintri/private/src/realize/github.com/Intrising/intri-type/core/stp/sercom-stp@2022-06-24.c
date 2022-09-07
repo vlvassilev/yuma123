@@ -46,8 +46,33 @@ static status_t intri_stp_MSTP_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_MSTPConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetConfig(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -60,6 +85,7 @@ static status_t intri_stp_MSTP_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -74,6 +100,7 @@ static status_t intri_stp_MSTP_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetConfig_invoke(
@@ -83,18 +110,69 @@ static status_t intri_stp_MSTP_SetConfig_invoke(
   status_t res = NO_ERR;
   struct stppb_MSTPConfig *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetConfig(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetConfig(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_MSTPConfig(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetConfig(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetCistConfig_invoke(
@@ -104,18 +182,45 @@ static status_t intri_stp_MSTP_SetCistConfig_invoke(
   status_t res = NO_ERR;
   struct stppb_CISTEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_stp_CISTEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetCistConfig(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetCistConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetMstiConfig_invoke(
@@ -125,18 +230,45 @@ static status_t intri_stp_MSTP_SetMstiConfig_invoke(
   status_t res = NO_ERR;
   struct stppb_MSTIList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_stp_MSTIList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetMstiConfig(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetMstiConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetCistStatus_invoke(
@@ -146,8 +278,33 @@ static status_t intri_stp_MSTP_GetCistStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_CISTStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetCistStatus(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetCistStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -160,6 +317,7 @@ static status_t intri_stp_MSTP_GetCistStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -174,6 +332,7 @@ static status_t intri_stp_MSTP_GetCistStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetMstiStatus_invoke(
@@ -183,8 +342,33 @@ static status_t intri_stp_MSTP_GetMstiStatus_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_MSTIStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetMstiStatus(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetMstiStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -197,6 +381,7 @@ static status_t intri_stp_MSTP_GetMstiStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -211,6 +396,7 @@ static status_t intri_stp_MSTP_GetMstiStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_RunReconfigPortState_invoke(
@@ -220,11 +406,37 @@ static status_t intri_stp_MSTP_RunReconfigPortState_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_RunReconfigPortState(in, out);
+  errstr->n = 0;
+  stp_MSTP_RunReconfigPortState(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigMode_invoke(
@@ -234,8 +446,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigMode_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigMode *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMode(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -248,6 +485,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMode_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -262,6 +500,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMode_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigMode_invoke(
@@ -271,18 +510,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigMode_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigMode *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMode(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMode(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigMode(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigMode(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigMode(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigPriority_invoke(
@@ -292,8 +582,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigPriority_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigPriority *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -306,6 +621,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigPriority_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -320,6 +636,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigPriority_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigPriority_invoke(
@@ -329,18 +646,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigPriority_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigPriority *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigPriority(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigPriority(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigPriority(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigHelloTime_invoke(
@@ -350,8 +718,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigHelloTime_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigHelloTime *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigHelloTime(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigHelloTime(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -364,6 +757,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigHelloTime_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -378,6 +772,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigHelloTime_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigHelloTime_invoke(
@@ -387,18 +782,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigHelloTime_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigHelloTime *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigHelloTime(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigHelloTime(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigHelloTime(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigHelloTime(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigHelloTime(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigMaxAge_invoke(
@@ -408,8 +854,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigMaxAge_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigMaxAge *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMaxAge(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMaxAge(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -422,6 +893,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMaxAge_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -436,6 +908,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMaxAge_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigMaxAge_invoke(
@@ -445,18 +918,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigMaxAge_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigMaxAge *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMaxAge(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMaxAge(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigMaxAge(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigMaxAge(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigMaxAge(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigForwardDelay_invoke(
@@ -466,8 +990,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigForwardDelay_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigForwardDelay *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigForwardDelay(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigForwardDelay(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -480,6 +1029,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigForwardDelay_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -494,6 +1044,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigForwardDelay_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigForwardDelay_invoke(
@@ -503,18 +1054,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigForwardDelay_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigForwardDelay *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigForwardDelay(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigForwardDelay(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigForwardDelay(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigForwardDelay(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigForwardDelay(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigTxHoldCount_invoke(
@@ -524,8 +1126,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigTxHoldCount_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigTxHoldCount *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigTxHoldCount(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigTxHoldCount(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -538,6 +1165,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigTxHoldCount_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -552,6 +1180,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigTxHoldCount_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigTxHoldCount_invoke(
@@ -561,18 +1190,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigTxHoldCount_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigTxHoldCount *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigTxHoldCount(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigTxHoldCount(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigTxHoldCount(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigTxHoldCount(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigTxHoldCount(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigMSTPRegionName_invoke(
@@ -582,8 +1262,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRegionName_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigMSTPRegionName *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPRegionName(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPRegionName(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -596,6 +1301,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRegionName_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -610,6 +1316,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRegionName_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigMSTPRegionName_invoke(
@@ -619,18 +1326,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigMSTPRegionName_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigMSTPRegionName *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPRegionName(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPRegionName(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigMSTPRegionName(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigMSTPRegionName(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigMSTPRegionName(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigMSTPRevisionLevel_invoke(
@@ -640,8 +1398,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRevisionLevel_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigMSTPRevisionLevel *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPRevisionLevel(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPRevisionLevel(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -654,6 +1437,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRevisionLevel_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -668,6 +1452,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPRevisionLevel_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigMSTPRevisionLevel_invoke(
@@ -677,18 +1462,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigMSTPRevisionLevel_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigMSTPRevisionLevel *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPRevisionLevel(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPRevisionLevel(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigMSTPRevisionLevel(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigMSTPRevisionLevel(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigMSTPRevisionLevel(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetBridgeConfigMSTPMaxHops_invoke(
@@ -698,8 +1534,33 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPMaxHops_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct stppb_BridgeConfigMSTPMaxHops *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPMaxHops(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPMaxHops(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -712,6 +1573,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPMaxHops_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -726,6 +1588,7 @@ static status_t intri_stp_MSTP_GetBridgeConfigMSTPMaxHops_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetBridgeConfigMSTPMaxHops_invoke(
@@ -735,18 +1598,69 @@ static status_t intri_stp_MSTP_SetBridgeConfigMSTPMaxHops_invoke(
   status_t res = NO_ERR;
   struct stppb_BridgeConfigMSTPMaxHops *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  stp_MSTP_GetBridgeConfigMSTPMaxHops(out, in);
+  errstr->n = 0;
+  stp_MSTP_GetBridgeConfigMSTPMaxHops(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_stp_BridgeConfigMSTPMaxHops(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetBridgeConfigMSTPMaxHops(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetBridgeConfigMSTPMaxHops(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigEnabled_invoke(
@@ -756,15 +1670,41 @@ static status_t intri_stp_MSTP_GetPortConfigEnabled_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigEnabled *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigEnabled(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigEnabled(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -777,6 +1717,7 @@ static status_t intri_stp_MSTP_GetPortConfigEnabled_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -791,6 +1732,7 @@ static status_t intri_stp_MSTP_GetPortConfigEnabled_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigEnabled_invoke(
@@ -800,18 +1742,45 @@ static status_t intri_stp_MSTP_SetPortConfigEnabled_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigEnabled *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigEnabled(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigEnabled(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigEnabled(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigPriority_invoke(
@@ -821,15 +1790,41 @@ static status_t intri_stp_MSTP_GetPortConfigPriority_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigPriority *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -842,6 +1837,7 @@ static status_t intri_stp_MSTP_GetPortConfigPriority_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -856,6 +1852,7 @@ static status_t intri_stp_MSTP_GetPortConfigPriority_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigPriority_invoke(
@@ -865,18 +1862,45 @@ static status_t intri_stp_MSTP_SetPortConfigPriority_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigPriority *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigPriority(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigAdminP2PPort_invoke(
@@ -886,15 +1910,41 @@ static status_t intri_stp_MSTP_GetPortConfigAdminP2PPort_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigAdminP2PPort *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigAdminP2PPort(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigAdminP2PPort(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -907,6 +1957,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminP2PPort_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -921,6 +1972,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminP2PPort_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigAdminP2PPort_invoke(
@@ -930,18 +1982,45 @@ static status_t intri_stp_MSTP_SetPortConfigAdminP2PPort_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigAdminP2PPort *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigAdminP2PPort(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigAdminP2PPort(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigAdminP2PPort(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigAdminEdgePort_invoke(
@@ -951,15 +2030,41 @@ static status_t intri_stp_MSTP_GetPortConfigAdminEdgePort_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigAdminEdgePort *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigAdminEdgePort(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigAdminEdgePort(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -972,6 +2077,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminEdgePort_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -986,6 +2092,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminEdgePort_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigAdminEdgePort_invoke(
@@ -995,18 +2102,45 @@ static status_t intri_stp_MSTP_SetPortConfigAdminEdgePort_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigAdminEdgePort *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigAdminEdgePort(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigAdminEdgePort(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigAdminEdgePort(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigAdminPathCost_invoke(
@@ -1016,15 +2150,41 @@ static status_t intri_stp_MSTP_GetPortConfigAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigAdminPathCost *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1037,6 +2197,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminPathCost_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1051,6 +2212,7 @@ static status_t intri_stp_MSTP_GetPortConfigAdminPathCost_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigAdminPathCost_invoke(
@@ -1060,18 +2222,45 @@ static status_t intri_stp_MSTP_SetPortConfigAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigAdminPathCost *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigAdminPathCost(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultPriority_invoke(
@@ -1081,15 +2270,41 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultPriority_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigMSTPDefaultPriority *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigMSTPDefaultPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigMSTPDefaultPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1102,6 +2317,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultPriority_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1116,6 +2332,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultPriority_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigMSTPDefaultPriority_invoke(
@@ -1125,18 +2342,45 @@ static status_t intri_stp_MSTP_SetPortConfigMSTPDefaultPriority_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigMSTPDefaultPriority *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigMSTPDefaultPriority(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigMSTPDefaultPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigMSTPDefaultPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigMSTPPortPriority_invoke(
@@ -1146,15 +2390,41 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortPriority_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigMSTPPortPriority *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigMSTPPortPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigMSTPPortPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1167,6 +2437,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortPriority_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1181,6 +2452,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortPriority_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigMSTPPortPriority_invoke(
@@ -1190,18 +2462,45 @@ static status_t intri_stp_MSTP_SetPortConfigMSTPPortPriority_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigMSTPPortPriority *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigMSTPPortPriority(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigMSTPPortPriority(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigMSTPPortPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost_invoke(
@@ -1211,15 +2510,41 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigMSTPDefaultAdminPathCost *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1232,6 +2557,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1246,6 +2572,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPDefaultAdminPathCost_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigMSTPDefaultAdminPathCost_invoke(
@@ -1255,18 +2582,45 @@ static status_t intri_stp_MSTP_SetPortConfigMSTPDefaultAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigMSTPDefaultAdminPathCost *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigMSTPDefaultAdminPathCost(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigMSTPDefaultAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigMSTPDefaultAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigMSTPPortAdminPathCost_invoke(
@@ -1276,15 +2630,41 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigMSTPPortAdminPathCost *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigMSTPPortAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigMSTPPortAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1297,6 +2677,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortAdminPathCost_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1311,6 +2692,7 @@ static status_t intri_stp_MSTP_GetPortConfigMSTPPortAdminPathCost_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigMSTPPortAdminPathCost_invoke(
@@ -1320,18 +2702,45 @@ static status_t intri_stp_MSTP_SetPortConfigMSTPPortAdminPathCost_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigMSTPPortAdminPathCost *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigMSTPPortAdminPathCost(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigMSTPPortAdminPathCost(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigMSTPPortAdminPathCost(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigBPDUGuard_invoke(
@@ -1341,15 +2750,41 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUGuard_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigBPDUGuard *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigBPDUGuard(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigBPDUGuard(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1362,6 +2797,7 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUGuard_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1376,6 +2812,7 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUGuard_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigBPDUGuard_invoke(
@@ -1385,18 +2822,45 @@ static status_t intri_stp_MSTP_SetPortConfigBPDUGuard_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigBPDUGuard *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigBPDUGuard(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigBPDUGuard(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigBPDUGuard(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigBPDUReceiveOnly_invoke(
@@ -1406,15 +2870,41 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUReceiveOnly_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigBPDUReceiveOnly *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigBPDUReceiveOnly(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigBPDUReceiveOnly(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1427,6 +2917,7 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUReceiveOnly_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1441,6 +2932,7 @@ static status_t intri_stp_MSTP_GetPortConfigBPDUReceiveOnly_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigBPDUReceiveOnly_invoke(
@@ -1450,18 +2942,45 @@ static status_t intri_stp_MSTP_SetPortConfigBPDUReceiveOnly_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigBPDUReceiveOnly *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigBPDUReceiveOnly(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigBPDUReceiveOnly(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigBPDUReceiveOnly(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigRestrictTcn_invoke(
@@ -1471,15 +2990,41 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictTcn_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigRestrictTcn *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigRestrictTcn(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigRestrictTcn(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1492,6 +3037,7 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictTcn_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1506,6 +3052,7 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictTcn_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigRestrictTcn_invoke(
@@ -1515,18 +3062,45 @@ static status_t intri_stp_MSTP_SetPortConfigRestrictTcn_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigRestrictTcn *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigRestrictTcn(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigRestrictTcn(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigRestrictTcn(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetPortConfigRestrictRoot_invoke(
@@ -1536,15 +3110,41 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictRoot_invoke(
   status_t res = NO_ERR;
   struct devicepb_PortList *in = malloc(sizeof(*in));
   struct stppb_STPPortConfigRestrictRoot *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_PortList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetPortConfigRestrictRoot(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetPortConfigRestrictRoot(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1557,6 +3157,7 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictRoot_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1571,6 +3172,7 @@ static status_t intri_stp_MSTP_GetPortConfigRestrictRoot_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetPortConfigRestrictRoot_invoke(
@@ -1580,18 +3182,45 @@ static status_t intri_stp_MSTP_SetPortConfigRestrictRoot_invoke(
   status_t res = NO_ERR;
   struct stppb_STPPortConfigRestrictRoot *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_STPPortConfigRestrictRoot(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetPortConfigRestrictRoot(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetPortConfigRestrictRoot(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_GetMSTPGroup_invoke(
@@ -1601,15 +3230,41 @@ static status_t intri_stp_MSTP_GetMSTPGroup_invoke(
   status_t res = NO_ERR;
   struct stppb_MSTPIDList *in = malloc(sizeof(*in));
   struct stppb_MSTPGroup *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_stp_MSTPIDList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_GetMSTPGroup(in, out);
+  errstr->n = 0;
+  stp_MSTP_GetMSTPGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -1622,6 +3277,7 @@ static status_t intri_stp_MSTP_GetMSTPGroup_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -1636,6 +3292,7 @@ static status_t intri_stp_MSTP_GetMSTPGroup_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_SetMSTPGroup_invoke(
@@ -1645,18 +3302,45 @@ static status_t intri_stp_MSTP_SetMSTPGroup_invoke(
   status_t res = NO_ERR;
   struct stppb_MSTPGroup *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_stp_MSTPGroup(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_SetMSTPGroup(in, out);
+  errstr->n = 0;
+  stp_MSTP_SetMSTPGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_stp_MSTP_DeleteMSTPGroup_invoke(
@@ -1666,18 +3350,45 @@ static status_t intri_stp_MSTP_DeleteMSTPGroup_invoke(
   status_t res = NO_ERR;
   struct stppb_MSTPIDList *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_stp_MSTPIDList(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  stp_MSTP_DeleteMSTPGroup(in, out);
+  errstr->n = 0;
+  stp_MSTP_DeleteMSTPGroup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

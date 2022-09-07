@@ -46,15 +46,41 @@ static status_t intri_diagnostic_Diagnostic_RunPingTest_invoke(
   status_t res = NO_ERR;
   struct commonpb_IPAddress *in = malloc(sizeof(*in));
   struct commonpb_Reply *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_IPAddress(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  diagnostic_Diagnostic_RunPingTest(in, out);
+  errstr->n = 0;
+  diagnostic_Diagnostic_RunPingTest(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -67,6 +93,7 @@ static status_t intri_diagnostic_Diagnostic_RunPingTest_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -81,6 +108,7 @@ static status_t intri_diagnostic_Diagnostic_RunPingTest_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_diagnostic_Diagnostic_RunTraceRoute_invoke(
@@ -90,15 +118,41 @@ static status_t intri_diagnostic_Diagnostic_RunTraceRoute_invoke(
   status_t res = NO_ERR;
   struct commonpb_IPAddress *in = malloc(sizeof(*in));
   struct commonpb_Reply *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_IPAddress(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  diagnostic_Diagnostic_RunTraceRoute(in, out);
+  errstr->n = 0;
+  diagnostic_Diagnostic_RunTraceRoute(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -111,6 +165,7 @@ static status_t intri_diagnostic_Diagnostic_RunTraceRoute_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -125,6 +180,7 @@ static status_t intri_diagnostic_Diagnostic_RunTraceRoute_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_diagnostic_Diagnostic_RunDNSLookup_invoke(
@@ -134,15 +190,41 @@ static status_t intri_diagnostic_Diagnostic_RunDNSLookup_invoke(
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct commonpb_Reply *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  diagnostic_Diagnostic_RunDNSLookup(in, out);
+  errstr->n = 0;
+  diagnostic_Diagnostic_RunDNSLookup(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -155,6 +237,7 @@ static status_t intri_diagnostic_Diagnostic_RunDNSLookup_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -169,6 +252,7 @@ static status_t intri_diagnostic_Diagnostic_RunDNSLookup_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_diagnostic_Diagnostic_GetARPTable_invoke(
@@ -178,8 +262,33 @@ static status_t intri_diagnostic_Diagnostic_GetARPTable_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct diagnosticpb_ARPTables *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  diagnostic_Diagnostic_GetARPTable(in, out);
+  errstr->n = 0;
+  diagnostic_Diagnostic_GetARPTable(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -192,6 +301,7 @@ static status_t intri_diagnostic_Diagnostic_GetARPTable_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -206,6 +316,7 @@ static status_t intri_diagnostic_Diagnostic_GetARPTable_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

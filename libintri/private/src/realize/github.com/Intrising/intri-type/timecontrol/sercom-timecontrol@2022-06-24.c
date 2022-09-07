@@ -48,15 +48,41 @@ static status_t intri_timecontrol_TimeControl_GetInputMonitorStatus_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_InputClockManage *in = malloc(sizeof(*in));
   struct timecontrolpb_MonitorStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_InputClockManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetInputMonitorStatus(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetInputMonitorStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -69,6 +95,7 @@ static status_t intri_timecontrol_TimeControl_GetInputMonitorStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -83,6 +110,7 @@ static status_t intri_timecontrol_TimeControl_GetInputMonitorStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetDPLLStatus_invoke(
@@ -92,15 +120,41 @@ static status_t intri_timecontrol_TimeControl_GetDPLLStatus_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetDPLLStatus(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetDPLLStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -113,6 +167,7 @@ static status_t intri_timecontrol_TimeControl_GetDPLLStatus_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -127,6 +182,7 @@ static status_t intri_timecontrol_TimeControl_GetDPLLStatus_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetDPLLRefPriority_invoke(
@@ -136,18 +192,45 @@ static status_t intri_timecontrol_TimeControl_SetDPLLRefPriority_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLRefPriority *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_DPLLRefPriority(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetDPLLRefPriority(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetDPLLRefPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetDPLLRefPriority_invoke(
@@ -157,15 +240,41 @@ static status_t intri_timecontrol_TimeControl_GetDPLLRefPriority_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLRefPriorityManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLRefPriority *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLRefPriorityManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetDPLLRefPriority(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetDPLLRefPriority(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -178,6 +287,7 @@ static status_t intri_timecontrol_TimeControl_GetDPLLRefPriority_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -192,6 +302,7 @@ static status_t intri_timecontrol_TimeControl_GetDPLLRefPriority_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetInputClockFreq_invoke(
@@ -201,18 +312,45 @@ static status_t intri_timecontrol_TimeControl_SetInputClockFreq_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_SyncEInputClockSpeed *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_SyncEInputClockSpeed(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetInputClockFreq(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetInputClockFreq(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetInputClockFreq_invoke(
@@ -222,15 +360,41 @@ static status_t intri_timecontrol_TimeControl_GetInputClockFreq_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_InputClockManage *in = malloc(sizeof(*in));
   struct timecontrolpb_SyncEInputClockSpeed *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_InputClockManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetInputClockFreq(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetInputClockFreq(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -243,6 +407,7 @@ static status_t intri_timecontrol_TimeControl_GetInputClockFreq_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -257,6 +422,7 @@ static status_t intri_timecontrol_TimeControl_GetInputClockFreq_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetToDSource_invoke(
@@ -266,18 +432,69 @@ static status_t intri_timecontrol_TimeControl_SetToDSource_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_ToDSource *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  timecontrol_TimeControl_GetToDSource(out, in);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetToDSource(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_timecontrol_ToDSource(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetToDSource(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetToDSource(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetToDSource_invoke(
@@ -287,8 +504,33 @@ static status_t intri_timecontrol_TimeControl_GetToDSource_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct timecontrolpb_ToDSource *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  timecontrol_TimeControl_GetToDSource(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetToDSource(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -301,6 +543,7 @@ static status_t intri_timecontrol_TimeControl_GetToDSource_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -315,6 +558,7 @@ static status_t intri_timecontrol_TimeControl_GetToDSource_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetToD_invoke(
@@ -324,18 +568,45 @@ static status_t intri_timecontrol_TimeControl_SetToD_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_ToDTime *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_ToDTime(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetToD(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetToD(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetToD_invoke(
@@ -345,15 +616,41 @@ static status_t intri_timecontrol_TimeControl_GetToD_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLToDManage *in = malloc(sizeof(*in));
   struct timecontrolpb_ToDTime *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLToDManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetToD(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetToD(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -366,6 +663,7 @@ static status_t intri_timecontrol_TimeControl_GetToD_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -380,6 +678,7 @@ static status_t intri_timecontrol_TimeControl_GetToD_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetFrequencyControl_invoke(
@@ -389,18 +688,45 @@ static status_t intri_timecontrol_TimeControl_SetFrequencyControl_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLFrequencyControl *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_DPLLFrequencyControl(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetFrequencyControl(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetFrequencyControl(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetFrequencyControl_invoke(
@@ -410,15 +736,41 @@ static status_t intri_timecontrol_TimeControl_GetFrequencyControl_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLFrequencyControl *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetFrequencyControl(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetFrequencyControl(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -431,6 +783,7 @@ static status_t intri_timecontrol_TimeControl_GetFrequencyControl_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -445,6 +798,7 @@ static status_t intri_timecontrol_TimeControl_GetFrequencyControl_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetPhaseControl_invoke(
@@ -454,18 +808,45 @@ static status_t intri_timecontrol_TimeControl_SetPhaseControl_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLPhaseControl *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_DPLLPhaseControl(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetPhaseControl(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetPhaseControl(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetPhaseControl_invoke(
@@ -475,15 +856,41 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControl_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLPhaseControl *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetPhaseControl(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetPhaseControl(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -496,6 +903,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControl_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -510,6 +918,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControl_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetPhaseSlopeLimit_invoke(
@@ -519,18 +928,45 @@ static status_t intri_timecontrol_TimeControl_SetPhaseSlopeLimit_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLPhaseSlopeLimit *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_DPLLPhaseSlopeLimit(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetPhaseSlopeLimit(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetPhaseSlopeLimit(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetPhaseSlopeLimit_invoke(
@@ -540,15 +976,41 @@ static status_t intri_timecontrol_TimeControl_GetPhaseSlopeLimit_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLPhaseSlopeLimit *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetPhaseSlopeLimit(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetPhaseSlopeLimit(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -561,6 +1023,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseSlopeLimit_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -575,6 +1038,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseSlopeLimit_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_SetPhaseControlTimer_invoke(
@@ -584,18 +1048,45 @@ static status_t intri_timecontrol_TimeControl_SetPhaseControlTimer_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLPhaseControlTimer *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: the Get func has input */
   res = build_to_priv_timecontrol_DPLLPhaseControlTimer(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_SetPhaseControlTimer(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_SetPhaseControlTimer(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_timecontrol_TimeControl_GetPhaseControlTimer_invoke(
@@ -605,15 +1096,41 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControlTimer_invoke(
   status_t res = NO_ERR;
   struct timecontrolpb_DPLLManage *in = malloc(sizeof(*in));
   struct timecontrolpb_DPLLPhaseControlTimer *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_timecontrol_DPLLManage(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  timecontrol_TimeControl_GetPhaseControlTimer(in, out);
+  errstr->n = 0;
+  timecontrol_TimeControl_GetPhaseControlTimer(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -626,6 +1143,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControlTimer_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -640,6 +1158,7 @@ static status_t intri_timecontrol_TimeControl_GetPhaseControlTimer_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

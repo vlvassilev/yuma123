@@ -50,8 +50,33 @@ static status_t intri_portauthentication_PortAuthentication_GetConfig_invoke(
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_Config *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -64,6 +89,7 @@ static status_t intri_portauthentication_PortAuthentication_GetConfig_invoke(
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -78,6 +104,7 @@ static status_t intri_portauthentication_PortAuthentication_GetConfig_invoke(
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetSystemConfig_invoke(
@@ -87,8 +114,33 @@ static status_t intri_portauthentication_PortAuthentication_GetSystemConfig_invo
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_SystemConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetSystemConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetSystemConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -101,6 +153,7 @@ static status_t intri_portauthentication_PortAuthentication_GetSystemConfig_invo
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -115,6 +168,7 @@ static status_t intri_portauthentication_PortAuthentication_GetSystemConfig_invo
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_SetSystemConfig_invoke(
@@ -124,18 +178,69 @@ static status_t intri_portauthentication_PortAuthentication_SetSystemConfig_invo
   status_t res = NO_ERR;
   struct portauthenticationpb_SystemConfig *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetSystemConfig(out, in);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetSystemConfig(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_portauthentication_SystemConfig(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_SetSystemConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_SetSystemConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetPortConfig_invoke(
@@ -145,8 +250,33 @@ static status_t intri_portauthentication_PortAuthentication_GetPortConfig_invoke
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_PortConfig *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetPortConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetPortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -159,6 +289,7 @@ static status_t intri_portauthentication_PortAuthentication_GetPortConfig_invoke
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -173,6 +304,7 @@ static status_t intri_portauthentication_PortAuthentication_GetPortConfig_invoke
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_UpdatePortConfig_invoke(
@@ -182,18 +314,69 @@ static status_t intri_portauthentication_PortAuthentication_UpdatePortConfig_inv
   status_t res = NO_ERR;
   struct portauthenticationpb_PortConfig *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetPortConfig(out, in);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetPortConfig(out, in, errstr);
+  if (errstr->n > 0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
   res = build_to_priv_portauthentication_PortConfig(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_UpdatePortConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_UpdatePortConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetAuthorizedMACsConfig_invoke(
@@ -203,8 +386,33 @@ static status_t intri_portauthentication_PortAuthentication_GetAuthorizedMACsCon
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_AuthorizedMACs *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetAuthorizedMACsConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetAuthorizedMACsConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -217,6 +425,7 @@ static status_t intri_portauthentication_PortAuthentication_GetAuthorizedMACsCon
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -231,6 +440,7 @@ static status_t intri_portauthentication_PortAuthentication_GetAuthorizedMACsCon
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_AddAuthorizedMACsEntryConfig_invoke(
@@ -240,18 +450,45 @@ static status_t intri_portauthentication_PortAuthentication_AddAuthorizedMACsEnt
   status_t res = NO_ERR;
   struct portauthenticationpb_AuthorizedMACsEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_portauthentication_AuthorizedMACsEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_AddAuthorizedMACsEntryConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_AddAuthorizedMACsEntryConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_DeleteAuthorizedMACsEntryConfig_invoke(
@@ -261,18 +498,45 @@ static status_t intri_portauthentication_PortAuthentication_DeleteAuthorizedMACs
   status_t res = NO_ERR;
   struct commonpb_Name *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_common_Name(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_DeleteAuthorizedMACsEntryConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_DeleteAuthorizedMACsEntryConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_UpdateAuthorizedMACsEntryConfig_invoke(
@@ -282,18 +546,45 @@ static status_t intri_portauthentication_PortAuthentication_UpdateAuthorizedMACs
   status_t res = NO_ERR;
   struct portauthenticationpb_AuthorizedMACsEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: has no Get func */
   res = build_to_priv_portauthentication_AuthorizedMACsEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_UpdateAuthorizedMACsEntryConfig(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_UpdateAuthorizedMACsEntryConfig(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetPortStatus_invoke(
@@ -303,8 +594,33 @@ static status_t intri_portauthentication_PortAuthentication_GetPortStatus_invoke
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_PortStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetPortStatus(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetPortStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -317,6 +633,7 @@ static status_t intri_portauthentication_PortAuthentication_GetPortStatus_invoke
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -331,6 +648,7 @@ static status_t intri_portauthentication_PortAuthentication_GetPortStatus_invoke
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetMACAuthorizationStatus_invoke(
@@ -340,8 +658,33 @@ static status_t intri_portauthentication_PortAuthentication_GetMACAuthorizationS
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_PortAuthorizationStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetMACAuthorizationStatus(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetMACAuthorizationStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -354,6 +697,7 @@ static status_t intri_portauthentication_PortAuthentication_GetMACAuthorizationS
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -368,6 +712,7 @@ static status_t intri_portauthentication_PortAuthentication_GetMACAuthorizationS
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_Get8021XAuthorizationStatus_invoke(
@@ -377,8 +722,33 @@ static status_t intri_portauthentication_PortAuthentication_Get8021XAuthorizatio
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_PortAuthorizationStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_Get8021XAuthorizationStatus(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_Get8021XAuthorizationStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -391,6 +761,7 @@ static status_t intri_portauthentication_PortAuthentication_Get8021XAuthorizatio
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -405,6 +776,7 @@ static status_t intri_portauthentication_PortAuthentication_Get8021XAuthorizatio
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_GetUserStatus_invoke(
@@ -414,8 +786,33 @@ static status_t intri_portauthentication_PortAuthentication_GetUserStatus_invoke
   status_t res = NO_ERR;
   struct emptypb_Empty *in = malloc(sizeof(*in));
   struct portauthenticationpb_UserStatus *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
-  portauthentication_PortAuthentication_GetUserStatus(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_GetUserStatus(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   obj_template_t *outobj = obj_find_child(
       msg->rpc_method,
@@ -428,6 +825,7 @@ static status_t intri_portauthentication_PortAuthentication_GetUserStatus_invoke
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
 
@@ -442,6 +840,7 @@ static status_t intri_portauthentication_PortAuthentication_GetUserStatus_invoke
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_RunPortConfigLearnMACNow_invoke(
@@ -451,18 +850,45 @@ static status_t intri_portauthentication_PortAuthentication_RunPortConfigLearnMA
   status_t res = NO_ERR;
   struct portauthenticationpb_LearnMACNowEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_portauthentication_LearnMACNowEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_RunPortConfigLearnMACNow(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_RunPortConfigLearnMACNow(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_RunPortConfigReauthenticate_invoke(
@@ -472,18 +898,45 @@ static status_t intri_portauthentication_PortAuthentication_RunPortConfigReauthe
   status_t res = NO_ERR;
   struct devicepb_InterfaceIdentify *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_device_InterfaceIdentify(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_RunPortConfigReauthenticate(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_RunPortConfigReauthenticate(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 static status_t intri_portauthentication_PortAuthentication_RunPortConfigUnauthorizeMAC_invoke(
@@ -493,18 +946,45 @@ static status_t intri_portauthentication_PortAuthentication_RunPortConfigUnautho
   status_t res = NO_ERR;
   struct portauthenticationpb_UnauthorizeMACEntry *in = malloc(sizeof(*in));
   struct emptypb_Empty *out = malloc(sizeof(*out));
+  GoString *errstr = malloc(sizeof(*errstr));
 
   /* ian: this func has no prefix Update/Set */
   res = build_to_priv_portauthentication_UnauthorizeMACEntry(msg->rpc_input, in);
   if (res != NO_ERR) {
     free(in);
     free(out);
+    free(errstr);
     return SET_ERROR(res);
   }
-  portauthentication_PortAuthentication_RunPortConfigUnauthorizeMAC(in, out);
+  errstr->n = 0;
+  portauthentication_PortAuthentication_RunPortConfigUnauthorizeMAC(in, out, errstr);
+  if (errstr->n >0) {
+    const xmlChar *errorstr = NULL;
+    val_value_t *errorval = NULL;
+    ncx_errinfo_t *errinfo = ncx_new_errinfo();
+    errinfo->error_message = (xmlChar*)(errstr->p);
+    res = ERR_NCX_INVALID_VALUE;
+    agt_record_error_errinfo(
+        scb,
+        &msg->mhdr,
+        NCX_LAYER_RPC,
+        res,
+        methnode,
+        NCX_NT_NONE,
+        errorstr,
+        NCX_NT_NONE,
+        errorval,
+        errinfo);
+    log_debug("err= %s", errstr->p);
+    free(in);
+    free(out);
+    free(errstr);
+    return res;
+  }
 
   free(in);
   free(out);
+  free(errstr);
   return res;
 }
 

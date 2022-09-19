@@ -7,6 +7,9 @@ LT_INIT([disable-static])
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_AS
+
+PKG_PROG_PKG_CONFIG
+
 AC_PROG_LIBTOOL
 AC_SEARCH_LIBS([dlopen], [dl dld], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
@@ -84,7 +87,11 @@ AC_ARG_WITH(tecla,
 AM_CONDITIONAL([WITH_TECLA], [test "x$TECLA" = x1])
 AM_CONDITIONAL([STANDALONE], [test x$standalone = xtrue])
 
-AM_PATH_XML2
+PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.3.9])
+XML_LIBS="$LIBXML2_LIBS"
+XML_CPPFLAGS="$LIBXML2_CFLAGS"
+AC_SUBST([XML_LIBS])
+AC_SUBST([XML_CPPFLAGS])
 
 AC_CONFIG_FILES([
         Makefile \

@@ -2,7 +2,17 @@ Source: yuma123
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
-Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
+Build-Depends:
+ debhelper (>= 10),
+ autoconf,
+ libncurses5-dev,
+ libreadline-dev,
+ libssh2-1-dev,
+ libssl-dev,
+ libtool,
+ libxml2-dev,
+ pkg-config,
+ zlib1g-dev
 Standards-Version: 4.1.4
 Homepage: https://yuma123.org
 

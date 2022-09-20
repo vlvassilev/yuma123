@@ -2,7 +2,15 @@ Source: libapache2-mod-yangrpc-example
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
-Build-Depends: debhelper (>= 10), autoconf, libxml2-dev, libtool, libyuma-dev (>= 2.13), libyangrpc-dev (>= 2.13), apache2-dev
+Build-Depends:
+ debhelper (>= 10),
+ apache2-dev,
+ autoconf,
+ libtool,
+ libxml2-dev,
+ libyangrpc-dev (>= 2.13),
+ libyuma-dev (>= 2.13),
+ pkg-config
 Standards-Version: 4.1.4
 Homepage: https://yuma123.org
 

@@ -30,8 +30,6 @@ date             init     comment
 08-feb-07    abb      Begun; started from agt_ses.h
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif

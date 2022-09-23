@@ -32,7 +32,6 @@ date	     init     comment
 */
 
 #include <math.h>
-#include <libxml/xmlstring.h>
 #include <assert.h>
 
 #include "xmlns.h"

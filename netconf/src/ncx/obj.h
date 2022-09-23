@@ -33,9 +33,6 @@ date	     init     comment
 
 */
 
-#include <libxml/xmlstring.h>
-#include <libxml/xmlregexp.h>
-
 #include "grp.h"
 #include "ncxconst.h"
 #include "ncxtypes.h"

@@ -32,8 +32,6 @@ date             init     comment
 16-apr-11    abb      Add support for string token preservation
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_help
 #include "help.h"
 #endif

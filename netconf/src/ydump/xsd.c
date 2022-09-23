@@ -32,9 +32,6 @@ date         init     comment
 #include <memory.h>
 #include <ctype.h>
 
-#include <libxml/xmlstring.h>
-#include <libxml/xmlreader.h>
-
 #include "procdefs.h"
 #include "cfg.h"
 #include "dlq.h"

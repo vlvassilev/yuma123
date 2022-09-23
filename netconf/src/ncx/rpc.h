@@ -30,10 +30,7 @@ date             init     comment
 ----------------------------------------------------------------------
 01-may-05    abb      Begun.
 */
-
-#include <libxml/xmlstring.h>
-
-
+ 
 #ifndef _H_dlq
 #include "dlq.h"
 #endif

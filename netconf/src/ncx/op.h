@@ -30,8 +30,6 @@ date             init     comment
 06-apr-05    abb      Begun.
 */
 
-#include <libxml/xmlstring.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

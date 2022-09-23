@@ -33,7 +33,6 @@ date	     init     comment
 */
 
 #include <stdio.h>
-#include <libxml/xmlstring.h>
 
 #ifndef _H_cfg
 #include "cfg.h"

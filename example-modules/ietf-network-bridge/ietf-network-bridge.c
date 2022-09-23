@@ -10,8 +10,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-
-#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"

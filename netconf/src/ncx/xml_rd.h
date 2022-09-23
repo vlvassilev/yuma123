@@ -12,7 +12,6 @@
 */
 
 #include <stdio.h>
-#include <libxml/xmlstring.h>
 #include "cfg.h"
 #include "dlq.h"
 #include "ncxtypes.h"

@@ -32,8 +32,6 @@ date             init     comment
 
 #include <sys/select.h>
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_getcb
 #include "getcb.h"
 #endif

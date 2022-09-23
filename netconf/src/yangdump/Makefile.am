@@ -39,8 +39,8 @@ $(top_srcdir)/netconf/src/ydump/yangtree.h \
 $(top_srcdir)/netconf/src/ydump/yangyin.h \
 $(top_srcdir)/netconf/src/ydump/ydump.h
 
-yangdump_CPPFLAGS = -I $(top_srcdir)/libtecla -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump $(XML_CPPFLAGS) -I$(top_srcdir)/netconf/src/yangrpc -I$(top_srcdir)/netconf/src/ydump
-yangdump_LDFLAGS = $(top_builddir)/netconf/src/ncx/libyumancx.la $(XML_LIBS) $(LIBS)
+yangdump_CPPFLAGS = -I $(top_srcdir)/libtecla -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I$(top_srcdir)/netconf/src/yangrpc -I$(top_srcdir)/netconf/src/ydump
+yangdump_LDFLAGS = $(top_builddir)/netconf/src/ncx/libyumancx.la $(LIBS)
 
 dist_yuma123_yang_DATA = \
 $(top_srcdir)/netconf/modules/yuma123/yangdump.yang

@@ -32,8 +32,6 @@ date         init     comment
 #include <unistd.h>
 #include <ctype.h>
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_procdefs
 #include  "procdefs.h"
 #endif

@@ -32,8 +32,6 @@ date	     init     comment
 
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_ses
 #include "ses.h"
 #endif

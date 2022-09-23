@@ -14,8 +14,6 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-
-#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_commit_complete.h"

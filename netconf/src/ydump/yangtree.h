@@ -19,7 +19,6 @@
   Convert YANG module to YANG tree format
 */
 
-#include <libxml/xmlstring.h>
 #include "ncxtypes.h"
 #include "ses.h"
 #include "status.h"

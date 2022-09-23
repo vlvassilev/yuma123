@@ -36,8 +36,12 @@ date             init     comment
 /* used for timestamps and time deltas */
 #include <time.h>
 
+#ifdef LIBXML2_ENABLED
 /* used by the agent for the xmlTextReader interface */
 #include <libxml/xmlreader.h>
+#else
+typedef void* xmlTextReaderPtr;
+#endif
 
 #ifndef _H_dlq
 #include "dlq.h"

@@ -61,8 +61,6 @@ date	     init     comment
 23-aug-09    abb      Update diagram in header
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif

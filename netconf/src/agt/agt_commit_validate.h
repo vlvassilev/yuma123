@@ -11,8 +11,6 @@
 
 */
 
-#include <libxml/xmlstring.h>
-
 #include "procdefs.h"
 #include "status.h"
 

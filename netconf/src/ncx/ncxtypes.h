@@ -33,8 +33,14 @@ date	     init     comment
 10-nov-07    abb      Split out from ncxconst.h
 */
 
+#ifdef LIBXML2_ENABLED
 #include <libxml/xmlstring.h>
 #include <libxml/xmlregexp.h>
+#else
+typedef unsigned char xmlChar;
+typedef void* xmlRegexpPtr;
+typedef void* xmlTextReaderPtr;
+#endif
 
 #ifndef _H_dlq
 #include "dlq.h"

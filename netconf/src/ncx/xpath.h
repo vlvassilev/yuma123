@@ -33,10 +33,6 @@ date	     init     comment
 
 */
 
-#include <libxml/xmlstring.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xmlregexp.h>
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif

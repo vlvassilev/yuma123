@@ -12,7 +12,7 @@
 
  */
 
-#include <libxml/xmlstring.h>
+#include <stdio.h>
 
 #ifndef _H_procdefs
 #include "procdefs.h"

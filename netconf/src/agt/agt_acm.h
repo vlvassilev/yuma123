@@ -32,8 +32,6 @@ date	     init     comment
 14-may-09    abb      add per-msg cache to speed up performance
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_agt
 #include "agt.h"
 #endif

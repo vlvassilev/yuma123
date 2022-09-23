@@ -79,7 +79,6 @@ date             init     comment
 29-may-08    abb      Converted NCX database model to simplified
                       YANG object model
 */
-#include <libxml/xmlstring.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

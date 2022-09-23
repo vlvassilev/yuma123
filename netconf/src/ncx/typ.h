@@ -33,8 +33,6 @@ date	     init     comment
                       to support N patterns per typdef
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif

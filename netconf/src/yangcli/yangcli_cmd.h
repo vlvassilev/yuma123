@@ -32,9 +32,6 @@ date	     init     comment
 
 */
 
-
-#include <libxml/xmlstring.h>
-
 #ifndef _H_obj
 #include "obj.h"
 #endif

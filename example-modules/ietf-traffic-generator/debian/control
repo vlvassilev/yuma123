@@ -12,7 +12,6 @@ Build-Depends:
  libtool,
  libxml2-dev,
  libyuma-dev (>= 2.13),
- pkg-config,
  zlib1g-dev
 Standards-Version: 4.1.4
 Homepage: https://lightside-instruments.com

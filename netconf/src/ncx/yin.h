@@ -32,8 +32,6 @@ date	     init     comment
 
 */
 
-#include <libxml/xmlstring.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

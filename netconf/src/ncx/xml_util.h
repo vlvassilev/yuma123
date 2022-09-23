@@ -77,11 +77,6 @@ date	     init     comment
                       xml_node_t
 */
 
-
-/* From /usr/include/libxml2/libxml/ */
-#include <libxml/xmlreader.h>
-#include <libxml/xmlstring.h>
-
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -165,6 +160,11 @@ typedef struct xml_node_t_ {
     xml_attrs_t    attrs;
 } xml_node_t;
 
+#ifdef LIBXML2_ENABLED
+/* From /usr/include/libxml2/libxml/ */
+#include <libxml/xmlreader.h>
+#include <libxml/xmlstring.h>
+#endif
 
 /********************************************************************
 *								    *
@@ -220,6 +220,8 @@ extern void
 extern void
     xml_clean_node (xml_node_t *node);
 
+
+#ifdef LIBXML2_ENABLED
 
 /********************************************************************
 * FUNCTION xml_get_reader_from_filespec
@@ -297,6 +299,63 @@ extern status_t
 extern void
     xml_free_reader (xmlTextReaderPtr reader);
 
+/********************************************************************
+* FUNCTION xml_advance_reader
+* 
+* Advance to the next node in the specified reader
+*
+* INPUTS:
+*   reader == XmlReader already initialized from File, Memory,
+*             or whatever
+* RETURNS:
+*   FALSE if OEF seen, or TRUE if normal
+*********************************************************************/
+extern boolean 
+    xml_advance_reader (xmlTextReaderPtr reader);
+
+
+/********************************************************************
+* FUNCTION xml_docdone
+*
+* check if the input is completed for a given PDU
+*
+* INPUTS:
+*    reader == xml text reader
+* RETURNS:
+*    TRUE if document is done
+*    FALSE if document is not done or some error
+*    If a node is read, the reader will be pointing to that node
+*********************************************************************/
+extern boolean 
+    xml_docdone (xmlTextReaderPtr reader);
+
+/********************************************************************
+* FUNCTION xml_check_ns
+*
+* INPUTS:
+*   reader == XmlReader already initialized from File, Memory,
+*             or whatever
+*   pfs->ns_id == element namespace to check
+*   elname == element name to check
+*
+* OUTPUTS:
+*   *id == namespace ID found or 0 if none
+*   *pfix_len == filled in > 0 if one found
+*             real element name will start at pfix_len+1
+*             if pfix is non-NULL
+*   *badns == pointer to unknown namespace if error returned
+* RETURNS:
+*   status; could be error if namespace specified but not supported
+*********************************************************************/
+extern status_t
+    xml_check_ns (xmlTextReaderPtr reader,
+		  const xmlChar   *elname,
+		  xmlns_id_t       *id,
+		  uint32           *pfix_len,
+		  const xmlChar   **badns);
+
+
+#endif /* LIBXML2_ENABLED */
 
 /********************************************************************
 * FUNCTION xml_get_node_name
@@ -311,21 +370,6 @@ extern void
 *********************************************************************/
 extern const char * 
     xml_get_node_name (int nodeval);
-
-
-/********************************************************************
-* FUNCTION xml_advance_reader
-* 
-* Advance to the next node in the specified reader
-*
-* INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
-* RETURNS:
-*   FALSE if OEF seen, or TRUE if normal
-*********************************************************************/
-extern boolean 
-    xml_advance_reader (xmlTextReaderPtr reader);
 
 
 /********************************************************************
@@ -363,22 +407,6 @@ extern status_t
 extern status_t
     xml_endnode_match (const xml_node_t *startnode,
 		       const xml_node_t *endnode);
-
-
-/********************************************************************
-* FUNCTION xml_docdone
-*
-* check if the input is completed for a given PDU
-*
-* INPUTS:
-*    reader == xml text reader
-* RETURNS:
-*    TRUE if document is done
-*    FALSE if document is not done or some error
-*    If a node is read, the reader will be pointing to that node
-*********************************************************************/
-extern boolean 
-    xml_docdone (xmlTextReaderPtr reader);
 
 
 /********************************************************************
@@ -963,33 +991,7 @@ extern xmlChar
     xml_convert_char_entity (const xmlChar *str, 
 			     uint32 *used);
 
-
-/********************************************************************
-* FUNCTION xml_check_ns
-*
-* INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
-*   pfs->ns_id == element namespace to check
-*   elname == element name to check
-*
-* OUTPUTS:
-*   *id == namespace ID found or 0 if none
-*   *pfix_len == filled in > 0 if one found
-*             real element name will start at pfix_len+1
-*             if pfix is non-NULL
-*   *badns == pointer to unknown namespace if error returned
-* RETURNS:
-*   status; could be error if namespace specified but not supported
-*********************************************************************/
-extern status_t
-    xml_check_ns (xmlTextReaderPtr reader,
-		  const xmlChar   *elname,
-		  xmlns_id_t       *id,
-		  uint32           *pfix_len,
-		  const xmlChar   **badns);
-
-
+#ifdef LIBXML2_ENABLED
 /********************************************************************
 * FUNCTION xml_check_qname_content
 * 
@@ -1083,6 +1085,7 @@ extern status_t
 status_t
     xml_skip_subtree (xmlTextReaderPtr reader,
                           const xml_node_t *startnode);
+#endif
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

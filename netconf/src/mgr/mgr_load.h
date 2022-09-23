@@ -30,8 +30,6 @@ date             init     comment
 27-jun-11    abb      Begun;
 */
 
-#include <libxml/xmlstring.h>
-
 #ifndef _H_obj
 #include "obj.h"
 #endif

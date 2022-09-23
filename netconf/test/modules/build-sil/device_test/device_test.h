@@ -23,8 +23,6 @@
 
  */
 
-#include <libxml/xmlstring.h>
-
 #include "dlq.h"
 #include "ncxtypes.h"
 #include "op.h"

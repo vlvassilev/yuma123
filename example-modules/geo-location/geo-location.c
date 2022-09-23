@@ -15,8 +15,6 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 
-
-#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"

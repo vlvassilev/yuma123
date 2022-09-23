@@ -3,7 +3,6 @@
     namespace urn:ietf:params:xml:ns:yang:ietf-alarms
  */
  
-#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"

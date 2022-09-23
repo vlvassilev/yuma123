@@ -1,4 +1,3 @@
-#include <libxml/xmlstring.h>
 #include <string.h>
 #include <assert.h>
 #include "dlq.h"

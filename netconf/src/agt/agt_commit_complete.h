@@ -28,10 +28,9 @@ date	     init     comment
 24-oct-11    mp       First draft.
 */
 
-#include <libxml/xmlstring.h>
-
 #include "procdefs.h"
 #include "status.h"
+#include "ncxtypes.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -13,6 +13,8 @@ AC_PROG_LIBTOOL
 pythondir="/usr/lib/python3/dist-packages"
 AC_SUBST(pythondir)
 
+PKG_CHECK_MODULES([PYTHON3],[python3])
+
 CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1"
 AC_SUBST(CFLAGS)
 

@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 
- #include "procdefs.h"
+#include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"
 #include "agt_timer.h"

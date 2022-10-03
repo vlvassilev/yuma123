@@ -31,6 +31,7 @@ date	     init     comment
 12-nov-05    abb      Begun
 
 */
+#include <stdio.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

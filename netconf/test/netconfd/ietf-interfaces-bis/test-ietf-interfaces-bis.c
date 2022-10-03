@@ -2,7 +2,6 @@
     module test-ietf-interfaces-bis
  */
  
-#include <libxml/xmlstring.h>
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
@@ -22,6 +21,7 @@
 #include "val.h"
 #include "val123.h"
 #include "agt_nmda.h"
+#include "val_set_cplxval_obj.h"
 
 /* module static variables */
 static ncx_module_t *ietf_interfaces_mod;

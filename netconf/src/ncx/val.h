@@ -89,6 +89,7 @@ date	     init     comment
 
 */
 
+#include <stdio.h>
 #include <time.h>
 
 #include "dlq.h"

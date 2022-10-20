@@ -2,7 +2,8 @@
 
 apt-get update
 apt-get -y upgrade
-apt-get -y install git devscripts
+apt-get -y install git devscripts \
+	equivs
 
 #getting/building/installing
 cd ~
@@ -42,7 +43,7 @@ rm -rf yuma123-python_${ver}
 tar -xzvf yuma123-python_${ver}.orig.tar.gz
 cd yuma123-python_${ver}
 debuild -us -uc
-apt-get -y install python-paramiko python-lxml
+apt-get -y install python3-paramiko python3-lxml
 dpkg -i ../python-yuma*.deb
 
 #testing
@@ -62,7 +63,7 @@ echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/t
 /etc/init.d/ssh restart
 
 cd ~/yuma123_${ver}/netconf/test/netconfd
-apt-get -y install python-ncclient valgrind
+apt-get -y install python3-ncclient valgrind
 
 multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
 prefix="/usr"

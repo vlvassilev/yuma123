@@ -82,7 +82,7 @@ class litenc:
             except socket.timeout:
                 return (1,[])
             if data:
-                self.receive_total_data = self.receive_total_data + str(data)
+                self.receive_total_data = self.receive_total_data + data.decode('ascii')
             else:
                 return (-1,[])
 
@@ -92,7 +92,7 @@ class litenc:
         ret=self.send('''<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="'''+str(message_id)+'''">'''+xml+"</rpc>")
         if(ret!=0):
             return (ret,[])
-	(ret,reply_xml)=self.receive()
+        (ret,reply_xml)=self.receive()
         return (ret,reply_xml)
 
     def close(self):

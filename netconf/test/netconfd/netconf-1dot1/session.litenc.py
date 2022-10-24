@@ -18,7 +18,7 @@ def step_1(server, port, user, password):
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		assert(0)
 	print("Connected ...")
 	return (conn_raw)
@@ -61,7 +61,7 @@ def step_2(conn_raw):
 			if n <= 0:
 				return -1
 			data = data[n:]
-	except Exception, e:
+	except Exception as e:
 		print("Exception while sending.")
 		assert(0)
 

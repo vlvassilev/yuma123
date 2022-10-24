@@ -12,6 +12,6 @@ if(conn==None):
 names = yangcli(conn, "xget /interfaces-state").xpath('./data/interfaces-state/interface/name')
 
 for name in names:
-	print name.text
+	print(name.text)
 
 print("Done.")

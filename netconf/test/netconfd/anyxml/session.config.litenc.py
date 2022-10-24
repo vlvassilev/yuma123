@@ -48,9 +48,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -67,7 +67,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 
 
@@ -110,14 +110,14 @@ def main():
 
         print("<edit-config> - /c/a ...")
         result = conn.rpc(edit_config_rpc)
-	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
         print("<commit> ...")
         result = conn.rpc(commit_rpc)
-	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
         print("<get> - /c/a ...")
         result = conn.rpc(get_rpc)
 
-	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
 	one = result.xpath("./nc:data/test-anyxml:c/test-anyxml:a/test-anyxml:one", namespaces=namespaces)
 	assert(len(one)==1)
 

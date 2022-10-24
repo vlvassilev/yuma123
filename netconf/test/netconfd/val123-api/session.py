@@ -10,7 +10,7 @@ if(conn==None):
     sys.exit(1)
 
 result=yangcli(conn, "xget /system-state/platform")
-print lxml.etree.tostring(result)
+print(lxml.etree.tostring(result))
 assert("foo"==result.xpath('./data/system-state/platform/os-name')[0].text)
 assert("bar"==result.xpath('./data/system-state/platform/os-release')[0].text)
 

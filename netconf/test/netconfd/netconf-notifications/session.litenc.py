@@ -48,9 +48,9 @@ def main():
 	conn = litenc.litenc()
 	ret = conn.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn_lxml=litenc_lxml.litenc_lxml(conn,strip_namespaces=True)
 	ret = conn.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -72,7 +72,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 	filter=""
 	if(args.with_filter_subtree):
@@ -97,14 +97,14 @@ def main():
 		print("[FAILED] Receiving <create-subscription> reply")
 		return(-1)
 
-	print "[OK] Receiving <create-subscription> reply =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <create-subscription> reply =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 	conn2 = litenc.litenc()
 	ret = conn2.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 
 	ret = conn2.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -121,7 +121,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 	conn2_lxml=litenc_lxml.litenc_lxml(conn2,strip_namespaces=True)
 	ret = conn2_lxml.rpc("""
@@ -133,20 +133,20 @@ def main():
 			print("[FAILED] Receiving <netconf-session-start> notification")
 			return(-1)
 
-		print lxml.etree.tostring(notification_xml)
+		print(lxml.etree.tostring(notification_xml))
 
 	notification_xml=conn_lxml.receive()
 	if notification_xml == None:
 		print("[FAILED] Receiving <netconf-session-end> notification")
 		return(-1)
 
-	print lxml.etree.tostring(notification_xml)
+	print(lxml.etree.tostring(notification_xml))
 
 	notification_xml=litenc_lxml.strip_namespaces(notification_xml)
 	match=notification_xml.xpath("/notification/netconf-session-end")
 	assert(len(match)==1)
 
-	print "[OK] Receiving <netconf-session-end>"
+	print("[OK] Receiving <netconf-session-end>")
 
 	return(0)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-import commands
+import subprocess
 
 # ----------------------------------------------------------------------------|
 def GetTestProgramList():
@@ -21,7 +21,7 @@ def RunTests( tests, argv  ):
 
     for test in tests:
         testCommand = test + " " + testArgs
-        print "running test %s" % testCommand
+        print("running test %s" % testCommand)
 
         # commands.getoutput( test )
         os.system( testCommand )

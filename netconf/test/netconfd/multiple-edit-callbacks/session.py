@@ -18,9 +18,9 @@ result=yangcli(conn, "xget /interfaces")
 a=result.xpath('./data/interfaces/interface[name=\'blah\']/a')
 b=result.xpath('./data/interfaces/interface[name=\'blah\']/b')
 
-print(a[0].text)
+print((a[0].text))
 assert(a[0].text=="Hello from a!")
-print(b[0].text)
+print((b[0].text))
 assert(b[0].text=="Hello from b!")
 
 print("Done.")

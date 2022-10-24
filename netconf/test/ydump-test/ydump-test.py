@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-import commands
+import subprocess
 import re
 
 # ----------------------------------------------------------------------------|
@@ -16,8 +16,8 @@ TestOutputDir = "./yangdump-op"
 # ----------------------------------------------------------------------------|
 def InitialiseOutputDir():
     """Create / Clean the test output directory"""
-    commands.getoutput( "mkdir -p " + TestOutputDir )
-    commands.getoutput( "rm -rf " + TestOutputDir+"/*" )
+    subprocess.getoutput( "mkdir -p " + TestOutputDir )
+    subprocess.getoutput( "rm -rf " + TestOutputDir+"/*" )
 
 # ----------------------------------------------------------------------------|
 def RunYangDump( fmt ):
@@ -33,8 +33,8 @@ def RunYangDump( fmt ):
                 + "defnames=true "
                 + "log=" + TestOutputDir+"/test-"+fmt+".log "
                 + "log-level=debug" )
-    print "Running command: %s" % command
-    commands.getoutput( command )
+    print("Running command: %s" % command)
+    subprocess.getoutput( command )
 
 # ----------------------------------------------------------------------------|
 def CountOccurrences ( searchText, data, ignoreCase = True ):
@@ -61,7 +61,7 @@ def SummariseErrorsAndWarnings( data ):
 def AnalyseOutput( fmt ):
     """Analyse the output log file for the specified yangdump format"""
     filename = TestOutputDir + "/test-" + fmt + ".log"
-    print "Analysing Results From %s" % filename
+    print("Analysing Results From %s" % filename)
     f = open( filename, "r" )
     data = f.read();
 
@@ -97,61 +97,61 @@ def TestYang():
 def DisplayResults( results ):
     colWid = 15
     tabWid = 80
-    print "\n"
-    print "="*tabWid
-    print " The Results of running yangdump are summarised in the table below."
-    print "-"*tabWid
-    print ( " %s %s %s %s %s" % ( "Format".ljust(colWid), 
+    print("\n")
+    print("="*tabWid)
+    print(" The Results of running yangdump are summarised in the table below.")
+    print("-"*tabWid)
+    print(( " %s %s %s %s %s" % ( "Format".ljust(colWid), 
                                  "Errors".center(colWid),
                                  "Warnings".center(colWid),
                                  "Seg-Faults".center(colWid),
-                                 "Internal".center(colWid) ) )
+                                 "Internal".center(colWid) ) ))
     totalErrors = 0
     totalInternal = 0
     totalSegFaults = 0
     warningHighWaterMark = 89
     warningHighWaterMarkExceeded = False
-    print "-"*tabWid
+    print("-"*tabWid)
     for k in sorted( results.keys() ):
         res = results[k]
-        print ( " %s %s %s %s %s" % ( repr(k).ljust(colWid), 
+        print(( " %s %s %s %s %s" % ( repr(k).ljust(colWid), 
                                      repr(res[0]).center(colWid), 
                                      repr(res[1]).center(colWid), 
                                      repr(res[2]).center(colWid), 
-                                     repr(res[3]).center(colWid) ) )
+                                     repr(res[3]).center(colWid) ) ))
         totalErrors += res[0]
         totalSegFaults += res[2]
         totalInternal += res[3]
         if res[1] > warningHighWaterMark:
             warningHighWaterMarkExceeded = True
 
-    print "-"*tabWid
-    print " Note: Many yang files currently emit warnings."
-    print "-"*tabWid
+    print("-"*tabWid)
+    print(" Note: Many yang files currently emit warnings.")
+    print("-"*tabWid)
     errorOp = False
     if totalErrors>0:
-        print "\033[31;1m Test Failed: There were %d errors \033[39;0m" % totalErrors
+        print("\033[31;1m Test Failed: There were %d errors \033[39;0m" % totalErrors)
         errorOp = True
     if totalInternal>0:
-        print "\033[31;1m Test Failed: There were %d Segment Faults \033[39;0m" % totalErrors
+        print("\033[31;1m Test Failed: There were %d Segment Faults \033[39;0m" % totalErrors)
         errorOp = True
     if totalInternal>0:
-        print "\033[31;1m Test Failed: There were %d internal errors \033[39;0m" % totalErrors
+        print("\033[31;1m Test Failed: There were %d internal errors \033[39;0m" % totalErrors)
         errorOp = True
     if warningHighWaterMarkExceeded:
-        print "\033[31;1m Test Failed: Warning High Water Mark of %d Exceeded, \033[39;0m" % warningHighWaterMark
-        print "\033[31;1m New Warnings were introduced! \033[39;0m" 
+        print("\033[31;1m Test Failed: Warning High Water Mark of %d Exceeded, \033[39;0m" % warningHighWaterMark)
+        print("\033[31;1m New Warnings were introduced! \033[39;0m") 
         errorOp = True
 
     if errorOp == False:
-        print "\033[39;1m Test Passed! \033[39;0m"
+        print("\033[39;1m Test Passed! \033[39;0m")
 
-    print "-"*tabWid
-    print "\n"
+    print("-"*tabWid)
+    print("\n")
 
 # ----------------------------------------------------------------------------|
 if __name__ == '__main__':
-    print "Testing Yangdump for various formats"
+    print("Testing Yangdump for various formats")
 
     InitialiseOutputDir()
     results = TestYang()

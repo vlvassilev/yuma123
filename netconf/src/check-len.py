@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-import commands
+import subprocess
 
 # ----------------------------------------------------------------------------|
 class NullFilter:
@@ -65,7 +65,7 @@ def GetAllFilenames( rootDir = "./", filenameFilter = NullFilter() ):
 
 # ----------------------------------------------------------------------------|
 def GetModifiedFiles():
-    svnOp = commands.getoutput( "svn status" )
+    svnOp = subprocess.getoutput( "svn status" )
     svnOp = svnOp.split( '\n' )
     filenameFilter = SVNModifiedFilenameFilter()
     filenames = []
@@ -77,15 +77,15 @@ def GetModifiedFiles():
 # ----------------------------------------------------------------------------|
 def CheckFile( filename ):
     """Check the length of every line in the file"""
-    print "Checking %s...." %filename
+    print("Checking %s...." %filename)
     f = open( filename, 'r' )
     lines = f.readlines()
     lineNo = 1
     for line in lines:
         # Note allow 1 character for CR
         if len( line ) > 81:
-            print ( "\tLine %d exceeds 80 characters:  %d" % 
-                    ( lineNo, len( line ) ) )
+            print(( "\tLine %d exceeds 80 characters:  %d" % 
+                    ( lineNo, len( line ) ) ))
         lineNo += 1
 
 # ----------------------------------------------------------------------------|

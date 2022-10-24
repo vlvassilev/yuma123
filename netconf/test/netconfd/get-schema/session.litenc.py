@@ -48,9 +48,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -79,14 +79,14 @@ def main():
 """
 
 	for identifier in {"main-module", "sub-module"}:
-		print("get %s."%(identifier))
+		print(("get %s."%(identifier)))
 		result = conn.rpc(get_rpc%{'identifier':identifier})
 		ok = result.xpath('data/netconf-state/schemas/schema/identifier')
-		print result
+		print(result)
 		# print ok
 		# print lxml.etree.tostring(result)
 		#assert(len(ok)==1)
-		print "[OK] Retrieving a (sub)module"
+		print("[OK] Retrieving a (sub)module")
 
 		get_schema = """
 <get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">
@@ -96,11 +96,11 @@ def main():
 		print("")
 		print("get-schema")
 
-		print(get_schema%{'identifier':identifier})
+		print((get_schema%{'identifier':identifier}))
 		result = conn.rpc(get_schema%{'identifier':identifier})
-		print lxml.etree.tostring(result)
+		print(lxml.etree.tostring(result))
 		rpc_error = result.xpath('rpc-error')
 		assert(len(rpc_error)==0)
-		print "[OK] Retrieving a (sub)module"
+		print("[OK] Retrieving a (sub)module")
 
 sys.exit(main())

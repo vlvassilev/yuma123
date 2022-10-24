@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-import commands
+import subprocess
 
 copyright = " * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.\n"
 
@@ -70,7 +70,7 @@ def GetAllFilenames( rootDir = "./", filenameFilter = NullFilter() ):
 
 # ----------------------------------------------------------------------------|
 def GetModifiedFiles():
-    svnOp = commands.getoutput( "svn status" )
+    svnOp = subprocess.getoutput( "svn status" )
     svnOp = svnOp.split( '\n' )
     filenameFilter = SVNModifiedFilenameFilter()
     filenames = []
@@ -82,7 +82,7 @@ def GetModifiedFiles():
 # ----------------------------------------------------------------------------|
 def CheckFile( filename ):
     """Check the copyright line as the file is being copied"""
-    print "Checking %s...." %filename
+    print("Checking %s...." %filename)
     copydone = 0
     outfilename = filename + ".tmp"
     f = open( filename, 'r' )

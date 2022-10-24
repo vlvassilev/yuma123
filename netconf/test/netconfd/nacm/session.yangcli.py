@@ -20,11 +20,11 @@ def main():
 
 	args = parser.parse_args()
 
-	print("""
+	print(("""
 #Description: Validate nacm --operation=%(operation)s --option=%(option)s
 #Procedure:
 #1 - Do %(operation)s.
-""" % {'operation': args.operation, 'option':args.option})
+""" % {'operation': args.operation, 'option':args.option}))
 
 
 	if(args.server==None or args.server==""):
@@ -67,7 +67,7 @@ def main():
 	elif(args.operation == 'get'):
 		result = yangcli(conn, '''sget /top/%s''' % (args.option))
 		value = result.xpath('./data/top/%s' % (args.option))
-		print etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+		print(etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
 		assert(len(value)==1)
 		assert(value[0].text==args.option)
 	else:

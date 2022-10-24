@@ -9,9 +9,9 @@ args = parser.parse_args()
 
 print("Before:")
 f=open(args.before,"r")
-print(f.read())
+print((f.read()))
 
 print("After:")
 f=open(args.after,"r")
-print(f.read())
+print((f.read()))
 

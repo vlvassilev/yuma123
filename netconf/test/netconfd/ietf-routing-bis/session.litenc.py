@@ -8,7 +8,7 @@ import litenc_lxml
 import lxml
 from lxml import etree
 #from litenc import strip_namespaces
-from StringIO import StringIO
+from io import StringIO
 import argparse
 from operator import attrgetter
 
@@ -45,8 +45,8 @@ def strip_namespaces(tree):
 
 # Hmm .. ?!
 def yang_data_equal(e1, e2):
-	print e1.tag
-	print e2.tag
+	print(e1.tag)
+	print(e2.tag)
 	if e1.tag != e2.tag:
 		assert(False)
 		return False
@@ -66,16 +66,16 @@ def yang_data_equal(e1, e2):
 			assert(False)
 			return False
 	if e1.attrib != e2.attrib:
-		print (e1.attrib)
-		print (e2.attrib)
+		print((e1.attrib))
+		print((e2.attrib))
 		assert(False)
 		print("diff attrib")
 		return False
 	if len(e1) != len(e2):
-		print e1
-		print len(e1)
-		print e2
-		print len(e2)
+		print(e1)
+		print(len(e1))
+		print(e2)
+		print(len(e2))
 		assert(False)
 		return False
 	for node in e1.findall("*"):  # searching top-level nodes only: node1, node2 ...
@@ -83,8 +83,8 @@ def yang_data_equal(e1, e2):
 	for node in e2.findall("*"):  # searching top-level nodes only: node1, node2 ...
 		node[:] = sorted(node, key=attrgetter("tag"))
 	for c1,c2 in zip(e1,e2):
-		print c1
-		print c2
+		print(c1)
+		print(c2)
 		print("---")
 		yang_data_equal(c1, c2)
 	return 1
@@ -130,9 +130,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -149,7 +149,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 	print("Connected ...")
 
@@ -163,7 +163,7 @@ def main():
 
 	print("<get> - /ietf-yang-library:modules-state ...")
 	result = conn.rpc(get_yang_library_rpc, strip_ns=False)
-	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
         namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
@@ -394,7 +394,7 @@ def main():
 
 	print("<edit-config> - load Appendix D. example config to 'candidate' ...")
 	result = conn.rpc(edit_config_rpc)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 	assert(len(ok)==1)
 
@@ -402,7 +402,7 @@ def main():
 
 	print("<commit> - commit example config ...")
 	result = conn.rpc(commit_rpc)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 	assert(len(ok)==1)
 
@@ -420,7 +420,7 @@ def main():
 
 	print("<get-data> - Appendix E. data ...")
 	result = conn.rpc(get_example_data_rpc, strip_ns=False)
-	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
         namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
 	data = result.xpath('./ncds:data', namespaces=namespaces)
 	assert(len(data)==1)
@@ -575,14 +575,14 @@ def main():
 	data_received.write_c14n(b)
 
 	print("Expected:")
-	print(a.getvalue())
+	print((a.getvalue()))
 	print("Received:")
-	print(b.getvalue())
+	print((b.getvalue()))
 	if yang_data_equal(lxml.etree.fromstring(a.getvalue()), lxml.etree.fromstring(b.getvalue())):
-		print "Bingo!"
+		print("Bingo!")
 		return 0
 	else:
-		print "Error: YANG data not equal!"
+		print("Error: YANG data not equal!")
 		return 1
 
 sys.exit(main())

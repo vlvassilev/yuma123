@@ -48,9 +48,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -67,14 +67,14 @@ def main():
 	result=conn.receive()
 
 	print("#1 - Verify ietf-yang-library is listed as capability in the hello message.")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	result=litenc_lxml.strip_namespaces(result)
 	found=False
 	for capability in result.xpath("/hello/capabilities/capability"):
 		#print lxml.etree.tostring(capability)
-		print capability.text
+		print(capability.text)
 		if(capability.text.startswith('urn:ietf:params:netconf:capability:yang-library:1.0?')):
-			print("Found it:" + capability.text)
+			print(("Found it:" + capability.text))
 			found=True
 	assert(found==True)
 
@@ -93,7 +93,7 @@ def main():
 	result = conn.rpc(get_rpc)
 	result=litenc_lxml.strip_namespaces(result)
 
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	name = result.xpath('data/modules-state/module/name')
 	assert(len(name)==1)
 
@@ -126,7 +126,7 @@ def main():
 	result = conn.rpc(get_rpc)
 	result=litenc_lxml.strip_namespaces(result)
 
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	name = result.xpath('data/modules-state/module/name')
 	assert(len(name)==1)
 

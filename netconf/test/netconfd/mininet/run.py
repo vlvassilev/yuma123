@@ -73,10 +73,10 @@ def netconfNet():
     b0.cmd( '''VCONN_ARG=ptcp:16636 ./run-netconfd --module=ietf-network-bridge-openflow --no-startup --superuser=${USER} --port=8830 --ncxserver-sockname=/tmp/ncxserver.8830.sock &''' )
     b0.cmd( 'ovs-vsctl del-br dp0' )
     b0.cmd( 'ovs-vsctl add-br dp0' )
-    for intf in b0.intfs.values():
-        print "Setting: "+ str(intf)
-        print b0.cmd( 'ovs-vsctl add-port dp0 %s' % intf )
-        print b0.cmd( 'ifconfig -a' )
+    for intf in list(b0.intfs.values()):
+        print("Setting: "+ str(intf))
+        print(b0.cmd( 'ovs-vsctl add-port dp0 %s' % intf ))
+        print(b0.cmd( 'ifconfig -a' ))
 
     # Note: controller and switch are in root namespace, and we
     # can connect via loopback interface
@@ -92,17 +92,17 @@ def netconfNet():
     b1.cmd( '''VCONN_ARG=ptcp:16635 ./run-netconfd --module=ietf-network-bridge-openflow --no-startup --superuser=${USER} --port=8831 --ncxserver-sockname=/tmp/ncxserver.8831.sock &''' )
     b1.cmd( 'ovs-vsctl del-br dp1' )
     b1.cmd( 'ovs-vsctl add-br dp1' )
-    for intf in b1.intfs.values():
-        print "Setting: "+ str(intf)
-        print b1.cmd( 'ovs-vsctl add-port dp1 %s' % intf )
-        print b1.cmd( 'ifconfig -a' )
+    for intf in list(b1.intfs.values()):
+        print("Setting: "+ str(intf))
+        print(b1.cmd( 'ovs-vsctl add-port dp1 %s' % intf ))
+        print(b1.cmd( 'ifconfig -a' ))
 
     # Note: controller and switch are in root namespace, and we
     # can connect via loopback interface
     b1.cmd( 'ovs-vsctl set-controller dp1 tcp:127.0.0.1:16635' )
 
     sleep(10)
-    raw_input("Press Enter to continue...")
+    input("Press Enter to continue...")
 
 
     tree=etree.parse("topology.xml")
@@ -155,7 +155,7 @@ create /flows/flow[id='h1-to-h0'] -- match/in-port=b1-eth1 actions/action[order=
 
     tntapi.print_state_ietf_interfaces_statistics_delta(network, state_before, state_after)
 
-    raw_input("Press Enter to continue...")
+    input("Press Enter to continue...")
 
     info( "*** Stopping network\n" )
     b0.cmd( 'killall -KILL netconfd' )

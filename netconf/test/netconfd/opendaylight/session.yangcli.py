@@ -13,7 +13,7 @@ def yangcli_ok_script(conn, yangcli_script):
 		line=line.strip()
 		if not line:
 			continue
-		print("Executing: "+line)
+		print(("Executing: "+line))
 		ok = yangcli(conn, line).xpath('./ok')
 		assert(len(ok)==1)
 
@@ -63,16 +63,16 @@ def main():
 
 	result = yangcli(conn, "commit")
 	ok = result.xpath('./ok')
-	print(lxml.etree.tostring(result))
+	print((lxml.etree.tostring(result)))
 	assert(len(ok)==1)
 
 	result = yangcli(conn, "merge /modules/module[name='right'][type='sal-netconf-connector'] -- address=127.0.0.1 sal-netconf:port=4830 tcp-only=false username=demo password=demo sal-netconf:event-executor/type=netty-event-executor sal-netconf:event-executor/name=global-event-executor sal-netconf:binding-registry/type=binding-broker-osgi-registry sal-netconf:binding-registry/name=binding-osgi-broker sal-netconf:dom-registry/type=dom-broker-osgi-registry sal-netconf:dom-registry/name=dom-broker sal-netconf:client-dispatcher/type=netconf-client-dispatcher sal-netconf:client-dispatcher/name=global-netconf-dispatcher sal-netconf:processing-executor/type=threadpool sal-netconf:processing-executor/name=global-netconf-processing-executor sal-netconf:keepalive-executor/type=scheduled-threadpool sal-netconf:keepalive-executor/name=global-netconf-ssh-scheduled-executor")
 	ok = result.xpath('./ok')
-	print(lxml.etree.tostring(result))
+	print((lxml.etree.tostring(result)))
 	assert(len(ok)==1)
 	result = yangcli(conn, "commit")
 	ok = result.xpath('./ok')
-	print(lxml.etree.tostring(result))
+	print((lxml.etree.tostring(result)))
 	assert(len(ok)==1)
 
 

@@ -13,7 +13,7 @@ def yangcli_ok_script(conn, yangcli_script):
 		line=line.strip()
 		if not line:
 			continue
-		print("Executing: "+line)
+		print(("Executing: "+line))
 		ok = yangcli(conn, line).xpath('./ok')
 		assert(len(ok)==1)
 
@@ -26,7 +26,7 @@ def connect(server, port, user, password):
 
 def commit(conn):
 	result = yangcli(conn, "commit")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0 or len(ok)==1)
@@ -37,7 +37,7 @@ def commit(conn):
 
 def discard(conn):
 	result = yangcli(conn, "discard")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0 or len(ok)==1)
@@ -65,7 +65,7 @@ def step_1(server, port0, port1, user, password):
 def step_2(conn_1,conn_2):
 	print("#2 - Validate /interfaces/interface/foo can be created on session #1.")
 	result = yangcli(conn_1, "create /interfaces/interface[name='foo'] -- type=ethernetCsmacd foo='hello'")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 	assert(len(ok)==1)
         commit(conn_1)
@@ -78,7 +78,7 @@ def step_2(conn_1,conn_2):
 def step_3(conn_1,conn_2):
 	print("#3 - Validate /interfaces/interface/bar can be created on session #2.")
 	result = yangcli(conn_2, "create /interfaces/interface[name='bar'] -- type=ethernetCsmacd bar='hello'")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 	assert(len(ok)==1)
         commit(conn_2)
@@ -101,7 +101,7 @@ def step_6(conn_1,conn_2):
 	print("#6 - Close session #1 and confirm 'bar' can still be created on session #2.")
 	yangrpc.close(conn_1)
 	result = yangcli(conn_2, "create /interfaces/interface[name='bar'] -- type=ethernetCsmacd bar='hello'")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 	assert(len(ok)==1)
         commit(conn_2)

@@ -90,9 +90,9 @@ def main():
 	result = conn.rpc(rpc)
 
 	names = result.xpath('//data/interfaces/interface/name')
-	print(len(names))
+	print((len(names)))
 	assert(len(names)==1)
-	print(names[0].text)
+	print((names[0].text))
 	assert(names[0].text=='foo')
 
 
@@ -134,15 +134,15 @@ def main():
 	result = conn.rpc(rpc)
 
 	names = result.xpath('//data/interfaces/interface/name')
-	print(len(names))
+	print((len(names)))
 	assert(len(names)==2)
 
 	name = result.xpath('//data/interfaces/interface[name=\'bar\']/name')
-	print(name[0].text)
+	print((name[0].text))
 	assert(name[0].text=='bar')
 
 	name = result.xpath('//data/interfaces/interface[name=\'foo\']/name')
-	print(name[0].text)
+	print((name[0].text))
 	assert(name[0].text=='foo')
 
 	rpc = """
@@ -182,11 +182,11 @@ def main():
 	result = conn.rpc(rpc)
 
 	names = result.xpath('//data/interfaces/interface/name')
-	print(len(names))
+	print((len(names)))
 	assert(len(names)==1)
 
 	name = result.xpath('//data/interfaces/interface[name=\'bar\']/name')
-	print(name[0].text)
+	print((name[0].text))
 	assert(name[0].text=='bar')
 
 	rpc = """
@@ -226,7 +226,7 @@ def main():
 	result = conn.rpc(rpc)
 
 	names = result.xpath('//data/interfaces/interface/name')
-	print(len(names))
+	print((len(names)))
 	assert(len(names)==0)
 
 

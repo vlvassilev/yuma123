@@ -12,7 +12,7 @@ def yangcli_ok_script(conn, yangcli_script):
 		line=line.strip()
 		if not line:
 			continue
-		print("Executing: "+line)
+		print(("Executing: "+line))
 		ok = yangcli(conn, line).xpath('./ok')
 		assert(len(ok)==1)
 
@@ -89,10 +89,10 @@ commit
 	result = yangcli(conn, "xget /interfaces")
 	names = result.xpath('./data/interfaces/interface/name')
 	for name in names:
-		print name.text
+		print(name.text)
 	types = result.xpath('./data/interfaces/interface/type')
 	for type in types:
-		print type.text
+		print(type.text)
 
 	#cleanup
 #	ok = yangcli(conn, '''delete /vlans''').xpath('./ok')

@@ -12,9 +12,9 @@ def connect(server, port, user, password):
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -31,7 +31,7 @@ def connect(server, port, user, password):
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 	return conn_raw
 
 def lock(conn):
@@ -44,7 +44,7 @@ def lock(conn):
 """
 	result = conn.rpc(lock_rpc)
 	ok = result.xpath('ok')
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 
 	assert(len(ok)==0 or len(ok)==1)
 	if(len(ok)==1):
@@ -62,7 +62,7 @@ def unlock(conn):
 """
 	result = conn.rpc(unlock_rpc)
 	ok = result.xpath('ok')
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 
 	assert(len(ok)==0 or len(ok)==1)
 	if(len(ok)==1):
@@ -77,7 +77,7 @@ def commit(conn):
 	print("commit ...")
 	result = conn.rpc(commit_rpc)
 	ok = result.xpath('ok')
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	assert(len(ok)==0 or len(ok)==1)
 	if(len(ok)==1):
 		return True
@@ -130,8 +130,8 @@ def step_4(conn_1,conn_2):
 	print("edit-config - create single 'foo' ...")
 	result = conn_2.rpc(edit_config_rpc)
 	ok = result.xpath('ok')
-	print result
-	print lxml.etree.tostring(result)
+	print(result)
+	print(lxml.etree.tostring(result))
 	assert(len(ok)==0)
 
 def step_5(conn_1,conn_2):
@@ -157,8 +157,8 @@ def step_5(conn_1,conn_2):
 	print("edit-config - create single 'foo' ...")
 	result = conn_1.rpc(edit_config_rpc)
 	ok = result.xpath('ok')
-	print result
-	print lxml.etree.tostring(result)
+	print(result)
+	print(lxml.etree.tostring(result))
 	assert(len(ok)==1)
 	return
 

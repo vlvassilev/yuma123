@@ -66,7 +66,7 @@ def main():
 	result = yangcli(conn, "xget /system")
 	searches = result.xpath('./data/system/dns-resolver/search')
 	for search in searches:
-		print search.text
+		print(search.text)
 
 	assert(len(searches)==1)
 	assert(searches[0].text=='foo')
@@ -80,7 +80,7 @@ def main():
 	result = yangcli(conn, "xget /system")
 	searches = result.xpath('./data/system/dns-resolver/search')
 	for search in searches:
-		print search.text
+		print(search.text)
 
 	assert(len(searches)==2)
 

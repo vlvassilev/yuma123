@@ -47,11 +47,11 @@ def eval_xpath_results(reply, hdr, exp):
 	if type(res) == type([]) and len(res) == 0:
 		# res[*] --> <type 'lxml.etree._Element'>
 		if DEBUG:
-			print(errmsg % (hdr, exp))
+			print((errmsg % (hdr, exp)))
 		rv = 2
 	elif type(res) == type(True) and res == False:
 		if DEBUG:
-			print(errmsg % (hdr, exp))
+			print((errmsg % (hdr, exp)))
 		rv = 2
 	#elif type(res) == type(1.0):
 	#elif type(res) == type(""):
@@ -99,7 +99,7 @@ def compare_module_lists(server_module_list, client_module_list):
 			pass
 		elif not servermod in client_module_list:
 			ok = False
-			print('Client is missing module %s' % (servermod))
+			print(('Client is missing module %s' % (servermod)))
 	return ok
 
 def main():
@@ -147,9 +147,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print("[FAILED] Connecting to server=%s:" % {'server':server})
+		print(("[FAILED] Connecting to server=%s:" % {'server':server}))
 		return(-1)
-	print("[OK] Connecting to server=%(server)s:" % {'server':server})
+	print(("[OK] Connecting to server=%(server)s:" % {'server':server}))
 	conn=litenc_lxml.litenc_lxml(conn_raw, strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -169,7 +169,7 @@ def main():
 	# get the modules list
 	(rv, reply) = send_rpc(conn, tests[0]['RPC'], tests[0]['edit-config-results'])
 	if rv > 0:
-		print('%s: sending RPC failed.' % tests[0]['name'])
+		print(('%s: sending RPC failed.' % tests[0]['name']))
 
 	server_module_list = parse_server_module_list(reply)
 	ok = compare_module_lists(server_module_list, client_module_list)

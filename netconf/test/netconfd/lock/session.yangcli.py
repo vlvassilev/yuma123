@@ -13,7 +13,7 @@ def yangcli_ok_script(conn, yangcli_script):
 		line=line.strip()
 		if not line:
 			continue
-		print("Executing: "+line)
+		print(("Executing: "+line))
 		ok = yangcli(conn, line).xpath('./ok')
 		assert(len(ok)==1)
 
@@ -27,7 +27,7 @@ def connect(server, port, user, password):
 
 def lock(conn):
 	result = yangcli(conn, "lock target=candidate")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0 or len(ok)==1)
@@ -38,7 +38,7 @@ def lock(conn):
 
 def unlock(conn):
 	result = yangcli(conn, "unlock target=candidate")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0 or len(ok)==1)
@@ -49,7 +49,7 @@ def unlock(conn):
 
 def commit(conn):
 	result = yangcli(conn, "commit")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0 or len(ok)==1)
@@ -83,7 +83,7 @@ def step_4(conn_1,conn_2):
 	print("#4 - Try to modify candidate from session #2. Validate this fails.")
 	line="create /interfaces/interface -- name=foo type=ethernetCsmacd"
 	result = yangcli(conn_2, line)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==0)
@@ -92,7 +92,7 @@ def step_5(conn_1,conn_2):
 	print("#5 - Modify candidate from session #1 confirm this is OK.")
 	line="create /interfaces/interface -- name=foo type=ethernetCsmacd"
 	result = yangcli(conn_1, line)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	ok = result.xpath('./ok')
 
 	assert(len(ok)==1)

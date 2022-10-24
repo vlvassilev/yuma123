@@ -48,9 +48,9 @@ def main():
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -67,7 +67,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 	print("Connected ...")
 
@@ -81,7 +81,7 @@ def main():
 """
 	print("get-schema - get ietf-yang-types ...")
 	result = conn.rpc(get_schema_rpc)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	error_app_tag = result.xpath('rpc-error/error-app-tag')
 	assert(len(error_app_tag)==1)
 	assert(error_app_tag[0].text=="data-not-unique")
@@ -95,7 +95,7 @@ def main():
 """
 	print("get-schema - get ietf-yang-types@2013-07-15 ...")
 	result1 = conn.rpc(get_schema_rpc)
-	print lxml.etree.tostring(result1)
+	print(lxml.etree.tostring(result1))
 	data1 = result1.xpath('data')
 	assert(len(data1)==1)
 
@@ -107,7 +107,7 @@ def main():
 """
 	print("get-schema - get ietf-yang-types@2013-07-15 ...")
 	result2 = conn.rpc(get_schema_rpc)
-	print lxml.etree.tostring(result2)
+	print(lxml.etree.tostring(result2))
 	data2 = result2.xpath('data')
 	assert(len(data2)==1)
 
@@ -119,7 +119,7 @@ def main():
 """
 	print("get-schema - get ietf-yang-types@2010-09-24 ...")
 	result3 = conn.rpc(get_schema_rpc)
-	print lxml.etree.tostring(result3)
+	print(lxml.etree.tostring(result3))
 	data3 = result3.xpath('data')
 	assert(len(data3)==1)
 

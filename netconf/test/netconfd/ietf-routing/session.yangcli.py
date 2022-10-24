@@ -13,7 +13,7 @@ def yangcli_ok_script(conn, yangcli_script):
 		line=line.strip()
 		if not line:
 			continue
-		print("Executing: "+line)
+		print(("Executing: "+line))
 		ok = yangcli(conn, line).xpath('./ok')
 		assert(len(ok)==1)
 
@@ -79,7 +79,7 @@ commit
 	yangcli_ok_script(conn, yangcli_script)
 
 	result = yangcli(conn, "xget /interfaces")
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 
 	return(0)
 sys.exit(main())

@@ -173,11 +173,11 @@ def eval_xpath_results(reply, hdr, exp):
 	if type(res) == type([]) and len(res) == 0:
 		# res[*] --> <type 'lxml.etree._Element'>
 		if DEBUG:
-			print(errmsg % (hdr, exp))
+			print((errmsg % (hdr, exp)))
 		rv = 2
 	elif type(res) == type(True) and res == False:
 		if DEBUG:
-			print(errmsg % (hdr, exp))
+			print((errmsg % (hdr, exp)))
 		rv = 2
 	#elif type(res) == type(1.0):
 	#elif type(res) == type(""):
@@ -203,17 +203,17 @@ def send_rpc(conn, rpcxml, expected=None):
 def run_one_test(conn, desc):
 	(rv, reply) = send_rpc(conn, rpc_discard_changes)
 	if rv > 0:
-		print('%s: sending discard-changes RPC failed.' % desc['name'])
+		print(('%s: sending discard-changes RPC failed.' % desc['name']))
 		return (desc['name'], rv)
 
 	(rv, reply) = send_rpc(conn, desc['RPC'], desc['edit-config-results'])
 	if rv > 0:
-		print('%s: sending test RPC failed.' % desc['name'])
+		print(('%s: sending test RPC failed.' % desc['name']))
 		return (desc['name'], rv)
 
 	(rv, reply) = send_rpc(conn, rpc_get_config_with_defaults, ['//data'])
 	if rv > 0:
-		print('%s: sending get-config RPC failed.' % desc['name'])
+		print(('%s: sending get-config RPC failed.' % desc['name']))
 
 	else:
 		for exp in desc['expected-results']:
@@ -273,9 +273,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print("[FAILED] Connecting to server=%s:" % {'server':server})
+		print(("[FAILED] Connecting to server=%s:" % {'server':server}))
 		return(-1)
-	print("[OK] Connecting to server=%(server)s:" % {'server':server})
+	print(("[OK] Connecting to server=%(server)s:" % {'server':server}))
 	conn=litenc_lxml.litenc_lxml(conn_raw, strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -295,7 +295,7 @@ def main():
 	results = run_tests(conn, tests)
 	ok = True
 	for x in results:
-		print("%-70.70s : %s" % (x[0], 'PASS' if x[1] == 0 else 'FAIL'))
+		print(("%-70.70s : %s" % (x[0], 'PASS' if x[1] == 0 else 'FAIL')))
 		if x[1] > 0:
 			ok = False
 

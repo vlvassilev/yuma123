@@ -15,8 +15,8 @@ class litenc:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(timeout)
             self.sock.connect((server, port))
-        except Exception, e:
-            print '*** Connect failed: ' + str(e)
+        except Exception as e:
+            print('*** Connect failed: ' + str(e))
             traceback.print_exc()
             return -1
 
@@ -27,10 +27,10 @@ class litenc:
             try:
                 self.t.start_client()
             except paramiko.SSHException:
-                print '*** SSH negotiation failed.'
+                print('*** SSH negotiation failed.')
                 return -1
-        except Exception, e:
-            print '*** Connect failed: ' + str(e)
+        except Exception as e:
+            print('*** Connect failed: ' + str(e))
             traceback.print_exc()
             return -1
 
@@ -43,7 +43,7 @@ class litenc:
             self.t.auth_password(user, password)
 
         if not self.t.is_authenticated():
-            print '*** Authentication failed. :('
+            print('*** Authentication failed. :(')
             self.t.close()
             return -1
 
@@ -62,8 +62,8 @@ class litenc:
                 if n <= 0:
                     return -1
                 data = data[n:]
-        except Exception, e:
-            print '*** Caught exception: ' + str(e.__class__) + ': ' + str(e)
+        except Exception as e:
+            print('*** Caught exception: ' + str(e.__class__) + ': ' + str(e))
             traceback.print_exc()
             return -1
 	return 0

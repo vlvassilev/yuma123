@@ -25,7 +25,7 @@ if(res!=0):
     print("Error: Missing /python-yuma-example/message leaf!")
     sys.exit(1)
 
-print(yuma.val_string(message_val))
+print((yuma.val_string(message_val)))
 
 yuma.val_dump_value(root_val,1)
 

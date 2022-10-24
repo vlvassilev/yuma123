@@ -48,9 +48,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -67,7 +67,7 @@ def main():
 		print("[FAILED] Receiving <hello>")
 		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	print("[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml})
 
 
 	print("Connected ...")
@@ -89,8 +89,8 @@ def main():
 	reply = lxml.etree.fromstring(reply_xml)
 	one_sent = request.xpath("./test-anyxml:ping/test-anyxml:one", namespaces=namespaces)
 	one_received = reply.xpath("./test-anyxml:pong/test-anyxml:one", namespaces=namespaces)
-	print one_sent
-	print one_received
+	print(one_sent)
+	print(one_received)
 	assert(len(one_sent)==1)
 	assert(len(one_received)==1)
 

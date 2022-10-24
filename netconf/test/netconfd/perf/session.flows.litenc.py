@@ -60,14 +60,14 @@ def session(args):
 
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
 
 	if(args.skip_hello=="true"):
 		conn_raw.close()
 		return(0)
 
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw, strip_namespaces=True)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -118,7 +118,7 @@ def edit_config(conn,args):
 	ok = result.xpath('ok')
 	#print result
 	#print ok
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	assert(len(ok)==1)
 
 	commit_rpc = """

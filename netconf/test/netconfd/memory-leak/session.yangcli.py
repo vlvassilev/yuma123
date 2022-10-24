@@ -67,10 +67,10 @@ def main():
 	result = yangcli(conn, "xget /interfaces")
 	names = result.xpath('./data/interfaces/interface/name')
 	for name in names:
-		print name.text
+		print(name.text)
 	types = result.xpath('./data/interfaces/interface/type')
 	for type in types:
-		print type.text
+		print(type.text)
 
 	assert(len(types)==1)
 	assert(types[0].text=='ianaift:ethernetCsmacd')
@@ -84,10 +84,10 @@ def main():
 	result = yangcli(conn, "xget /interfaces")
 	names = result.xpath('./data/interfaces/interface/name')
 	for name in names:
-		print name.text
+		print(name.text)
 	types = result.xpath('./data/interfaces/interface/type')
 	for type in types:
-		print type.text
+		print(type.text)
 
 	assert(len(types)==1)
 	assert(types[0].text=='ianaift:other')

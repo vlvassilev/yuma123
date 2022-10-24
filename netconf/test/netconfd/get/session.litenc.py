@@ -48,9 +48,9 @@ def main():
 	conn_raw = litenc.litenc()
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
-		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
+		print("[FAILED] Connecting to server=%(server)s:" % {'server':server})
 		return(-1)
-	print "[OK] Connecting to server=%(server)s:" % {'server':server}
+	print("[OK] Connecting to server=%(server)s:" % {'server':server})
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -71,10 +71,10 @@ def main():
   <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"></get>
 """
 	result = conn.rpc(get_rpc)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	rpc_error = result.xpath('rpc-error')
 	assert(len(rpc_error)==0)
-	print "[OK] Getting"
+	print("[OK] Getting")
 
 	get_rpc_w_filter = """
   <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -89,9 +89,9 @@ def main():
   </get>
 """
 	result = conn.rpc(get_rpc_w_filter)
-	print lxml.etree.tostring(result)
+	print(lxml.etree.tostring(result))
 	rpc_error = result.xpath('rpc-error')
 	assert(len(rpc_error)==0)
-	print "[OK] Getting with subtree filter"
+	print("[OK] Getting with subtree filter")
 
 sys.exit(main())

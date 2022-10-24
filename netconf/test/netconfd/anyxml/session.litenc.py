@@ -86,7 +86,7 @@ def main():
 
 	request = lxml.etree.fromstring(ping_pong_rpc)
 
-	reply = lxml.etree.fromstring(reply_xml)
+	reply = lxml.etree.fromstring(reply_xml.encode('ascii'))
 	one_sent = request.xpath("./test-anyxml:ping/test-anyxml:one", namespaces=namespaces)
 	one_received = reply.xpath("./test-anyxml:pong/test-anyxml:one", namespaces=namespaces)
 	print(one_sent)

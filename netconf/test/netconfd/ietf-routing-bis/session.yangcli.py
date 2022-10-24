@@ -3,7 +3,7 @@
 import time
 import sys, os
 import argparse
-from yangcli import yangcli
+from yangcli.yangcli import yangcli
 import lxml
 from lxml import etree
 import yangrpc

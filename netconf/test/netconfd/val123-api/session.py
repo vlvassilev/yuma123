@@ -1,4 +1,4 @@
-from yangcli import yangcli
+from yangcli.yangcli import yangcli
 import lxml
 import yangrpc
 import sys

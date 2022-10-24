@@ -47,7 +47,7 @@ apt-get -y install python3-paramiko python3-lxml
 dpkg -i ../python-yuma*.deb
 
 #testing
-ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+ssh-keygen -t rsa -b 4096 -m PEM -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config

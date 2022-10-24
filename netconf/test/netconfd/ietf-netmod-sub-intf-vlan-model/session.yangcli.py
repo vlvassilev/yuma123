@@ -67,7 +67,7 @@ def main():
 	ok = yangcli(conn, '''commit''').xpath('./ok')
 	assert(len(ok)==1)
 
-        yangcli_script='''
+		yangcli_script='''
 create /interfaces/interface -- name='xe0' type='ethernetCsmacd'
 create /interfaces/interface -- name='ge0' type='ethernetCsmacd'
 create /interfaces/interface -- name='ge1' type='ethernetCsmacd'

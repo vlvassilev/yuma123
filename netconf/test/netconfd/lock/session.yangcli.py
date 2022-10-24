@@ -181,7 +181,7 @@ def main():
 
 	time.sleep(1)
 
-        yangcli_script='''
+	yangcli_script='''
 create /interfaces/interface -- name=eth0 type=ethernetCsmacd description="Uplink to ISP."
 create /interfaces/interface[name='eth0']/ipv4/address -- ip=192.0.2.1 prefix-length=24
 create /interfaces/interface[name='eth0']/ipv4/forwarding value=enabled

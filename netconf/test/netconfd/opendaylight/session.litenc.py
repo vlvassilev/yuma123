@@ -69,7 +69,7 @@ def main():
 	print("#1 - Print the <hello>")
 	print(lxml.etree.tostring(result))
 
-        print("#2 - Print the operational state.")
+	print("#2 - Print the operational state.")
 
 	get_rpc = """
 <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">

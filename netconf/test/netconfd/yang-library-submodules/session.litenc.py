@@ -65,7 +65,7 @@ def main():
 	# receive <hello>
 	result=conn.receive()
 
-        print("#1 - Verify /modules-state/module[name='test-yang-library-submodules'] container is present.")
+		print("#1 - Verify /modules-state/module[name='test-yang-library-submodules'] container is present.")
 
 	get_rpc = """
 <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -94,6 +94,6 @@ def main():
 	assert(len(submodule_name)==1)
 	assert(submodule_name[0].text=="test-yang-library-submodules-sub1")
 
-        return(0)
+		return(0)
 
 sys.exit(main())

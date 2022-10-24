@@ -242,7 +242,7 @@ def main():
 	print("<get-data> - Appendix E. data ...")
 	result = conn.rpc(get_example_data_rpc, strip_ns=False)
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
-        namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
+	namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
 	data = result.xpath('./ncds:data', namespaces=namespaces)
 	assert(len(data)==1)
         #Copy from draft-netconf-nmda-netconf-01
@@ -338,13 +338,13 @@ def main():
 
 	expected = lxml.etree.fromstring(expected)
 
-        #strip comments
+	#strip comments
 	comments = expected.xpath('//comment()')
 	for c in comments:
 		p = c.getparent()
 		p.remove(c)
 
-        #strip namespaces
+	#strip namespaces
 	data1 = expected.xpath('.',namespaces=namespaces)
 	data_expected=strip_namespaces(data1[0])
 	data_received=strip_namespaces(data[0])

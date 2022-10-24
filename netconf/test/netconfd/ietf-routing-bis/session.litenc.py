@@ -164,7 +164,7 @@ def main():
 	print("<get> - /ietf-yang-library:modules-state ...")
 	result = conn.rpc(get_yang_library_rpc, strip_ns=False)
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
-        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
 	#Copied from draft-ietf-netmod-rfc8022bis-00 Appendix E.
@@ -421,7 +421,7 @@ def main():
 	print("<get-data> - Appendix E. data ...")
 	result = conn.rpc(get_example_data_rpc, strip_ns=False)
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
-        namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
+	namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
 	data = result.xpath('./ncds:data', namespaces=namespaces)
 	assert(len(data)==1)
 
@@ -551,13 +551,13 @@ def main():
 
 	expected = lxml.etree.fromstring(expected)
 
-        #strip comments
+	#strip comments
 	comments = expected.xpath('//comment()')
 	for c in comments:
 		p = c.getparent()
 		p.remove(c)
 
-        #strip namespaces
+	#strip namespaces
 	data1 = expected.xpath('.',namespaces=namespaces)
 	data_expected=strip_namespaces(data1[0])
 	data_received=strip_namespaces(data[0])

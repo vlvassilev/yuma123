@@ -7,8 +7,8 @@ print("Loading schema module python-yuma-example.yang")
 
 (res, mod) = yuma.schema_module_load("python-yuma-example.yang")
 if(res!=0):
-    print("Error: python-yuma-example.yang failed to load!")
-    sys.exit(1)
+	print("Error: python-yuma-example.yang failed to load!")
+	sys.exit(1)
 
 obj = yuma.ncx_find_object(mod,"python-yuma-example")
 assert(obj!=None)

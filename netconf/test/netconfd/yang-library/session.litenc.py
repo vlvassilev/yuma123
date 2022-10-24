@@ -78,7 +78,7 @@ def main():
 			found=True
 	assert(found==True)
 
-        print("#2 - Verify /modules-state/module[name='test-yang-library'] container is present.")
+		print("#2 - Verify /modules-state/module[name='test-yang-library'] container is present.")
 
 	get_rpc = """
 <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -138,6 +138,6 @@ def main():
 	assert(len(conformance_type)==1)
 	#assert(conformance_type[0].text=="import")
 
-        return(0)
+		return(0)
 
 sys.exit(main())

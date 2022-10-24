@@ -65,7 +65,7 @@ def main():
 	result=conn.receive()
 
 
-        print("# send invalid value for union element of leaf-list")
+	print("# send invalid value for union element of leaf-list")
 
 	get_rpc = """
 <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -90,6 +90,6 @@ def main():
 
 	print(lxml.etree.tostring(result))
 
-        return(0)
+	return(0)
 
 sys.exit(main())

@@ -108,14 +108,14 @@ def main():
 </get>
 """
 
-        print("<edit-config> - /c/a ...")
-        result = conn.rpc(edit_config_rpc)
+	print("<edit-config> - /c/a ...")
+	result = conn.rpc(edit_config_rpc)
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
-        print("<commit> ...")
-        result = conn.rpc(commit_rpc)
+	print("<commit> ...")
+	result = conn.rpc(commit_rpc)
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
-        print("<get> - /c/a ...")
-        result = conn.rpc(get_rpc)
+	print("<get> - /c/a ...")
+	result = conn.rpc(get_rpc)
 
 	print(lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True))
 	one = result.xpath("./nc:data/test-anyxml:c/test-anyxml:a/test-anyxml:one", namespaces=namespaces)

@@ -1,7 +1,8 @@
 module ietf-traffic-analyzer {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer";
-  prefix ta;
+  prefix ntta;
+
   import ietf-interfaces {
     prefix if;
     reference
@@ -25,31 +26,32 @@ module ietf-traffic-analyzer {
     "This module contains a collection of YANG definitions for
      description and management of network interconnect testers.
 
-     Copyright (c) 2021 IETF Trust and the persons identified as
+     Copyright (c) 2022 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
-     without modification, is permitted pursuant to, and subject
-     to the license terms contained in, the Simplified BSD License
-     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Revised BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).
 
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2021-07-11 {
+  revision 2022-10-22 {
     description
       "Initial revision.";
     reference
       "RFC XXXX: A YANG Data Model for
-       Network Interconnect Tester Management";
+       Network Tester Management";
   }
 
   feature egress-direction {
     description
       "The device can analyze traffic from the egress direction.";
   }
+
   feature ingress-direction {
     description
       "The device can generate traffic from the ingress direction.";
@@ -81,7 +83,7 @@ module ietf-traffic-analyzer {
   }
 
   identity ethernet {
-    base ta:filter;
+    base ntta:filter;
     description
       "Ethernet packet fields filter.";
   }
@@ -108,7 +110,7 @@ module ietf-traffic-analyzer {
         "Total accumulated period with no frame transmission
          taking place measured in octets at the current link
          speed. Octets not counted in ../octets but not idle are
-         for example layer 1 framing octets - for Ethernet links
+         for example layer 1 framing octets - for Ethernet interfaces
          7+1 preamble octets per packet.";
     }
     leaf errors {
@@ -290,6 +292,7 @@ module ietf-traffic-analyzer {
       }
     }
   }
+
   grouping filter-data {
     description
       "Grouping with a filter container specifying the filtering
@@ -305,7 +308,7 @@ module ietf-traffic-analyzer {
          a specific subset of the frames.";
       leaf type {
         type identityref {
-          base ta:filter;
+          base ntta:filter;
         }
         mandatory true;
         description
@@ -350,8 +353,9 @@ module ietf-traffic-analyzer {
     }
   }
 
-  augment "/if:interfaces/if:interface/ta:traffic-analyzer/ta:filter" {
-    when "derived-from-or-self(ta:type, 'ta:ethernet')";
+  augment "/if:interfaces/if:interface/ntta:traffic-analyzer/"
+        + "ntta:filter" {
+    when "derived-from-or-self(ntta:type, 'ntta:ethernet')";
     description
       "Ethernet frame specific filter type.";
     leaf ether-type {

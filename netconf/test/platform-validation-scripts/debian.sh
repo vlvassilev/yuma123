@@ -50,7 +50,6 @@ dpkg -i ../python3-yuma*.deb
 apt-get install openssh-client openssh-server
 ssh-keygen -t rsa -b 4096 -m PEM -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "Port 22" >> /etc/ssh/sshd_config
 echo "Port 830" >> /etc/ssh/sshd_config
@@ -61,7 +60,9 @@ echo "Port 4830" >> /etc/ssh/sshd_config
 echo "Port 5830" >> /etc/ssh/sshd_config
 echo "Port 6830" >> /etc/ssh/sshd_config
 echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock --ncxserver-sockname=1830@/tmp/ncxserver.1830.sock --ncxserver-sockname=2830@/tmp/ncxserver.2830.sock --ncxserver-sockname=3830@/tmp/ncxserver.3830.sock --ncxserver-sockname=4830@/tmp/ncxserver.4830.sock --ncxserver-sockname=5830@/tmp/ncxserver.5830.sock --ncxserver-sockname=6830@/tmp/ncxserver.6830.sock"' >> /etc/ssh/sshd_config
-/etc/init.d/ssh restart
+
+/etc/init.d/ssh restart || true
+ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 
 cd ~/yuma123_${ver}/netconf/test/netconfd
 apt-get -y install python3-ncclient valgrind

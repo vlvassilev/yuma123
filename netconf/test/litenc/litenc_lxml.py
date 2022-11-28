@@ -39,7 +39,7 @@ class litenc_lxml():
 		(ret,reply_xml)=self.litenc.receive()
 		if(ret!=0):
 			return None
-		reply_lxml = lxml.etree.fromstring(reply_xml)
+		reply_lxml = lxml.etree.fromstring(reply_xml.encode('ascii'))
 		if(self.strip_namespaces):
 			reply_lxml=strip_namespaces(reply_lxml)
 		return reply_lxml

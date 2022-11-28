@@ -10,7 +10,7 @@ Build-Depends:
  libyuma-dev (>= 2.13),
  pkg-config,
  dh-python,
- python3-all-dev:native,
+ python3-all-dev,
  libpython3-all-dev
 Standards-Version: 4.4.1
 Homepage: https://yuma123.org

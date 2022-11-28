@@ -9,17 +9,18 @@ Build-Depends:
  libyangrpc-dev (>= 2.13),
  libyuma-dev (>= 2.13),
  pkg-config,
- python3-all-dev,
  dh-python,
-Standards-Version: 4.1.4
+ python3-all-dev:native,
+ libpython3-all-dev
+Standards-Version: 4.4.1
 Homepage: https://yuma123.org
 
-Package: python-yuma
+Package: python3-yuma
 Section: python
 Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python3-lxml, libyuma2 (>=2.13), libyangrpc2 (>=2.13)
-Provides: libyuma-python, ${python:Provides}
-XB-Python-Version: ${python:Versions}
+Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}, python3-lxml, libyuma2 (>=2.13), libyangrpc2 (>=2.13)
+X-Python3-Versions: ${python3:Versions}
+Provides: libyuma-python, ${python3:Provides}
 Description:  NETCONF/YANG Python support
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

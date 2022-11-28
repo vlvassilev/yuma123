@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 #export DH_VERBOSE=1
+export PYBUILD_NAME=yuma
+export DEB_BUILD_OPTIONS=nocheck
 
 # TODO
 # without -pie build fails during perl module build somehow...
@@ -12,7 +14,7 @@ COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
 
 
 %:
-	dh $@ --with autoreconf,python3
+	dh $@ --with autoreconf,python3 --buildsystem=pybuild
 
 override_dh_install:
 	python3 setup.py build ; \

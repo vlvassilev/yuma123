@@ -31,7 +31,7 @@ cd yuma123_${ver}
 debuild -us -uc
 dpkg -i ../*.deb
 
-#build and install python-yuma (used in the testsuite)
+#build and install python3-yuma (used in the testsuite)
 cd ~
 apt-get -y install rsync
 rsync -rav yuma123_${ver}/netconf/python/ yuma123-python_${ver}
@@ -44,9 +44,10 @@ tar -xzvf yuma123-python_${ver}.orig.tar.gz
 cd yuma123-python_${ver}
 debuild -us -uc
 apt-get -y install python3-paramiko python3-lxml
-dpkg -i ../python-yuma*.deb
+dpkg -i ../python3-yuma*.deb
 
 #testing
+apt-get install openssh-client openssh-server
 ssh-keygen -t rsa -b 4096 -m PEM -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts

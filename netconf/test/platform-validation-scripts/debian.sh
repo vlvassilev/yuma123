@@ -47,7 +47,7 @@ apt-get -y install python3-paramiko python3-lxml
 dpkg -i ../python3-yuma*.deb
 
 #testing
-apt-get install openssh-client openssh-server
+apt-get -y install openssh-client openssh-server
 ssh-keygen -t rsa -b 4096 -m PEM -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config

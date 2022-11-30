@@ -67,6 +67,7 @@ ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 cd ~/yuma123_${ver}/netconf/test/netconfd
 apt-get -y install python3-ncclient valgrind
 apt-get -y install python-is-python3
+apt-get -y install psmisc # contains killall
 
 multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
 prefix="/usr"

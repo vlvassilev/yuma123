@@ -10,25 +10,9 @@ Branching from the last BSD licensed branch of the Yuma project the code has evo
 - support was added for new YANG extensions
 - added to debian.org repositories
 
-==Option 1: Debian installation==
-===Option 1.1: Install from the yuma123 Debian repository (latest packages)===
- apt-get -y install netconfd yangcli
- apt-get update
- apt-get -y upgrade
- apt-get -y install software-properties-common
- add-apt-repository -s "deb http://yuma123.org/repos/apt/debian stable main"
- apt-get -y install wget gnupg
- wget -O - http://yuma123.org/repos/yuma123.gpg.key | apt-key add -
- apt-get update
- apt-get -y install netconfd yangcli
-
-===Option 1.2: Install from the official repository===
- apt-get update
- apt-get -y install netconfd yangcli
-
-==Option 2: Compilation and installation from source==
- #Build and runtime dependencies resolution for Debian stretch. Replace with appropriate command line if you are not using Debian.
- sudo apt-get install git autoconf gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev libssl-dev
+==Compilation==
+ #Build dependencies resolution for Debian Bullseye. Replace with appropriate command line if you are not using Debian.
+ sudo apt-get install git autoconf automake pkg-config gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev libssl-dev
  git clone git://git.code.sf.net/p/yuma123/git yuma123-git
  cd yuma123-git
  autoreconf -i -f
@@ -36,18 +20,9 @@ Branching from the last BSD licensed branch of the Yuma project the code has evo
  make
  sudo make install
 
-#Build and runtime dependencies resolution for Cent OS 8.
-sudo dnf group install "Development Tools"
-sudo dnf -y install epel-release
-sudo dnf install ncurses-devel readline-devel libxml2-devel zlib-devel openssl-devel libssh2-devel
-git clone git://git.code.sf.net/p/yuma123/git yuma123-git
-cd yuma123-git
-autoreconf -i -f
-./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
-make
-sudo make install
- 
 ==Configure and start==
+ #Runtime dependencies resolution for Debian Bullseye. Replace with appropriate command line if you are not using Debian.
+ sudo apt-get install openssh-server
 
  echo '<config/>' > /tmp/startup-cfg.xml
  /usr/sbin/netconfd --module=helloworld --startup=/tmp/startup-cfg.xml --log-level="debug4" --superuser="$USER"
@@ -59,31 +34,28 @@ Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_conf
  Port 830
  Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
 
-For Cent OS 8 with SELINUX in enforcing mode
- sudo dnf install policycoreutils-python-utils
- sudo semanage port -a -t ssh_port_t -p tcp 830
-
-Then on Debian:
+Start sshd (on Debian):
  sudo /etc/init.d/ssh restart
-or on Cent OS 8
- sudo service sshd restart
  
 You can verify everything is OK:
 
- yangcli --user="$USER" --server=localhost
-...
- yangcli vladimir@localhost> xget /helloworld
+ root@lmf:~# yangcli --user="$USER" --server=localhost --password='mysecretpass'
+ ...
+ yangcli root@localhost> xget /helloworld-state 
  
- RPC Data Reply 2 for session 2:
+ RPC Data Reply 2 for session 3:
  
  rpc-reply {
    data {
-     helloworld {
+     helloworld-state {
        message 'Hello World!'
      }
    }
  }
+ 
+ yangcli root@localhost>
 
 or
 
- xget /
+ yangcli root@localhost> xget /
+ ...

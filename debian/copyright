@@ -7,18 +7,18 @@ Files: *
 Copyright: 2008-2012 Andy Bierman <andy@yumaworks.com>
            2009-2010 Netconf Central, Inc.
            2012 YumaWorks, Inc. <support@yumaworks.com>
-           2013-2021 Vladimir Vassilev <vladimir@lightside-instruments.com>
+           2013-2022 Vladimir Vassilev <vladimir@lightside-instruments.com>
            2013-2018 Transpacket AS <support@transpacket.com>
-           2019-2021 Lightside Instruments AS <admin@lightside-instruments.com>
+           2019-2022 Lightside Instruments AS <admin@lightside-instruments.com>
 License: BSD-3-clause
 
 Files: debian/*
-Copyright: 2013-2021 Vladimir Vassilev <vladimir@lightside-instruments.com>
+Copyright: 2013-2022 Vladimir Vassilev <vladimir@lightside-instruments.com>
 License: BSD-3-clause
 
 Files: netconf/modules/ietf/*
 Copyright: 2011-2018 IETF Trust
-           2011-2018 Persons identified as the document authors
+           2011-2022 Persons identified as the document authors
 License: BSD-3-clause
 
 Files: libtecla/*

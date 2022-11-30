@@ -1,5 +1,5 @@
-yuma123-netconfd-module-ietf-interfaces (2.13-0) UNRELEASED; urgency=medium
+yuma123-netconfd-module-ietf-interfaces (2.13-0) stable; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 25 Aug 2021 00:01:25 +0200
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 30 Nov 2022 17:20:00 +0100

@@ -7,13 +7,13 @@
 <center>Client/Server Quickstart Guide</center>
 
 
-<center>Version yuma123-2.10</center>
+<center>Version yuma123-2.13</center>
 
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2022, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as

@@ -7,13 +7,13 @@
 <center>NETCONF Over SSH Client</center>
 
 
-<center>Version yuma123-2.11</center>
+<center>Version yuma123-2.13</center>
 
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2022, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as described in the printed document:

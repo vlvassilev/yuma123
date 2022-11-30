@@ -1,8 +1,25 @@
-yuma123 (2.13) UNRELEASED; urgency=medium
+yuma123 (2.13) stable; urgency=medium
 
-  * 
+  * ncx
+    - Added if-feature parsing support for YANG 1.1 logical expressions
+    - Fixed bug in obj_next_child_deep processing of models with multiple
+      levels of choice/case statements
+    - Fixed bug in ncx_sprintf_num for decimal64 e.g. -0.000068623 was
+      represented as 0.0000-68623
+  * netconfd
+    - Fixed bug causing netconfd to not handle --running-error=continue
+  * yangcli
+    - Fill for rpc issue solved by not serializing the virtual <input>
+    - Fixed socket connection timeout and signal handlng e.g. ctrl-c now
+      terminates stall connection attempt
+  * autoconf
+    - pkg-config is now used to find libxml2
+  * python/test
+    - transition to python3
+  * examples
+    - Added initial ietf-ip support as part of the ietf-interfaces example
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 25 Aug 2021 00:00:00 +0200
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 30 Nov 2022 17:20:00 +0100
 
 yuma123 (2.12) stable; urgency=medium
 

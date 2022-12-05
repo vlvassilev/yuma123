@@ -1,4 +1,4 @@
-AC_INIT([netconfd-test-suite], [2.13], [vladimir@lightside-instruments.com])
+AC_INIT([netconfd-test-suite], [2.14], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

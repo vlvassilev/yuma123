@@ -53,7 +53,7 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"2.13"
+#define YUMA_VERSION  (const xmlChar *)"2.14"
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

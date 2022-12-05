@@ -6,8 +6,8 @@ Build-Depends:
  debhelper (>= 10),
  autoconf,
  libxml2-dev,
- libyangrpc-dev (>= 2.13),
- libyuma-dev (>= 2.13),
+ libyangrpc-dev (>= 2.14),
+ libyuma-dev (>= 2.14),
  pkg-config,
  dh-python,
  python3-all-dev,
@@ -18,7 +18,7 @@ Homepage: https://yuma123.org
 Package: python3-yuma
 Section: python
 Architecture: any
-Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}, python3-lxml, libyuma2 (>=2.13), libyangrpc2 (>=2.13)
+Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}, python3-lxml, libyuma2 (>=2.14), libyangrpc2 (>=2.14)
 X-Python3-Versions: ${python3:Versions}
 Provides: libyuma-python, ${python3:Provides}
 Description:  NETCONF/YANG Python support

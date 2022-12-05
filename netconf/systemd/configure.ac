@@ -1,4 +1,4 @@
-AC_INIT([yuma123-systemd-services], [2.13], [vladimir@lightside-instruments.com])
+AC_INIT([yuma123-systemd-services], [2.14], [vladimir@lightside-instruments.com])
 AC_CANONICAL_SYSTEM
 
 AM_INIT_AUTOMAKE([foreign])

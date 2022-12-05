@@ -11,7 +11,7 @@ Build-Depends:
  libssl-dev,
  libtool,
  libxml2-dev,
- libyuma-dev (>= 2.13),
+ libyuma-dev (>= 2.14),
  openvswitch-dev,
  zlib1g-dev
 Standards-Version: 4.1.4
@@ -19,7 +19,7 @@ Homepage: http://yuma123.org
 
 Package: netconfd-module-ietf-network-bridge
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.13), openvswitch-common
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14), openvswitch-common
 Description: SIL module for netconfd implementing ietf-network-bridge*.yang
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

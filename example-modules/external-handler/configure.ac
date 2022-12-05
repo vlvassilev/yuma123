@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-external-handler], [2.13], [vladimir@lightside-instruments.com])
+AC_INIT([yuma123-netconfd-module-external-handler], [2.14], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

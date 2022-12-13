@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 #export DH_VERBOSE=1
-#export DEB_BUILD_OPTIONS=nocheck
+export PYBUILD_NAME=yuma
+export DEB_BUILD_OPTIONS=nocheck
 
 # TODO
 # without -pie build fails during perl module build somehow...
@@ -13,11 +14,4 @@ COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
 
 
 %:
-	dh $@ --with autoreconf
-
-override_dh_install:
-	python3 setup.py build ; \
-	python3 setup.py install --root=$(CURDIR)/debian/python3-yuma --install-layout=deb ; \
-	find $(CURDIR) -name *.pyc -delete
-	dh_install
-
+	dh $@ --with python3 --buildsystem=pybuild

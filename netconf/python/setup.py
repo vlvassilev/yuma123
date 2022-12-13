@@ -1,4 +1,11 @@
-from distutils.core import setup
+from distutils.core import setup, Extension
+
+yuma = Extension('yuma',
+                   sources = ['yuma.c'],
+                   extra_compile_args=['-I/usr/include/yuma/platform', '-I/usr/include/yuma/ncx' , '-I/usr/include/yuma/agt'], extra_link_args=['-lyumancx', '-lyumaagt'])
+yangrpc = Extension('yangrpc',
+                   sources = ['yangrpc.c'],
+                   extra_compile_args=['-I/usr/include/yuma/platform', '-I/usr/include/yuma/ncx' , '-I/usr/include/yuma/yangrpc'], extra_link_args=['-lyumancx', '-lyangrpc'])
 
 setup(name='yangcli',
 	  version='0.0.1',
@@ -11,4 +18,5 @@ setup(name='yangcli',
 	  platforms=["Posix; OS X; Windows"],
 	  #classifiers=[]
 	  #scripts=['scripts/myscript']
+          ext_modules=[yuma, yangrpc],
 	  )

@@ -1,4 +1,4 @@
-Source: yuma123-netconfd-module-network-tester
+Source: yuma123-netconfd-module-ietf-traffic-generator
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
@@ -16,15 +16,46 @@ Build-Depends:
 Standards-Version: 4.1.4
 Homepage: https://lightside-instruments.com
 
-Package: netconfd-module-network-tester
+Package: netconfd-module-ietf-traffic-generator
 Architecture: any
-Provides: traffic-generator, traffic-analyzer
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14), openvswitch-common
-Description: SIL module for netconfd implementing ietf-traffic-generator*.yang
- The NETCONF protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14),
+ traffic-generator-cli
+Description: SIL module for netconfd implementing ietf-traffic-generator.yang
  .
- The yuma123 netconfd module ietf-traffic-generator implements the functionality
- modeled in ietf-traffic-generator*.yang using some common command line tools.
+ Implements the functionality modeled in ietf-traffic-generator.yang using
+ the available traffic-generator CLI tool.
+
+Package: netconfd-module-ietf-traffic-analyzer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14),
+ traffic-generator-cli
+Description: SIL module for netconfd implementing ietf-traffic-analyzer.yang
+ .
+ Implements the functionality modeled in ietf-traffic-analyzer.yang using
+ the available traffic-analyzer CLI tool.
+
+Package: traffic-generator-cli-rawsocket
+Architecture: any
+Provides: traffic-generator-cli
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), traffic-generator-make-testframe
+Description: CLI tools starting traffic generator stream and a traffic analyzer on local network interface.
+ .
+ This package contains a rawsocket implementation of the traffic-generator-cli interface. It is not as deterministic
+ as alternative hardware based implementations. It also serves as a template and is universally supported
+ on all Linux machines with generic interfaces supporting SOCK_RAW.
+
+Package: traffic-analyzer-cli-rawsocket
+Architecture: any
+Provides: traffic-analyzer-cli
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13)
+Description: CLI tools starting and monitoring traffic analyzer on local network interface.
+ .
+ This package contains a rawsocket implementation of the traffic-analyzer-cli interface. It is not as deterministic
+ as alternative hardware based implementations. It also serves as a template and is universally supported
+ on all Linux machines with generic interfaces supporting SOCK_RAW.
+
+Package: traffic-generator-make-testframe
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CLI tools printing the hexadecimal data of a traffic generator testframe according to parameters.
 

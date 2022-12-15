@@ -74,7 +74,7 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
             sprintf(cli_args_str+strlen(cli_args_str),"%02X",(unsigned int)(val->v.binary.ustr[i]));
         }
 #else
-        sprintf(cli_args_str+strlen(cli_args_str),VAL_STRING(val));
+        sprintf(cli_args_str+strlen(cli_args_str),"%s",VAL_STRING(val));
 #endif
     }
 

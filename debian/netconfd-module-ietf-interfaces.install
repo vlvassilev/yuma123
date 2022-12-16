@@ -1,2 +1,3 @@
 usr/lib/*/yuma/libietf-interfaces.so*
 usr/share/yuma/modules/examples/interfaces-notifications.yang
+usr/bin/get-interface-ipv4

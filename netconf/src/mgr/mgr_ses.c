@@ -1626,6 +1626,7 @@ ssize_t
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
     int        ret;
+    int        bytes_read;
 
 #ifdef DEBUG
     if (!s || !buff || !erragain) {
@@ -1650,7 +1651,6 @@ ssize_t
                        ret);
         }
     }
-
     mscb->returncode = ret;
     if (ret < 0) {
         if (ret == LIBSSH2_ERROR_EAGAIN) {
@@ -1659,15 +1659,16 @@ ssize_t
             log_ssh2_error(scb, mscb, "read");
         }
     } else if (ret > 0) {
+        bytes_read = ret;
         if (LOGDEBUG2) {
             log_debug2("\nmgr_ses: channel read %d bytes OK "
                        "on session %u (a:%u)",
-                       ret, 
+                       bytes_read,
                        scb->sid,
                        mscb->agtsid);
         }
         if (scb->dump_input_data != NULL) {
-            if(fwrite(buff,ret,1,scb->dump_input_data) != 1) {
+            if(fwrite(buff,bytes_read,1,scb->dump_input_data) != 1) {
                 assert(0);
             }
             fflush(scb->dump_input_data);
@@ -1678,7 +1679,7 @@ ssize_t
             struct timespec tp;
             char tsbuf[]="0123456789.123456789 0123456789\n";
             ret = clock_gettime(CLOCK_MONOTONIC, &tp);
-            sprintf(tsbuf,"%010u.%09u %d\n",(unsigned int)tp.tv_sec,(unsigned int)tp.tv_nsec, (unsigned int)ret);
+            sprintf(tsbuf,"%010u.%09u %u\n",(unsigned int)tp.tv_sec,(unsigned int)tp.tv_nsec, (unsigned int)bytes_read);
             if (ret || (fwrite (tsbuf, strlen(tsbuf), 1, scb->dump_input_timestamps) != 1)) {
                 assert(0);
             }

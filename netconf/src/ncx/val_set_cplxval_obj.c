@@ -43,7 +43,7 @@ status_t val_set_cplxval_obj(val_value_t *val, obj_template_t *obj, char* xmlstr
     fp = fmemopen((void*)xmlstr, strlen(xmlstr), "r");
     res = xml_rd_open_file (fp, obj, &tmp_val);
     if(res!=NO_ERR) {
-        return NO_ERR;
+        return res;
     }
     val_move_children(tmp_val,val);
 

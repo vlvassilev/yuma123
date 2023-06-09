@@ -27,6 +27,13 @@
 #include "val123.h"
 #include "val_set_cplxval_obj.h"
 
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if.h>
+#include <netdb.h>
+
+
 /* module static variables */
 static val_value_t* root_prev_val;
 static val_value_t* with_nmda_param_val;
@@ -290,8 +297,6 @@ static status_t
         ptr = fgets(buf+strlen(buf), BUFSIZE, fp);
     } while(ptr);
 
-    printf("get-interface-ipv4: %s", buf);
-
     if(pclose(fp))  {
         printf("Command not found or exited with error status\n");
         assert(0);
@@ -307,6 +312,51 @@ static status_t
     res = val_set_cplxval_obj(dst_val,
                               vir_val->obj,
                               buf);
+
+    return res;
+}
+
+
+static status_t
+    get_phys_address(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    status_t res;
+
+    val_value_t* name_val;
+
+    name_val = val_find_child(dst_val->parent,
+                              "ietf-interfaces",
+                              "name");
+    assert(name_val);
+
+    char* ptr;
+    res = NO_ERR;
+
+    /* .../phys-address */
+
+    char buf[]="01:23:45:67:89:AB";
+
+    struct ifreq s;
+    int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+    strcpy(s.ifr_name, VAL_STRING(name_val));
+    if (0 == ioctl(fd, SIOCGIFHWADDR, &s)) {
+        sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+            (unsigned int) (s.ifr_addr.sa_data[0]&0xFF),
+            (unsigned int) (s.ifr_addr.sa_data[1]&0xFF),
+            (unsigned int) (s.ifr_addr.sa_data[2]&0xFF),
+            (unsigned int) (s.ifr_addr.sa_data[3]&0xFF),
+            (unsigned int) (s.ifr_addr.sa_data[4]&0xFF),
+            (unsigned int) (s.ifr_addr.sa_data[5]&0xFF)) ;
+        res = val_set_simval_obj(dst_val, vir_val->obj, buf);
+
+    } else {
+        res = ERR_NCX_SKIPPED;
+    }
+    close(fd);
+
 
     return res;
 }
@@ -541,6 +591,24 @@ static status_t
                      ipv4_obj);
 
     val_add_child(ipv4_val, interface_val);
+
+    /* Add phys-address leaf */
+    obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "phys-address");
+    assert(obj != NULL);
+    val = val_new_value();
+    if (val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(val, obj);
+
+    val_init_virtual(val,
+                     get_phys_address,
+                     obj);
+
+    val_add_child(val, interface_val);
 
     return res;
 }

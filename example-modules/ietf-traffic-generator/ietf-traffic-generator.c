@@ -98,7 +98,7 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
 
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","total-frames");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%llu",VAL_UINT64(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%lu",VAL_UINT64(val));
     }
 
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","testframe-type");
@@ -108,13 +108,13 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
 
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","realtime-epoch");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --realtime-epoch=%llu",VAL_STRING(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --realtime-epoch=%s",VAL_STRING(val));
     }
 }
 
 static void traffic_generator_delete(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[4096];
+    char cmd_buf[5000];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
 
@@ -135,7 +135,7 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[4096];
+    char cmd_buf[5000];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
 

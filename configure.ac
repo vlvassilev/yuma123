@@ -108,7 +108,6 @@ AC_CONFIG_FILES([
         example-modules/helloworld/Makefile
         example-modules/ietf-interfaces/Makefile
         example-modules/ietf-system/Makefile
-        example-modules/ietf-network-bridge/Makefile
         example-modules/yangcli-to-rpc/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
@@ -119,6 +118,7 @@ AC_CONFIG_FILES([
 
 # Disabled targets
 #        netconf/src/yangdiff/Makefile
+#        example-modules/ietf-network-bridge/Makefile
 
 # Test framework
 #        netconf/test/Makefile

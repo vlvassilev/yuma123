@@ -28,3 +28,7 @@ override_dh_installdocs:
 
 override_dh_makeshlibs:
 	dh_makeshlibs -Xhelloworld -Xtoaster -Xietf-interfaces -Xietf-system
+
+override_dh_clean:
+	dh_autoreconf_clean
+	dh_clean

@@ -51,7 +51,7 @@ $(top_srcdir)/netconf/test/support/misc-util/log-utils.cpp \
 $(top_srcdir)/netconf/test/support/misc-util/ptree-utils.cpp \
 $(top_srcdir)/netconf/test/support/misc-util/base64.cpp
 
-libyumatest_la_CPPFLAGS = -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
+libyumatest_la_CPPFLAGS = $(LIBXML2_CFLAGS) -DLIBXML2_ENABLED -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
 libyumatest_la_LDFLAGS=-lboost_unit_test_framework  $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lz  $(LIBS) -lssh2 -lncurses
 
 #Test modules - YANGs
@@ -64,19 +64,19 @@ $(top_srcdir)/netconf/test/modules/yang/device_test.yang
 netconfmodule_LTLIBRARIES = libsimple_yang_test.la
 libsimple_yang_test_la_SOURCES = \
 $(top_srcdir)/netconf/test/modules/build-sil/simple_yang_test/simple_yang_test.cpp
-libsimple_yang_test_la_CPPFLAGS = -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
+libsimple_yang_test_la_CPPFLAGS = $(LIBXML2_CFLAGS) -DLIBXML2_ENABLED -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
 libsimple_yang_test_la_LDFLAGS = -module $(top_builddir)/netconf/test/libyumatest.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lz  $(LIBS)
 
 netconfmodule_LTLIBRARIES+=libsimple_list_test.la
 libsimple_list_test_la_SOURCES = \
 $(top_srcdir)/netconf/test/modules/build-sil/simple_list_test/simple_list_test.cpp
-libsimple_list_test_la_CPPFLAGS = -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
+libsimple_list_test_la_CPPFLAGS = $(LIBXML2_CFLAGS) -DLIBXML2_ENABLED -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
 libsimple_list_test_la_LDFLAGS = -module $(top_builddir)/netconf/test/libyumatest.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lz  $(LIBS)
 
 netconfmodule_LTLIBRARIES+=libdevice_test.la
 libdevice_test_la_SOURCES = \
 $(top_srcdir)/netconf/test/modules/build-sil/device_test/device_test.cpp
-libdevice_test_la_CPPFLAGS = -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
+libdevice_test_la_CPPFLAGS = $(LIBXML2_CFLAGS) -DLIBXML2_ENABLED -I $(top_srcdir)/netconf -I $(top_srcdir)/libtoaster/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump
 libdevice_test_la_LDFLAGS = -module $(top_builddir)/netconf/test/libyumatest.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lz  $(LIBS)
 
 

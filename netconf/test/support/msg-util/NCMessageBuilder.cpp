@@ -3,7 +3,7 @@
 //#include <iostream>
 #include <sstream>
 #include <string>
-
+#include <libxml/xmlstring.h>
 #include "src/ncx/xml_util.h"
 
 // ---------------------------------------------------------------------------!

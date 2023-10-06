@@ -6,7 +6,8 @@
 // ---------------------------------------------------------------------------|
 // Boost test include files.
 // ---------------------------------------------------------------------------|
-#include <boost/test/unit_test_suite_impl.hpp>
+#include <boost/test/unit_test_suite.hpp>
+#include <boost/test/impl/unit_test_main.ipp>
 #include <boost/test/results_collector.hpp>
 
 // ---------------------------------------------------------------------------|

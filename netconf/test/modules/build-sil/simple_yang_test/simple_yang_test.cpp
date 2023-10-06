@@ -21,9 +21,8 @@
 
  */
 
-extern "C" {
-#include <xmlstring.h>
-
+//extern "C" {
+#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"
@@ -35,7 +34,7 @@ extern "C" {
 #include "ncxtypes.h"
 #include "status.h"
 #include "simple_yang_test.h"
-}
+//}
 
 #include "test/support/callbacks/sil-callback-log.h"
 

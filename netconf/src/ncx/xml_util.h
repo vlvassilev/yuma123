@@ -85,6 +85,11 @@ date	     init     comment
 #include "xmlns.h"
 #endif
 
+#ifdef LIBXML2_ENABLED
+#include <libxml/xmlreader.h>
+#include <libxml/xmlstring.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -160,11 +165,6 @@ typedef struct xml_node_t_ {
     xml_attrs_t    attrs;
 } xml_node_t;
 
-#ifdef LIBXML2_ENABLED
-/* From /usr/include/libxml2/libxml/ */
-#include <libxml/xmlreader.h>
-#include <libxml/xmlstring.h>
-#endif
 
 /********************************************************************
 *								    *

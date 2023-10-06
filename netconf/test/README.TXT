@@ -1,5 +1,15 @@
-The Yuma Test Harness
+The Legacy Yuma Test Harness
 ===============================================================================
+
+ATTENTION: This file is relevant for the libboost-test based test framework
+which is the legacy test system which manages the testcases in test/integ-tests
+and test/sys-tests.
+
+The majority of testcases that are actively used are under test/netconfd and
+test/yangcli and do not use libboost-test. They are following the Autotools
+test suite script based convention and launched with the `make test` command.
+
+If you are interested in the legacy Yuma Test Harness keep reading.
 
 1: Pre-requisites:
     Operating System	Ubuntu 10.04 or later	

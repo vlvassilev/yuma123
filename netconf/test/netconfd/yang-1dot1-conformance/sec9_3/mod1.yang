@@ -1,0 +1,9 @@
+module mod1 {
+  prefix m1;
+  namespace "http://yuma123.org/ns/sec9_3/mod1";
+  reference "https://github.com/vlvassilev/yuma123/issues/143";
+  leaf sample-configuration {
+    type decimal64 { fraction-digits 4; range "0 .. 1.9999";}
+    default 0.001;
+  }
+}

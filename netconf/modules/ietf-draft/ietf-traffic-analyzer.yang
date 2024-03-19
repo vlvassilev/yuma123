@@ -26,7 +26,7 @@ module ietf-traffic-analyzer {
     "This module contains a collection of YANG definitions for
      description and management of network interconnect testers.
 
-     Copyright (c) 2022 IETF Trust and the persons identified as
+     Copyright (c) 2024 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -39,7 +39,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2023-03-13 {
+  revision 2024-03-04 {
     description
       "Initial revision.";
     reference
@@ -47,21 +47,11 @@ module ietf-traffic-analyzer {
        Network Tester Management";
   }
 
-  feature egress-direction {
-    description
-      "The device can analyze traffic from the egress direction.";
-  }
-
-  feature ingress-direction {
-    description
-      "The device can generate traffic from the ingress direction.";
-  }
-
-  feature filter {
+  feature testframe-filter {
     description
       "This feature indicates that the device implements
        filter that can specify a subset of packets to be
-       analyzed when filtering is enabled.";
+       analyzed as testframes.";
   }
 
   feature idle-octets-counter {
@@ -77,15 +67,15 @@ module ietf-traffic-analyzer {
        packet capture functionality.";
   }
 
-  identity filter {
+  identity testframe-filter {
     description
-      "Base filter identity.";
+      "Base testframe-filter identity.";
   }
 
-  identity ethernet {
-    base ntta:filter;
+  identity bit-field-match {
+    base ntta:testframe-filter;
     description
-      "Ethernet packet fields filter.";
+      "Bit field matching filter according to template data and mask.";
   }
 
   grouping statistics-data {
@@ -122,18 +112,18 @@ module ietf-traffic-analyzer {
     }
     container testframe-stats {
       description
-        "Statistics for testframe packets containing
+        "Statistics for received testframes containing
          either sequence number, payload checksum,
          timestamp or any combination of these features.";
-      leaf testframe-pkts {
+      leaf pkts {
         type yang:counter64;
         description
-          "Total count of detected testframe packets.";
+          "Total count of detected testframes.";
       }
       leaf sequence-errors {
         type yang:counter64;
         description
-          "Total count of testframe packets with
+          "Total count of testframes with
            unexpected sequence number. After each sequence
            error the expected next sequence number is
            updated.";
@@ -141,7 +131,7 @@ module ietf-traffic-analyzer {
       leaf payload-errors {
         type yang:counter64;
         description
-          "Total count of testframe packets with
+          "Total count of testframes with
            payload errors.";
       }
       container latency {
@@ -215,7 +205,7 @@ module ietf-traffic-analyzer {
             leaf testframe-index {
               type uint64;
               description
-                "Starts capture as specified testframe index.";
+                "Starts capture at specified testframe index.";
             }
           }
         }
@@ -290,8 +280,8 @@ module ietf-traffic-analyzer {
       "Grouping with a filter container specifying the filtering
        rules for processing only a specific subset of the
        frames.";
-    container filter {
-      if-feature "filter";
+    container testframe-filter {
+      if-feature "testframe-filter";
       presence "When present packets are
                 filtered before analyzed according
                 to the filter type";
@@ -300,7 +290,7 @@ module ietf-traffic-analyzer {
          a specific subset of the frames.";
       leaf type {
         type identityref {
-          base ntta:filter;
+          base ntta:testframe-filter;
         }
         mandatory true;
         description
@@ -314,25 +304,9 @@ module ietf-traffic-analyzer {
     description
       "Traffic analyzer augmentations of ietf-interfaces.";
     container traffic-analyzer {
-      if-feature "ingress-direction";
-      presence "Enables the traffic analyzer for ingress traffic.";
+      presence "Enables the traffic analyzer.";
       description
         "Traffic analyzer for ingress direction.";
-      uses filter-data;
-      uses capture-config-data;
-      container state {
-        config false;
-        description
-          "State data.";
-        uses statistics-data;
-        uses capture-data;
-      }
-    }
-    container traffic-analyzer-egress {
-      if-feature "egress-direction";
-      presence "Enables the traffic analyzer for egress traffic.";
-      description
-        "Traffic analyzer for egress direction.";
       uses filter-data;
       uses capture-config-data;
       container state {
@@ -346,17 +320,24 @@ module ietf-traffic-analyzer {
   }
 
   augment "/if:interfaces/if:interface/ntta:traffic-analyzer/"
-        + "ntta:filter" {
-    when "derived-from-or-self(ntta:type, 'ntta:ethernet')";
+        + "ntta:testframe-filter" {
+    when "derived-from-or-self(ntta:type, 'ntta:bit-field-match')";
     description
-      "Ethernet frame specific filter type.";
-    leaf ether-type {
-      type uint16;
+      "Logical AND of masked bit fields.";
+    leaf mask {
+      type string {
+        pattern '([0-9A-F]{2})*';
+      }
       description
-        "The Ethernet Type (or Length) value
-         defined by IEEE 802.";
-      reference
-        "IEEE 802-2014 Clause 9.2";
+        "Specifies bit field mask for comparison.
+         Non-masked bit fields are ignored.";
+    }
+    leaf data {
+      type string {
+        pattern '([0-9A-F]{2})*';
+      }
+      description
+        "Specify data to be matched according to the specified mask.";
     }
   }
 }

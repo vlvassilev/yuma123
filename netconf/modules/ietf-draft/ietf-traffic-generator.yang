@@ -26,7 +26,7 @@ module ietf-traffic-generator {
     "This module contains a collection of YANG definitions for
      description and management of network interconnect testers.
 
-     Copyright (c) 2022 IETF Trust and the persons identified as
+     Copyright (c) 2024 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -39,22 +39,12 @@ module ietf-traffic-generator {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2023-03-13 {
+  revision 2024-03-04 {
     description
       "Initial revision.";
     reference
       "RFC XXXX: A YANG Data Model for
        Network Tester Management";
-  }
-
-  feature egress-direction {
-    description
-      "The device can generate traffic in the egress direction.";
-  }
-
-  feature ingress-direction {
-    description
-      "The device can generate traffic in the ingress direction.";
   }
 
   feature multi-stream {
@@ -177,13 +167,19 @@ module ietf-traffic-generator {
       type string {
         pattern '([0-9A-F]{2})*';
       }
-      must 'string-length(.)<=(../frame-size*2)';
       description
         "The raw  frame data specified as hexadecimal string.
-         The specified data can be shorter then the ../frame-size
-         value specifying only the header or the header and the
+         The string length of the specified data can be
+         shorter then the 2*../frame-size value
+         specifying only the header or the header and the
          payload with or without the 4 byte CRC Checksum
-         in the case of a Ethernet frame.";
+         in the case of a Ethernet frame. If the frame data string
+         specified is longer then ../frame-size*2 the excess
+         of the specified frame data is trunkated.
+
+         In multi-stream mode if frame-data leaf for one of the
+         streams is not specified, it is the value specified for
+         the closest stream that precedes it that is used.";
     }
     leaf interframe-gap {
       type uint32;
@@ -307,9 +303,8 @@ module ietf-traffic-generator {
     description
       "Traffic generator augmentations of ietf-interfaces.";
     container traffic-generator {
-      if-feature "egress-direction";
       description
-        "Traffic generator for egress direction.";
+        "Traffic generator configuration data.";
       choice type {
         description
           "Choice of the type of the data model of the generator.
@@ -317,23 +312,6 @@ module ietf-traffic-generator {
         case single-stream {
           uses burst-data;
           uses modifier-data;
-        }
-        case multi-stream {
-          uses multi-stream-data;
-        }
-      }
-      uses common-data;
-    }
-    container traffic-generator-ingress {
-      if-feature "ingress-direction";
-      description
-        "Traffic generator for ingress direction.";
-      choice type {
-        description
-          "Choice of the type of the data model of the generator.
-           Single or multi stream.";
-        case single-stream {
-          uses burst-data;
         }
         case multi-stream {
           uses multi-stream-data;

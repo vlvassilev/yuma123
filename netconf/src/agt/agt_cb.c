@@ -525,8 +525,10 @@ void
 * INPUTS:
 *   modname == module that defines the target object for
 *              these callback functions 
-*   defpath == Xpath with default (or no) prefixes
-*              defining the object that will get the callbacks
+*   defpath == Xpath defining the object that will get the callbacks.
+*              If no prefix is specified, try the first prefix that has
+*              a matching top-level object.  If child nodes are not found,
+*              return ERR_NCX_DEFSEG_NOT_FOUND.
 *   version == exact module revision date expected
 *              if condition not met then an error will
 *              be logged  (TBD: force unload of module!)

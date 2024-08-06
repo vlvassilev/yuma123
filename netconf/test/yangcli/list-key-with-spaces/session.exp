@@ -1,0 +1,22 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /u1/u2\[name=\"foo bar\"\]\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

@@ -12,4 +12,5 @@ test-identical-node-names \
 test-identical-identity-names \
 test-external-file-vars \
 test-mgrload \
-test-fill
+test-fill \
+test-list-key-with-spaces

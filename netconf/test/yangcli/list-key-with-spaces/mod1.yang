@@ -1,0 +1,25 @@
+module mod1 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test/yangcli/tab-completion-union/mod1";
+  prefix m1;
+
+  organization
+    "yuma123.org";
+
+  description 'List key with spaces testing module';
+
+  revision 2024-08-06 {
+    description
+      "Initial version";
+  }
+
+  container u1 {
+    list u2 {
+      key name;
+      leaf name {
+        type string;
+      }
+    }
+  }
+}

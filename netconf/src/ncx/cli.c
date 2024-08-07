@@ -1556,7 +1556,27 @@ val_value_t *
 
                             /* find the end of the unquoted string */
                             str = parmval+1;
-                            while (*str && !isspace((int)*str)) {
+                            unsigned int quote=0;
+                            unsigned int squote=0;
+                            unsigned int backslash_seq=0;
+
+                            while (*str) {
+                                if(isspace((int)*str)) {
+                                    if((quote%2)==0 && (squote%2)==0) {
+                                        //no open quotes
+                                        break;
+                                    }
+                                } else if((backslash_seq%2)==0 && *str == NCX_QUOTE_CH) {
+                                    quote++;
+                                } else if((backslash_seq%2)==0 && *str == NCX_SQUOTE_CH) {
+                                    squote++;
+                                }
+
+                                if(*str=='\\') {
+                                  backslash_seq++;
+                                } else {
+                                  backslash_seq==0;
+                                }
                                 str++;
                             }
                         }

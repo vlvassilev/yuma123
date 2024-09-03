@@ -32,7 +32,8 @@ The server is now started with the example helloworld module.
 Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_config:
 
  Port 830
- Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
+ Subsystem netconf /usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock
+
 
 Start sshd (on Debian):
  sudo /etc/init.d/ssh restart

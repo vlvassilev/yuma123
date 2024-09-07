@@ -131,7 +131,9 @@ $(top_srcdir)/netconf/src/agt/agt_commit_validate.h \
 $(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h \
 $(top_srcdir)/netconf/src/agt/agt_nmda.h \
 $(top_srcdir)/netconf/src/agt/agt_cfg.h \
-$(top_srcdir)/netconf/src/agt/agt_yang_library.h
+$(top_srcdir)/netconf/src/agt/agt_yang_library.h \
+$(top_srcdir)/netconf/src/agt/agt_fd_event_cb.h
+
 
 mgr_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/mgr/mgr.h \

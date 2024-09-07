@@ -60,6 +60,7 @@ date         init     comment
 #include "status.h"
 #include "xmlns.h"
 
+#include "agt_fd_event_cb.h"
 
 /********************************************************************
  *                                                                   *
@@ -78,6 +79,10 @@ static fd_set active_fd_set;
 static fd_set read_fd_set;
 static fd_set write_fd_set;
 
+//static fd_set event_fd_set;
+
+int event_fd = -1;
+agt_fd_event_cb_fn_t event_cb_fn;
 
 /********************************************************************
  * FUNCTION make_named_socket
@@ -254,12 +259,13 @@ static void
  * RETURNS:
  *   status
  *********************************************************************/
+static int                    ncxsock, maxwrnum, maxrdnum;
+
 status_t
     agt_ncxserver_run (void)
 {
     ses_cb_t              *scb;
     agt_profile_t         *profile;
-    int                    ncxsock, maxwrnum, maxrdnum;
     int                    i, new, ret;
     struct sockaddr_un     clientname;
     struct timeval         timeout;
@@ -301,6 +307,7 @@ status_t
     FD_ZERO(&read_fd_set);
     FD_ZERO(&write_fd_set);
     FD_ZERO(&active_fd_set);
+    //FD_ZERO(&event_fd_set);
     FD_SET(ncxsock, &active_fd_set);
     maxwrnum = maxrdnum = ncxsock;
 
@@ -367,6 +374,11 @@ status_t
             continue;
         }
      
+        if ((event_fd!=-1) && FD_ISSET(event_fd, &read_fd_set)) {
+            event_cb_fn(event_fd);
+            continue;
+        }
+
         /* Service all the sockets with input and/or output pending */
         done2 = FALSE;
         for (i = 0; i < max(maxrdnum+1, maxwrnum+1) && !done2; i++) {
@@ -537,7 +549,42 @@ void
 } /* agt_ncxserver_clear_fd */
 
 
+/********************************************************************
+ * FUNCTION agt_fd_event_cb_register
+ * 
+ * Register event file descriptor in the select loop with
+ * corresponding callback
+ * 
+ * INPUTS:
+ *   fd == file descriptor number
+ *   cb_fn == callback function pointer
+ *********************************************************************/
+void
+    agt_fd_event_cb_register(int fd, agt_fd_event_cb_fn_t cb_fn)
+{
+    FD_SET(fd, &active_fd_set);
+    if (fd > maxrdnum) {
+        maxrdnum = fd;
+    }
+    event_fd = fd;
+    event_cb_fn = cb_fn;
+} /* agt_fd_event_cb_register */
+
+/********************************************************************
+ * FUNCTION agt_fd_event_cb_unregister
+ * 
+ * Unregister event file descriptor from the select loop
+ * 
+ * INPUTS:
+ *   fd == file descriptor number
+ *********************************************************************/
+void
+    agt_fd_event_cb_unregister(int fd)
+{
+//    FD_CLR(fd, &event_fd_set);
+    event_fd = -1;
+    FD_CLR(fd, &active_fd_set);
+} /* agt_fd_event_cb_register */
+
+
 /* END agt_ncxserver.c */
-
-
-

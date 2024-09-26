@@ -713,7 +713,15 @@ static status_t
 * 
 * Follow the absolute-path expression
 * and return the obj_template_t that it indicates
-* A missing prefix means check any namespace for the symbol
+* A missing prefix means check any namespace for the symbol and return
+* the first hit
+*
+* Note of caution: if top-level objects in different XML namespaces 
+* share the same name, e.g. "/system", only the first such object will
+* be searched for child nodes.  If a child node is not found because
+* the wrong object/wrong namespace was searched, the function will return
+* ERR_NCX_DEFSEG_NOT_FOUND.  In this case, a fully-qualified XPath with 
+* namespace should be used.
 *
 * !!! Internal version !!!
 * !!! Error messages are not printed by this function!!
@@ -785,7 +793,9 @@ static status_t
         /* get the first object template */
         curobj = obj_find_template_top(mod, ncx_get_modname(mod), name);
     } else {
-        /* no prefix given, check all top-level objects */
+        /* no prefix given, check all top-level objects and return
+        *  the first one found.  
+        */
         curobj = ncx_find_any_object(name);
     }
 

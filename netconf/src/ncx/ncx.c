@@ -1940,9 +1940,11 @@ void
 /**
  * \fn ncx_find_any_object
  * \brief Check if an obj_template_t in in any module that
- * matches the object name string
+ * matches the object name string.
+ * Note that if many modules have an object of the same name, this
+ * function will return only the first such object found. 
  * \param objname object name to match
- * \return pointer to struct if present, NULL otherwise
+ * \return pointer to first matching struct if present, NULL otherwise
  */
 obj_template_t *
     ncx_find_any_object (const xmlChar *objname)

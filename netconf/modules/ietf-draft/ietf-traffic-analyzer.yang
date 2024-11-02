@@ -39,7 +39,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2024-03-04 {
+  revision 2024-10-21 {
     description
       "Initial revision.";
     reference
@@ -168,6 +168,26 @@ module ietf-traffic-analyzer {
           units "nanoseconds";
           description
             "Latency of the latest sample.";
+        }
+      }
+      container last-sequence-error {
+        description
+          "Last sequence error state data.";
+        leaf timestamp {
+          type yang:date-and-time;
+          description
+            "Timestamp of the moment a testframe with
+             unexpected sequence number was received.";
+        }
+        leaf expected {
+          type yang:counter64;
+          description
+            "Expected sequence number.";
+        }
+        leaf received {
+          type yang:counter64;
+          description
+            "Received sequence number.";
         }
       }
     }

@@ -39,7 +39,7 @@ module ietf-traffic-generator {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2024-03-04 {
+  revision 2024-10-21 {
     description
       "Initial revision.";
     reference

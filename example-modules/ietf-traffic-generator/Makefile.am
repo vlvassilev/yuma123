@@ -19,7 +19,8 @@ traffic_generator_SOURCES = \
 traffic-generator.c \
 libtraffic-generator.c \
 raw-socket.c \
-timespec-math.c
+timespec-math.c \
+yang-date-and-time.c
 
 traffic_generator_CPPFLAGS =
 traffic_generator_LDFLAGS = -lz
@@ -29,8 +30,8 @@ bin_PROGRAMS += traffic-generator-make-testframe
 traffic_generator_make_testframe_SOURCES = \
 traffic-generator-make-testframe.c \
 libtraffic-generator.c \
-timespec-math.c
-
+timespec-math.c \
+yang-date-and-time.c
 
 traffic_generator_make_testframe_CPPFLAGS =
 traffic_generator_make_testframe_LDFLAGS = -lz
@@ -66,8 +67,8 @@ traffic_analyzer_SOURCES = \
 traffic-analyzer.c \
 libtraffic-analyzer.c \
 raw-socket.c \
-timespec-math.c
-
+timespec-math.c \
+yang-date-and-time.c
 
 traffic_analyzer_LDFLAGS = -pthread
 

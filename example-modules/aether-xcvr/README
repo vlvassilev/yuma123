@@ -1,0 +1,34 @@
+==Standalone project for netconfd module implementing helloworld.yang==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers.
+
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+===Running===
+Terminal 1:
+ $ /usr/sbin/netconfd --module=helloworld --no-startup
+Terminal 2:
+ $ yangcli --server=localhot --user=${USER}
+ 
+ yangcli vladimir@localhost> create /helloworld/message value="Hello World!"
+ 
+ RPC OK Reply 2 for session 1:
+ 
+ yangcli vladimir@localhost> commit
+ 
+ RPC OK Reply 3 for session 1:
+ 
+ yangcli vladimir@localhost> xget /helloworld/message
+ 
+ RPC Data Reply 4 for session 1:
+ 
+ rpc-reply {
+   data {
+     helloworld {
+       message 'Hello World!'
+     }
+   }
+ }

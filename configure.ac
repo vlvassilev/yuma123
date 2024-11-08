@@ -106,6 +106,7 @@ AC_CONFIG_FILES([
         netconf/src/subsys/Makefile
         libtoaster/src/Makefile
         example-modules/helloworld/Makefile
+        example-modules/aether-xcvr/Makefile
         example-modules/ietf-interfaces/Makefile
         example-modules/ietf-system/Makefile
         example-modules/yangcli-to-rpc/Makefile

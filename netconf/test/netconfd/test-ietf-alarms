@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd ietf-alarms
+./run.sh

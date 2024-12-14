@@ -1,4 +1,5 @@
 TESTS=\
+test-ietf-alarms \
 test-nacm \
 test-get \
 test-notification-in-grouping \

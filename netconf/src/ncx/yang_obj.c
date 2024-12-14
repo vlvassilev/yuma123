@@ -8914,7 +8914,7 @@ static status_t
     status_t         res;
 
     expstr = "anyxml, anydata, container, leaf, leaf-list, list, choice, uses,"
-        "or augment keyword";
+        "augment, notification keyword";
     errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
@@ -8944,6 +8944,8 @@ static status_t
             res = consume_uses(pcb, tkc, mod, que, parent, grp);
         } else if ((mod->langver>=NCX_YANG_VERSION11) && !xml_strcmp(val, YANG_K_ACTION)) {
             res = consume_action(pcb, tkc, mod, que, parent, grp);
+        } else if ((mod->langver>=NCX_YANG_VERSION11) && !xml_strcmp(val, YANG_K_NOTIFICATION)) {
+            res = yang_obj_consume_notification(pcb, tkc, mod, que, parent, grp);
         } else {
             res = ERR_NCX_WRONG_TKVAL;
             errdone = FALSE;

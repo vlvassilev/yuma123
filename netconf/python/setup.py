@@ -1,4 +1,9 @@
-from distutils.core import setup, Extension
+import sys
+
+if sys.version_info < (3,10):
+    from distutils.core import setup,Extension
+else:
+    from setuptools import setup,Extension
 
 yuma = Extension('yuma',
                    sources = ['yuma.c'],

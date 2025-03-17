@@ -1,5 +1,6 @@
-yuma123-netconfd-module-ietf-system (2.14-0) UNRELEASED; urgency=medium
+yuma123-netconfd-module-ietf-system (2.14-0) stable; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 30 Nov 2022 17:20:00 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Mon, 17 Mar 2025 00:50:38 +0100
+

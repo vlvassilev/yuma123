@@ -1,5 +1,6 @@
-yuma123-netconfd-module-ietf-traffic-generator (2.14-0) UNRELEASED; urgency=medium
+yuma123-netconfd-module-ietf-traffic-generator (2.14-0) stable; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Thu, 15 Dec 2022 01:59:44 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Mon, 17 Mar 2025 00:50:38 +0100
+

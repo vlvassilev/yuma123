@@ -1,6 +1,12 @@
-yuma123 (2.14) UNRELEASED; urgency=medium
+yuma123 (2.14) stable; urgency=medium
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 30 Nov 2022 17:20:00 +0100
+  * Added support for notifications defined inside list
+  * Bug in cli parsing list keys containing spaces fixed
+  * Added agt_fd_event_cb_register(fd, callback) function for file descriptor event interrupts
+  * Fixed bug in --dump-session always reporting of received chunk size 0 in *-in.ts
+  * Fixed bug in val_set_cplxval_obj function always returning NO_ERR even if validation fails
+
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Sun, 16 Mar 2025 11:37:02 +0100
 
 yuma123 (2.13) stable; urgency=medium
 

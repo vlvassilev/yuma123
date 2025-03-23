@@ -20,7 +20,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=./test-yang-library.yang --module=./test-yang-library-deviation.yang --feature-disable=test-yang-library:bar --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=./test-yang-library.yang --deviation=./test-yang-library-deviation.yang --feature-disable=test-yang-library:bar --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 sleep 3

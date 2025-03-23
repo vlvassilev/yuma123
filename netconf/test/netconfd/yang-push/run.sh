@@ -3,10 +3,10 @@
 rm -rf tmp || true
 mkdir tmp
 cd tmp
-wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
+
 for draft in draft-ietf-netconf-yang-push-15 draft-ietf-netconf-subscribed-notifications-10 draft-ietf-netconf-netconf-event-notifications-08 ; do
     wget https://tools.ietf.org/id/${draft}.txt
-    sh ./rfcstrip ${draft}.txt
+    rfcstrip ${draft}.txt
 done
 ln -sh ietf-subscribed-notifications@2018-02-23.yang ietf-subscribed-notifications.yang
 

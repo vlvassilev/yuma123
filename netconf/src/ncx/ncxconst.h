@@ -763,7 +763,7 @@ extern "C" {
 
 
 #define COPYRIGHT_STRING_LINE0 "Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.\n"
-#define COPYRIGHT_STRING_LINE1 "Copyright (c) 2013-2022, Vladimir Vassilev, All Rights Reserved.\n"
+#define COPYRIGHT_STRING_LINE1 "Copyright (c) 2013-2025, Vladimir Vassilev, All Rights Reserved.\n"
 
 #define COPYRIGHT_STRING COPYRIGHT_STRING_LINE0 COPYRIGHT_STRING_LINE1
 

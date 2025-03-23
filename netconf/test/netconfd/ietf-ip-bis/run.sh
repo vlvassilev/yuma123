@@ -3,12 +3,12 @@
 rm -rf tmp || true
 mkdir tmp
 cd tmp
-wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
 
 wget https://www.rfc-editor.org/rfc/rfc8343.txt
 wget https://www.rfc-editor.org/rfc/rfc8344.txt
-sh ./rfcstrip rfc8343.txt
-sh ./rfcstrip rfc8344.txt
+rfcstrip rfc8343.txt
+rfcstrip rfc8344.txt
+
 pyang --ietf -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-interfaces@2018-02-20.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ example-ethernet-bonding.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ example-ethernet.yang

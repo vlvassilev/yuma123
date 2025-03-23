@@ -3,7 +3,7 @@ Upstream-Name: netconfd-autostart
 Upstream-Contact: Vladimir Vassilev <vladimir@lightside-instruments.com>
 
 Files: *
-Copyright: 2019-2022 Vladimir Vassilev <vladimir@lightside-instruments.com>
+Copyright: 2019-2025 Vladimir Vassilev <vladimir@lightside-instruments.com>
 
 License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without

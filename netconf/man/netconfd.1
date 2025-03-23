@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "November 30, 2022" Linux "netconfd 2.13"
+.TH netconfd 1 "March 23, 2025" Linux "netconfd 2.14"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -162,7 +162,7 @@ Zero or more entries are allowed.
 .IP --\fBhello-timeout\fP=number
 Specifies the number of seconds that a session
 may exist before the hello PDU is received.
-A seesion will be dropped if no hello PDU 
+A session will be dropped if no hello PDU
 is received before this number of seconds elapses.
 
 If this parameter is set to zero, then the server
@@ -184,7 +184,7 @@ to use instead of HOME.
 .IP --\fBidle-timeout\fP=number
 Specifies the number of seconds that a session
 may remain idle without issuing any RPC requests.
-A seesion will be dropped if it is idle for an
+A session will be dropped if it is idle for an
 interval longer than this number of seconds.
 
 Sessions that have a notification subscription

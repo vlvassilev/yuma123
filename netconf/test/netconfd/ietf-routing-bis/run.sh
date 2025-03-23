@@ -3,14 +3,13 @@
 rm -rf tmp || true
 mkdir tmp
 cd tmp
-wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
 
 wget https://www.rfc-editor.org/rfc/rfc8343.txt
 wget https://www.rfc-editor.org/rfc/rfc8344.txt
 wget https://www.rfc-editor.org/rfc/rfc8349.txt
-sh ./rfcstrip rfc8343.txt
-sh ./rfcstrip rfc8344.txt
-sh ./rfcstrip rfc8349.txt
+rfcstrip rfc8343.txt
+rfcstrip rfc8344.txt
+rfcstrip rfc8349.txt
 
 pyang --ietf -f tree --path /usr/share/yuma/nmda-modules/ietf:/usr/share/yuma/modules/ietf ietf-interfaces@2018-02-20.yang
 pyang --ietf -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-ip@2018-02-22.yang

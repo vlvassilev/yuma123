@@ -97,7 +97,7 @@ Description: Validate YANG modules and convert them to different formats
 Package: netconfd-module-ietf-interfaces
 Architecture: any
 Multi-Arch: same
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8), iproute2, net-tools
 Description: SIL module for netconfd implementing ietf-interfaces.yang
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

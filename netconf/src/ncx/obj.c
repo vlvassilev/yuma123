@@ -2313,6 +2313,9 @@ static obj_template_t* search_choice( obj_template_t* obj,
  */
 static boolean  obj_is_choice_or_case( obj_template_t* obj )
 {
+    if (!obj)
+        return false;
+    
     return ( obj->objtype == OBJ_TYP_CHOICE || obj->objtype == OBJ_TYP_CASE );
 }
 

@@ -11,14 +11,14 @@ Build-Depends:
  libssl-dev,
  libtool,
  libxml2-dev,
- libyuma-dev (>= 2.14),
+ libyuma-dev (>= 2.15),
  zlib1g-dev
 Standards-Version: 4.1.4
 Homepage: http://yuma123.org
 
 Package: NETCONFd-module-ietf-system
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14)
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.15)
 Description: SIL module for netconfd implementing ietf-system.yang
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

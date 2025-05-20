@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-ietf-traffic-generator], [2.14], [vladimir@lightside-instruments.com])
+AC_INIT([yuma123-netconfd-module-ietf-traffic-generator], [2.15], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

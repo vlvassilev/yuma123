@@ -11,14 +11,14 @@ Build-Depends:
  libssl-dev,
  libtool,
  libxml2-dev,
- libyuma-dev (>= 2.14),
+ libyuma-dev (>= 2.15),
  zlib1g-dev
 Standards-Version: 4.1.4
 Homepage: https://lightside-instruments.com
 
 Package: netconfd-module-ietf-traffic-generator
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14),
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.15),
  traffic-generator-cli
 Description: SIL module for netconfd implementing ietf-traffic-generator.yang
  .
@@ -27,7 +27,7 @@ Description: SIL module for netconfd implementing ietf-traffic-generator.yang
 
 Package: netconfd-module-ietf-traffic-analyzer
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.14),
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.15),
  traffic-generator-cli
 Description: SIL module for netconfd implementing ietf-traffic-analyzer.yang
  .

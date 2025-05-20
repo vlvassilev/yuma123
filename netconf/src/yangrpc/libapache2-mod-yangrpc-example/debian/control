@@ -8,8 +8,8 @@ Build-Depends:
  autoconf,
  libtool,
  libxml2-dev,
- libyangrpc-dev (>= 2.14),
- libyuma-dev (>= 2.14),
+ libyangrpc-dev (>= 2.15),
+ libyuma-dev (>= 2.15),
  pkg-config
 Standards-Version: 4.1.4
 Homepage: https://yuma123.org

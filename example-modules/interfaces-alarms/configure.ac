@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-interfaces-alarms], [2.14], [vladimir@lightside-instruments.com])
+AC_INIT([yuma123-netconfd-module-interfaces-alarms], [2.15], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

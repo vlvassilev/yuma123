@@ -21,7 +21,8 @@ AC_SUBST(CFLAGS)
 
 AC_CONFIG_FILES([
         Makefile
-	get/Makefile
+        get/Makefile
+	multi-session/Makefile
 ])
 
 AC_OUTPUT

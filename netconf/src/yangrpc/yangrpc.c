@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
+ * Copyright (c) 2013 - 2025, Vladimir Vassilev, All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -1022,6 +1022,10 @@ void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
 
     free_server_cb(server_cb);
 
+}
+
+void yangrpc_cleanup(void)
+{
     /* Cleanup the Netconf Server Library */
     mgr_cleanup();
 
@@ -1031,3 +1035,4 @@ void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
 }
+

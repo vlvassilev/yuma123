@@ -115,3 +115,13 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 *
 *********************************************************************/
 void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr);
+
+/********************************************************************
+* FUNCTION yangrpc_cleanup
+*
+* Function for cleanup of global resources - called last
+*
+*
+*********************************************************************/
+void yangrpc_cleanup(void);
+

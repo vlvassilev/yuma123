@@ -114,6 +114,7 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 static int set_nonblock(int fd)
 {
         int val;
+        return 0;
 
         val = fcntl(fd, F_GETFL);
         if (val < 0) {
@@ -1076,6 +1077,14 @@ status_t
                          privkeyfile,
                          (const char *)privkeypass,
                          ssh_use_agent);
+      if(res==NO_ERR) {
+          mgr_scb_t *mscb;
+          mscb = mgr_ses_get_mscb(scb);
+
+          libssh2_channel_set_blocking(mscb->channel,1);
+          libssh2_session_set_blocking(mscb->session,1);
+          libssh2_session_set_timeout(mscb->session,timeout);
+      }
     } else if (res == NO_ERR && transport == SES_TRANSPORT_TCP) {
         int flags = fcntl(scb->fd, F_GETFL, 0);
         fcntl(scb->fd, F_SETFL, flags | O_NONBLOCK);

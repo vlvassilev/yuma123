@@ -125,10 +125,15 @@ int main(int argc, char* argv[])
     val_free_value(reply_val);
 
     //stopping the netconfd process so we get timeout
+    printf("Blocking the netconfd server with signal ...\n");
     stop_process(netconfd_pid);
+
+    printf("Waiting for timeout ...\n");
 
     res = yangrpc_exec(yangrpc_cb_ptr, request_val, &reply_val);
     assert(res!=0);
+
+    printf("Timeout res=%u\n", res);
 
     val_free_value(request_val);
 

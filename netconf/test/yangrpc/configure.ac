@@ -23,6 +23,7 @@ AC_CONFIG_FILES([
         Makefile
         get/Makefile
 	multi-session/Makefile
+	timeout/Makefile
 ])
 
 AC_OUTPUT

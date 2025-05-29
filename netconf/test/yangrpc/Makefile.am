@@ -5,4 +5,5 @@ test-get-check-memory-leak
 
 SUBDIRS=\
 get \
-multi-session
+multi-session \
+timeout

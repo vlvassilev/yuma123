@@ -208,6 +208,60 @@ extern status_t
                          xpath_getvar_fn_t getvar_fn,
                          val_value_t *protocols_parent);
 
+/********************************************************************
+* FUNCTION mgr_ses_new_session3
+*
+* Create a new session control block and
+* start a NETCONF session with to the specified server
+*
+* After this functions returns OK, the session state will
+* be in HELLO_WAIT state. An server <hello> must be received
+* before any <rpc> requests can be sent
+*
+* The pubkeyfile and privkeyfile parameters will be used first.
+* If this fails, the password parameter will be checked
+*
+* INPUTS:
+*   user == user name
+*   password == user password
+*   pubkeyfile == filespec for client public key
+*   privkeyfile == filespec for client private key
+*   privkeypass == passphrase to unlock private key
+*   target == ASCII IP address or DNS hostname of target
+*   port == NETCONF port number to use, or 0 to use defaults
+*   transport == enum for the transport to use (SSH or TCP)
+*   progcb == temp program instance control block,
+*          == NULL if a session temp files control block is not
+*             needed
+*   retsid == address of session ID output
+*   getvar_cb == XPath get varbind callback function
+*   params_val == pointer to val_value_t that may contain
+*         a session-specific --protocols variable to set
+*         == NULL if not used
+*   blocking == use blocking socket and SSH mode if TRUE
+*
+* OUTPUTS:
+*   *retsid == session ID, if no error
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    mgr_ses_new_session3 (const xmlChar *user,
+                         const xmlChar *password,
+                         const char *pubkeyfile,
+                         const char *privkeyfile,
+                         const xmlChar *privkeypass,
+                         boolean ssh_use_agent,
+                         const xmlChar *target,
+                         uint16 port,
+                         ses_transport_t transport,
+                         ncxmod_temp_progcb_t *progcb,
+                         ses_id_t *retsid,
+                         xpath_getvar_fn_t getvar_fn,
+                         val_value_t *params_val,
+                         int blocking);
+
 
 /********************************************************************
 * FUNCTION mgr_ses_free_session

@@ -620,7 +620,7 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
     if (connect_valset) {
         parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_SERVER);
         if (parm && parm->res == NO_ERR) {
-            res = do_connect(server_cb, NULL, NULL, 0, TRUE);
+            res = do_connect2(server_cb, NULL, NULL, 0, TRUE, 1 /*blocking=TRUE*/);
             if (res != NO_ERR) {
                 if (FALSE /*!batchmode*/) {
                     res = NO_ERR;

@@ -114,7 +114,6 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 static int set_nonblock(int fd)
 {
         int val;
-        return 0;
 
         val = fcntl(fd, F_GETFL);
         if (val < 0) {
@@ -214,6 +213,7 @@ static int waitrfd(int fd, int *timeoutp)
 *   hent == host entry struct
 *   port == port number to try, or 0 for defaults
 *   timeout == connection establishment timeout in milliseconds
+*   blocking == use blocking socket and SSH mode if TRUE
 *
 * RETURNS:
 *   status
@@ -222,7 +222,8 @@ static status_t
     connect_to_server (ses_cb_t *scb,
                       struct hostent *hent,
                       uint16_t port,
-                      uint32_t timeout)
+                      uint32_t timeout,
+                      int blocking)
 {
     struct sockaddr_in  targ;
     int                 ret;
@@ -236,7 +237,9 @@ static status_t
         return ERR_NCX_RESOURCE_DENIED;
     }
 
-    set_nonblock(scb->fd);
+    if(!blocking) {
+        set_nonblock(scb->fd);
+    }
 
     /* set the NETCONF server address */
     memset(&targ, 0x0, sizeof(targ));
@@ -290,7 +293,6 @@ done:
     return NO_ERR;
 
 }  /* connect_to_server */
-
 
 /********************************************************************
 * FUNCTION ssh2_setup
@@ -899,7 +901,7 @@ void
 }  /* mgr_ses_cleanup */
 
 /********************************************************************
-* FUNCTION mgr_ses_new_session2
+* FUNCTION mgr_ses_new_session3
 *
 * Create a new session control block and
 * start a NETCONF session with to the specified server
@@ -928,6 +930,7 @@ void
 *   params_val == pointer to val_value_t that may contain
 *         a session-specific --protocols variable to set
 *         == NULL if not used
+*   blocking == use blocking socket and SSH mode if TRUE
 *
 * OUTPUTS:
 *   *retsid == session ID, if no error
@@ -936,7 +939,7 @@ void
 *   status
 *********************************************************************/
 status_t
-    mgr_ses_new_session2 (const xmlChar *user,
+    mgr_ses_new_session3 (const xmlChar *user,
                          const xmlChar *password,
                          const char *pubkeyfile,
                          const char *privkeyfile,
@@ -948,7 +951,8 @@ status_t
                          ncxmod_temp_progcb_t *progcb,
                          ses_id_t *retsid,
                          xpath_getvar_fn_t getvar_fn,
-                         val_value_t *params_val)
+                         val_value_t *params_val,
+                         int blocking)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
@@ -1063,7 +1067,7 @@ status_t
     hent = gethostbyname((const char *)target);
     if (hent) {
         /* entry OK, try to get a TCP connection to server */
-        res = connect_to_server(scb, hent, port, timeout);
+        res = connect_to_server(scb, hent, port, timeout, blocking);
     } else {
         res = ERR_NCX_UNKNOWN_HOST;
     } 
@@ -1077,7 +1081,7 @@ status_t
                          privkeyfile,
                          (const char *)privkeypass,
                          ssh_use_agent);
-      if(res==NO_ERR) {
+      if(res==NO_ERR && blocking) {
           mgr_scb_t *mscb;
           mscb = mgr_ses_get_mscb(scb);
 
@@ -1188,7 +1192,74 @@ status_t
     *retsid = slot;
     return res;
 
-}  /* mgr_ses_new_session */
+}  /* mgr_ses_new_session3 */
+
+/********************************************************************
+* FUNCTION mgr_ses_new_session2
+*
+* Create a new session control block and
+* start a NETCONF session with to the specified server
+*
+* After this functions returns OK, the session state will
+* be in HELLO_WAIT state. An server <hello> must be received
+* before any <rpc> requests can be sent
+*
+* The pubkeyfile and privkeyfile parameters will be used first.
+* If this fails, the password parameter will be checked
+*
+* INPUTS:
+*   user == user name
+*   password == user password
+*   pubkeyfile == filespec for client public key
+*   privkeyfile == filespec for client private key
+*   privkeypass == passphrase to unlock private key
+*   target == ASCII IP address or DNS hostname of target
+*   port == NETCONF port number to use, or 0 to use defaults
+*   transport == enum for the transport to use (SSH or TCP)
+*   progcb == temp program instance control block,
+*          == NULL if a session temp files control block is not
+*             needed
+*   retsid == address of session ID output
+*   getvar_cb == XPath get varbind callback function
+*   params_val == pointer to val_value_t that may contain
+*         a session-specific --protocols variable to set
+*         == NULL if not used
+*
+* OUTPUTS:
+*   *retsid == session ID, if no error
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    mgr_ses_new_session2 (const xmlChar *user,
+                         const xmlChar *password,
+                         const char *pubkeyfile,
+                         const char *privkeyfile,
+                         const xmlChar *privkeypass,
+                         boolean ssh_use_agent,
+                         const xmlChar *target,
+                         uint16 port,
+                         ses_transport_t transport,
+                         ncxmod_temp_progcb_t *progcb,
+                         ses_id_t *retsid,
+                         xpath_getvar_fn_t getvar_fn,
+                         val_value_t *params_val)
+{
+    return mgr_ses_new_session3 (user,
+                         password,
+                         pubkeyfile,
+                         privkeyfile,
+                         privkeypass,
+                         ssh_use_agent,
+                         target,
+                         port,
+                         transport,
+                         progcb,
+                         retsid,
+                         getvar_fn,
+                         params_val, 0 /*blocking==FALSE*/);
+}
 
 /********************************************************************
 * FUNCTION mgr_ses_new_session

@@ -32,21 +32,10 @@ date	     init     comment
 
 */
 
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -163,6 +152,36 @@ extern xmlChar *
     get_cmd_line (server_cb_t *server_cb,
 		  status_t *res);
 
+
+/********************************************************************
+ * FUNCTION do_connect2
+ * 
+ * INPUTS:
+ *   server_cb == server control block to use
+ *   rpc == rpc header for 'connect' command
+ *   line == input text from readline call, not modified or freed here
+ *   start == byte offset from 'line' where the parse RPC method
+ *            left off.  This is eiother empty or contains some 
+ *            parameters from the user
+ *   climode == TRUE if starting from CLI and should try
+ *              to connect right away if the mandatory parameters
+ *              are present
+ *
+ *   blocking == use blocking socket and SSH mode if TRUE
+ * OUTPUTS:
+ *   connect_valset parms may be set 
+ *   create_session may be called
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    do_connect2(server_cb_t *server_cb,
+		obj_template_t *rpc,
+		const xmlChar *line,
+		uint32 start,
+                boolean climode,
+                boolean blocking);
 
 /********************************************************************
  * FUNCTION do_connect

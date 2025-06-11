@@ -2025,7 +2025,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION create_session
+* FUNCTION create_session2
 * 
 * Start a NETCONF session and change the program state
 * Since this is called in sequence with readline, the STDIN IO
@@ -2044,7 +2044,7 @@ static status_t
 *
 *********************************************************************/
 void
-    create_session (server_cb_t *server_cb)
+    create_session2 (server_cb_t *server_cb, boolean blocking)
 {
     const xmlChar          *server, *username, *password;
     const xmlChar          *privkeypass;
@@ -2200,7 +2200,7 @@ void
     /* this function call will cause us to block while the
      * protocol layer connect messages are processed
      */
-    res = mgr_ses_new_session2(username,
+    res = mgr_ses_new_session3(username,
                               password, 
                               publickey,
                               privatekey,
@@ -2213,7 +2213,8 @@ void
                               server_cb->temp_progcb,
                               &server_cb->mysid,
                               xpath_getvar_fn,
-                              server_cb->connect_valset);
+                              server_cb->connect_valset,
+                              blocking);
     if (res == NO_ERR) {
         ses_cb_t *scb;
         mgr_scb_t *mscb;
@@ -2253,8 +2254,32 @@ void
         server_cb->state = MGR_IO_ST_IDLE;
     }
     
-} /* create_session */
+} /* create_session2 */
 
+/********************************************************************
+* FUNCTION create_session
+* 
+* Start a NETCONF session and change the program state
+* Since this is called in sequence with readline, the STDIN IO
+* handler may get called if the user enters keyboard text 
+*
+* The STDIN handler will not do anything with incoming chars
+* while state == MGR_IO_ST_CONNECT
+* 
+* INPUTS:
+*   server_cb == server control block to use
+*
+* OUTPUTS:
+*   'server_cb->mysid' is set to the output session ID, if NO_ERR
+*   'server_cb->state' is changed based on the success of 
+*    the session setup
+*
+*********************************************************************/
+void
+    create_session (server_cb_t *server_cb)
+{
+    create_session2(server_cb, 0 /*blocking=FALSE*/);
+}
 
 /********************************************************************
  * FUNCTION do_mgrload (local RPC)
@@ -7459,7 +7484,7 @@ xmlChar *
 
 
 /********************************************************************
- * FUNCTION do_connect
+ * FUNCTION do_connect2
  * 
  * INPUTS:
  *   server_cb == server control block to use
@@ -7473,6 +7498,7 @@ xmlChar *
  *              are present.
  *               == FALSE to check --optional and add parameters
  *                  if set or any missing mandatory parms
+ *   blocking    == TRUE uses blocking socket and SSH configuration
  *
  * OUTPUTS:
  *   connect_valset parms may be set 
@@ -7482,11 +7508,12 @@ xmlChar *
  *   status
  *********************************************************************/
 status_t
-    do_connect (server_cb_t *server_cb,
+    do_connect2(server_cb_t *server_cb,
                 obj_template_t *rpc,
                 const xmlChar *line,
                 uint32 start,
-                boolean startupmode)
+                boolean startupmode,
+                boolean blocking)
 {
     obj_template_t        *obj;
     val_value_t           *connect_valset;
@@ -7650,7 +7677,7 @@ status_t
             log_warn("\nWarning: connection parameters could not be saved");
             res = NO_ERR;
         }
-        create_session(server_cb);
+        create_session2(server_cb, blocking);
     } else {
         res = ERR_NCX_MISSING_PARM;
         log_write("\nError: Connect failed due to missing parameter(s)");
@@ -7659,8 +7686,40 @@ status_t
 
     return res;
 
-}  /* do_connect */
+}  /* do_connect2 */
 
+/********************************************************************
+ * FUNCTION do_connect
+ * 
+ * INPUTS:
+ *   server_cb == server control block to use
+ *   rpc == rpc header for 'connect' command
+ *   line == input text from readline call, not modified or freed here
+ *   start == byte offset from 'line' where the parse RPC method
+ *            left off.  This is eiother empty or contains some 
+ *            parameters from the user
+ *   startupmode == TRUE if starting from init and should try
+ *              to connect right away if the mandatory parameters
+ *              are present.
+ *               == FALSE to check --optional and add parameters
+ *                  if set or any missing mandatory parms
+ *
+ * OUTPUTS:
+ *   connect_valset parms may be set 
+ *   create_session may be called
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t
+    do_connect(server_cb_t *server_cb,
+                obj_template_t *rpc,
+                const xmlChar *line,
+                uint32 start,
+                boolean startupmode)
+{
+    return do_connect2(server_cb, rpc, line, start, startupmode, 0 /*blocking=FALSE*/);
+}
 
 /********************************************************************
 * FUNCTION parse_def

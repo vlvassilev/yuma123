@@ -117,20 +117,25 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
     char cmd_buf[5000];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
+    val_value_t* streams_val;
 
     printf("traffic_generator_delete:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
     name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
     assert(name_val);
 
-    serialize_params(traffic_generator_val, cmd_args_buf);
-    sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
-    log_info(cmd_buf);
-    system(cmd_buf);
+    if(streams_val!=NULL) {
+        printf("multi-stream implementation not currently supported.\n");
+    } else {
+        serialize_params(traffic_generator_val, cmd_args_buf);
+        sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
+        log_info(cmd_buf);
+        system(cmd_buf);
 
-    sprintf(cmd_buf, "traffic-generator %s --disable &", cmd_args_buf);
-    log_info(cmd_buf);
-    system(cmd_buf);
+        sprintf(cmd_buf, "traffic-generator %s --disable &", cmd_args_buf);
+        log_info(cmd_buf);
+        system(cmd_buf);
+    }
 }
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
@@ -138,16 +143,24 @@ static void traffic_generator_create(val_value_t* traffic_generator_val)
     char cmd_buf[5000];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
+    val_value_t* streams_val;
 
     printf("traffic_generator_create:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
     name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
     assert(name_val);
 
-    serialize_params(traffic_generator_val, cmd_args_buf);
-    sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
-    log_info(cmd_buf);
-    system(cmd_buf);
+    streams_val = val_find_child(traffic_generator_val,"ietf-traffic-generator","streams");
+
+    if(streams_val!=NULL) {
+        printf("multi-stream implementation not currently supported.\n");
+    } else {
+    
+        serialize_params(traffic_generator_val, cmd_args_buf);
+        sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
+        log_info(cmd_buf);
+        system(cmd_buf);
+    }
 }
 
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)

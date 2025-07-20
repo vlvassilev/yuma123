@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+    <interface>
+      <name>eth1</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+      <traffic-generator xmlns="urn:ietf:params:xml:ns:yang:ietf-traffic-generator">
+        <streams>
+          <stream>
+            <id>1</id>
+            <frame-size>64</frame-size>
+            <frame-data>6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112</frame-data>
+            <interframe-gap>20</interframe-gap>
+            <frames-per-stream>1</frames-per-stream>
+            <interstream-gap>20</interstream-gap>
+          </stream>
+          <stream>
+            <id>2</id>
+            <frame-size>68</frame-size>
+            <frame-data>6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F10111213141516</frame-data>
+            <interframe-gap>20</interframe-gap>
+            <frames-per-stream>1</frames-per-stream>
+            <interstream-gap>20</interstream-gap>
+          </stream>
+        </streams>
+      </traffic-generator>
+    </interface>
+  </interfaces>
+</config>

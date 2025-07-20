@@ -1,0 +1,45 @@
+The TG configuration data can exapand to PCAP files when executed in simulation mode. And PCAP files can be converted to TG configuration and replayed.
+
+The work to make the tp2pcap and pcap2tg scripts is ongoing and initiated during IETF123 Hackathon.
+
+Some usecases illustrating the advantages of TG configuration to PCAP files when used for specifying generator replayable data:
+
+
+Testcase 1 (trivial): Send 1B 64 octet sized RFC2544 specified testframes with minimal interframe gap
+
+create /interfaces/interface[name='eth0']/traffic-generator --
+frame-size=64 interframe-gap=20 frame-data=6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
+total-frames=1000000000
+commit
+
+---
+
+Testcase 2: Same as #1 but 1 in million is with bad CRC
+
+Solution 1: Superposition of traffic generators and bursts
+
+create /interfaces/interface[name='eth0']/traffic-generator --
+frame-size=64 interframe-gap=20 interburst-gap=84 frames-per-burst=999999 frame-data=6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
+total-frames=999999999
+create /interfaces/interface[name='eth0.1']/traffic-generator --
+frame-size=64 interframe-gap=83999916 frame-data=6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112FBADBEEF
+total-frames=999999999
+
+commit
+
+
+--
+
+Solution 2: Multistream mode
+
+Multi stream mode 1B 64 octet sized RFC2544 specified testframes with
+1/1000000 sent with bad CRC
+
+create /interfaces/interface[name='eth0']/traffic-generator -- total-frames=1000000000
+create /interfaces/interface[name='eth0']/traffic-generator/stream[id='1'] --
+frame-size=64 interframe-gap=20 frame-data=6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
+interstream-gap=20 frames-per-stream=999999
+create /interfaces/interface[name='eth0']/traffic-generator/stream[id='2'] --
+frame-size=64 interframe-gap=20 frame-data=6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112FBADBEEF
+interstream-gap=20 frames-per-stream=1
+commit

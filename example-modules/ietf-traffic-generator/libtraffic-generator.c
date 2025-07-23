@@ -39,7 +39,7 @@ static char byte2hexchar(unsigned char byte)
     return hexchar;
 }
 
-static void hexstr2bin(char* hexstr, uint8_t* data)
+void hexstr2bin(char* hexstr, uint8_t* data)
 {
     unsigned int i;
     unsigned int len;
@@ -304,7 +304,7 @@ char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hex
     return result_frame_hexstr;
 }
 
-traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe_type)
+traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* realtime_epoch, uint64_t total_frames, char* testframe_type, unsigned int streams_num, stream_t* streams)
 {
     unsigned int i;
     traffic_generator_t* tg;
@@ -313,9 +313,8 @@ traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* real
     tg = (traffic_generator_t*)malloc(sizeof(traffic_generator_t));
     memset(tg,0,sizeof(traffic_generator_t));
 
-    tg->streams_num = 1;
-    tg->streams = malloc(sizeof(stream_t)*tg->streams_num);
-    memset(tg->streams,0,sizeof(stream_t)*tg->streams_num);
+    tg->streams_num = streams_num;
+    tg->streams = streams;
 
     tg->nsec_per_octet = ((double)8*1000000000) / interface_speed; /* e.g. 8.0 for 1Gb */
     tg->octets_per_sec = interface_speed / 8;
@@ -323,21 +322,12 @@ traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* real
     tg->total_frame_index = 0;
 
     for(i=0;i<tg->streams_num;i++) {
-        tg->streams[i].bursts_per_stream = bursts_per_stream;
-        tg->streams[i].frame_size = frame_size;
-        tg->streams[i].frame_data = malloc(tg->streams[i].frame_size);
-        memset(tg->streams[i].frame_data,0,frame_size);
-        assert(strlen(frame_data_hexstr)/2 <= frame_size);
-        hexstr2bin(frame_data_hexstr,tg->streams[i].frame_data);
-
-        tg->streams[i].interframe_gap=interframe_gap;
-        tg->streams[i].frames_per_burst=frames_per_burst;
-        tg->streams[i].interburst_gap=interburst_gap;
-        tg->streams[i].frames_per_burst=frames_per_burst;
-        if(interburst_gap!=0) {
-            tg->streams[i].interstream_gap=interburst_gap;
-        } else {
-            tg->streams[i].interstream_gap=interframe_gap;
+        if(tg->streams[i].interstream_gap == 0) {
+            if(tg->streams[i].interburst_gap!=0) {
+                tg->streams[i].interstream_gap=tg->streams[i].interburst_gap;
+            } else {
+                tg->streams[i].interstream_gap=tg->streams[i].interframe_gap;
+            }
         }
         if(testframe_type!=NULL) {
             tg->streams[i].testframe_type=1;

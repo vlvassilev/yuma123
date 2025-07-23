@@ -38,10 +38,43 @@ void print_frame(uint64_t frame_index, uint32_t frame_size, uint8_t* frame_data,
     printf("\n");
 }
 
+#define MAX_STREAMS 2
+int getopt_multistream(stream_t* streams, char* arg)
+{
+    int ret;
+    int stream_index;
+    if(0==memcmp(arg, "--frame-size", strlen("--frame-size"))) {
+    	unsigned int frame_size;
+    	ret = sscanf(arg+strlen("--frame-size"),"%u=%u",&stream_index,&frame_size);
+        streams[stream_index-1].frame_size=frame_size;
+    } else if(0==memcmp(arg, "--interframe-gap", strlen("--interframe-gap"))) {
+    	unsigned int interframe_gap;
+    	ret = sscanf(arg+strlen("--interframe-gap"),"%u=%u",&stream_index,&interframe_gap);
+        streams[stream_index-1].interframe_gap=interframe_gap;
+    } else if(0==memcmp(arg, "--interstream-gap", strlen("--interstream-gap"))) {
+    	unsigned int interstream_gap;
+    	ret = sscanf(arg+strlen("--interstream-gap"),"%u=%u",&stream_index,&interstream_gap);
+        streams[stream_index-1].interstream_gap=interstream_gap;
+    }  else if(0==memcmp(arg, "--frame-data", strlen("--frame-data"))) {
+    	uint8_t* frame_data;
+    	char* frame_data_hexstr;
+    	ret = sscanf(arg+strlen("--frame-data"),"%u=",&stream_index);
+    	frame_data_hexstr=strchr(arg, '=')+1;
+    	frame_data = malloc(streams[stream_index-1].frame_size);
+        memset(frame_data,0,streams[stream_index-1].frame_size);
+        hexstr2bin(frame_data_hexstr, frame_data);
+        streams[stream_index-1].frame_data=frame_data;
+
+    } else {
+        return -1;
+    }
+    return 0;
+}
 
 int main(int argc, char** argv)
 {
     int ret;
+    int i;
     raw_socket_t raw_socket;
     uint64_t tx_time_sec;
     uint32_t tx_time_nsec;
@@ -64,11 +97,17 @@ int main(int argc, char** argv)
     char* src_udp_port=NULL;
     char* dst_udp_port=NULL;
 
+    stream_t streams[MAX_STREAMS];
+    unsigned int streams_num=1;
+
+
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
 
     traffic_generator_t* tg;
     int stdout_mode = 0;
+
+    memset(streams,0,MAX_STREAMS*sizeof(stream_t));
 
     while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t:T:e:S:m", long_options, NULL)) != -1) {
         switch (optc) {
@@ -76,22 +115,22 @@ int main(int argc, char** argv)
                 interface_name=optarg;
                 break;
             case 's':
-                frame_size = atoi(optarg);
+                streams[0].frame_size = atoi(optarg);
                 break;
             case 'd':
-                frame_data_hexstr = optarg; /*hexstr*/
+                streams[0].frame_data_hexstr = optarg; /*hexstr*/
                 break;
             case 'f':
-                interframe_gap = atoi(optarg);
+                streams[0].interframe_gap = atoi(optarg);
                 break;
             case 'b':
-                interburst_gap = atoi(optarg);
+                streams[0].interburst_gap = atoi(optarg);
                 break;
             case 'n':
-                frames_per_burst = atoi(optarg);
+                streams[0].frames_per_burst = atoi(optarg);
                 break;
             case 'p':
-                bursts_per_stream = atoi(optarg);
+                streams[0].bursts_per_stream = atoi(optarg);
                 break;
             case 't':
                 total_frames = atoll(optarg);
@@ -109,7 +148,11 @@ int main(int argc, char** argv)
                 stdout_mode = 1;
                 break;
             default:
-                exit (-1);
+                ret = getopt_multistream(streams, argv[optind-1]);
+                if(ret!=0) {
+                    printf("Invalid option optind=%d, optarg=%s, ret=%d\n", optind, optarg, ret);
+                    return -1;
+                }
         }
     }
 
@@ -135,7 +178,13 @@ int main(int argc, char** argv)
         realtime_epoch = buf;
     }
 
-    tg = traffic_generator_init(interface_speed, realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe_type);
+    for(i=0;i<MAX_STREAMS;i++) {
+        if(streams[i].frame_size!=0) {
+            streams_num=i+1;
+        }
+    }
+
+    tg = traffic_generator_init(interface_speed, realtime_epoch, total_frames, testframe_type, streams_num, streams);
 
     uint64_t frm=0;
     uint64_t print_sec=0;

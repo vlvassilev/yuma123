@@ -54,20 +54,17 @@ static status_t
     {"total-frames", required_argument, NULL, 't'},
     {"testframe-type", required_argument, NULL, 'T'},
 */
-static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
+
+static void serialize_params_stream(val_value_t* parent /*either traffic-generator or stream */, char* cli_args_str, char* id)
 {
     val_value_t* val;
-    unsigned int i;
 
-    val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
-    sprintf(cli_args_str,"--interface-name=%s",VAL_STRING(val));
+    val = val_find_child(parent,"ietf-traffic-generator","frame-size");
+    sprintf(cli_args_str+strlen(cli_args_str)," --frame-size%s=%u",id,VAL_UINT32(val));
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frame-size");
-    sprintf(cli_args_str+strlen(cli_args_str)," --frame-size=%u",VAL_UINT32(val));
-
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frame-data");
+    val = val_find_child(parent,"ietf-traffic-generator","frame-data");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --frame-data=");
+        sprintf(cli_args_str+strlen(cli_args_str)," --frame-data%s=",id);
         
 #if 0
         for(i=0;i<val->v.binary.ustrlen;i++) {
@@ -78,22 +75,42 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
 #endif
     }
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","interframe-gap");
-    sprintf(cli_args_str+strlen(cli_args_str)," --interframe-gap=%u",VAL_UINT32(val));
+    val = val_find_child(parent,"ietf-traffic-generator","interframe-gap");
+    sprintf(cli_args_str+strlen(cli_args_str)," --interframe-gap%s=%u",id,VAL_UINT32(val));
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","interburst-gap");
+    val = val_find_child(parent,"ietf-traffic-generator","interburst-gap");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --interburst-gap=%u",VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --interburst-gap%s=%u",id,VAL_UINT32(val));
     }
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frames-per-burst");
+    val = val_find_child(parent,"ietf-traffic-generator","frames-per-burst");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --frames-per-burst=%u",VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --frames-per-burst%s=%u",id,VAL_UINT32(val));
     }
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","bursts-per-stream");
+    val = val_find_child(parent,"ietf-traffic-generator","bursts-per-stream");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --bursts-per-stream=%u",VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --bursts-per-stream%s=%u",id,VAL_UINT32(val));
+    }
+    val = val_find_child(parent,"ietf-traffic-generator","interstream-gap");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --interstream-gap%s=%u",id,VAL_UINT32(val));
+    }
+}
+
+static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
+{
+    val_value_t* val;
+    val_value_t* streams_val;
+    val_value_t* stream_val;
+    val_value_t* id_val;
+
+    val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
+    sprintf(cli_args_str,"--interface-name=%s",VAL_STRING(val));
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","testframe-type");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --testframe-type=%s", val->v.idref.name);
     }
 
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","total-frames");
@@ -101,66 +118,101 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
         sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%lu",VAL_UINT64(val));
     }
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","testframe-type");
-    if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --testframe-type=%s", val->v.idref.name);
-    }
-
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","realtime-epoch");
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --realtime-epoch=%s",VAL_STRING(val));
     }
+
+    if(streams_val==NULL) {
+        serialize_params_stream(stream_val, cli_args_str, "");
+    } else {
+        for (stream_val = val_get_first_child(streams_val);
+             stream_val != NULL;
+             stream_val = val_get_next_child(stream_val)) {
+            char id_buf[] = "4294967295";
+
+            id_val = val_find_child(stream_val,"ietf-traffic-generator","id");
+            sprintf(id_buf, "%u", VAL_UINT32(id_val));
+            serialize_params_stream(stream_val, cli_args_str, id_buf);
+        }
+    }
 }
+
 
 static void traffic_generator_delete(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[5000];
-    static char cmd_args_buf[4096];
+    static char cmd_buf[50000];
+    static char cmd_args_buf[40960];
     val_value_t* name_val;
     val_value_t* streams_val;
+    val_value_t* stream_val;
+    val_value_t* id_val;
 
     printf("traffic_generator_delete:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
-    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
-    assert(name_val);
 
-    if(streams_val!=NULL) {
-        printf("multi-stream implementation not currently supported.\n");
+    serialize_params(traffic_generator_val, cmd_args_buf);
+
+    streams_val = val_find_child(traffic_generator_val,"ietf-traffic-generator","streams");
+
+    if(streams_val==NULL) {
+        serialize_params_stream(traffic_generator_val, cmd_args_buf, "");
     } else {
-        serialize_params(traffic_generator_val, cmd_args_buf);
-        sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
-        log_info(cmd_buf);
-        system(cmd_buf);
+        for (stream_val = val_get_first_child(streams_val);
+             stream_val != NULL;
+             stream_val = val_get_next_child(stream_val)) {
 
-        sprintf(cmd_buf, "traffic-generator %s --disable &", cmd_args_buf);
-        log_info(cmd_buf);
-        system(cmd_buf);
+            char id_buf[] = "4294967295";
+
+            id_val = val_find_child(stream_val,"ietf-traffic-generator","id");
+            sprintf(id_buf, "%u", VAL_UINT32(id_val));
+            serialize_params_stream(stream_val, cmd_args_buf, id_buf);
+        }
     }
+    sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
+    log_info(cmd_buf);
+    system(cmd_buf);
+
+    sprintf(cmd_buf, "traffic-generator %s --disable &", cmd_args_buf);
+    log_info(cmd_buf);
+    system(cmd_buf);
 }
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[5000];
-    static char cmd_args_buf[4096];
+    static char cmd_buf[50000];
+    static char cmd_args_buf[40960];
     val_value_t* name_val;
     val_value_t* streams_val;
+    val_value_t* stream_val;
+    val_value_t* id_val;
 
     printf("traffic_generator_create:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
-    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
-    assert(name_val);
+
+    serialize_params(traffic_generator_val, cmd_args_buf);
 
     streams_val = val_find_child(traffic_generator_val,"ietf-traffic-generator","streams");
 
-    if(streams_val!=NULL) {
-        printf("multi-stream implementation not currently supported.\n");
+    if(streams_val==NULL) {
+        serialize_params_stream(traffic_generator_val, cmd_args_buf, "");
     } else {
-    
-        serialize_params(traffic_generator_val, cmd_args_buf);
-        sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
-        log_info(cmd_buf);
-        system(cmd_buf);
+        for (stream_val = val_get_first_child(streams_val);
+             stream_val != NULL;
+             stream_val = val_get_next_child(stream_val)) {
+
+            char id_buf[] = "4294967295";
+
+            id_val = val_find_child(stream_val,"ietf-traffic-generator","id");
+            assert(id_val);
+            sprintf(id_buf, "%u", VAL_UINT32(id_val));
+
+            serialize_params_stream(stream_val, cmd_args_buf+strlen(cmd_args_buf), id_buf);
+        }
     }
+    sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
+    log_info(cmd_buf);
+    system(cmd_buf);
 }
 
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
@@ -296,8 +348,6 @@ status_t
     }
 
     agt_disable_feature ("ietf-traffic-generator", "multi-stream");
-    agt_disable_feature("ietf-traffic-generator", "ethernet-vlan");
-    agt_disable_feature("ietf-traffic-generator", "ingress-direction");
 
     res=agt_commit_complete_register("ietf-traffic-generator" /*SIL id string*/,
                                      y_commit_complete);

@@ -12,7 +12,7 @@
             <frame-size>64</frame-size>
             <frame-data>6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112</frame-data>
             <interframe-gap>20</interframe-gap>
-            <frames-per-stream>1</frames-per-stream>
+            <frames-per-stream>999999</frames-per-stream>
             <interstream-gap>20</interstream-gap>
           </stream>
           <stream>
@@ -24,6 +24,7 @@
             <interstream-gap>20</interstream-gap>
           </stream>
         </streams>
+        <total-frames>1000000000</total-frames>
       </traffic-generator>
     </interface>
   </interfaces>

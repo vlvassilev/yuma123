@@ -39,7 +39,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2024-10-21 {
+  revision 2025-11-03 {
     description
       "Initial revision.";
     reference
@@ -61,6 +61,7 @@ module ietf-traffic-analyzer {
        the link is not utilized. The minimum required
        idle gaps are not counted as idle octets.";
   }
+
   feature capture {
     description
       "This feature indicates that the device implements
@@ -75,7 +76,10 @@ module ietf-traffic-analyzer {
   identity bit-field-match {
     base ntta:testframe-filter;
     description
-      "Bit field matching filter according to template data and mask.";
+      "Bit field matching filter. Frames that do not have
+       equal values for all the bits of the specified data
+       at the offsets specified with bits set in the mask
+       are not processed as testframes.";
   }
 
   grouping statistics-data {
@@ -140,9 +144,9 @@ module ietf-traffic-analyzer {
         leaf samples {
           type uint64;
           description
-            "Total count of packets used for estimating
-             the latency statistics. Ideally
-             samples=../testframe-stats.";
+            "Total count of testframes used for estimating
+             the latency statistics. When every testframe is
+             used samples=../pkts.";
         }
         leaf min {
           type uint64;
@@ -180,12 +184,12 @@ module ietf-traffic-analyzer {
              unexpected sequence number was received.";
         }
         leaf expected {
-          type yang:counter64;
+          type uint64;
           description
             "Expected sequence number.";
         }
         leaf received {
-          type yang:counter64;
+          type uint64;
           description
             "Received sequence number.";
         }
@@ -198,17 +202,18 @@ module ietf-traffic-analyzer {
       "Grouping with a capture configuration container.";
     container capture {
       if-feature "capture";
-
+      presence "Enables the capture functionality";
       description
         "Contains capture parameters.";
-
       container start-trigger {
-          description
-            "Configures when the capture start is triggered.";
+        presence "Enables trigger condition that starts
+                  the capture process.";
+        description
+          "Configures when the capture start is triggered.";
         choice start-trigger {
+          mandatory true;
           description
-            "If none of the cases in this choice are configured the
-             capture process starts from the first frame received.";
+            "Choice of start-trigger condition.";
           case frame-index {
             description
               "Start capturing frames at the specified frame index.";
@@ -225,28 +230,29 @@ module ietf-traffic-analyzer {
             leaf testframe-index {
               type uint64;
               description
-                "Starts capture at specified testframe index.";
+                "First captured testframe index.";
             }
           }
         }
       }
       container stop-trigger {
-          description
-            "Configures when the capture is stopped.";
+        presence "Enables trigger condition that stops
+                  the capture process.";
+        description
+          "Configures when the capture is stopped.";
         choice stop-trigger {
+          mandatory true;
           description
-            "If none of the cases in this choice are configured the
-             captured frames are always the last frames received for
-             as many frames the implementation can buffer.";
+            "Choice of stop-trigger condition.";
           case when-full {
             description
               "Stops capturing when the implementation can not store
                more frames.";
             leaf when-full {
-                type empty;
-                description
-                  "When present in configuration capture stops when
-                   the capture buffer is full.";
+              type empty;
+              description
+                "When present in configuration capture stops when
+                 the capture buffer is full.";
             }
           }
         }

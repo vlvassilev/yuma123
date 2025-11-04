@@ -39,7 +39,7 @@ module ietf-traffic-generator {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2024-10-21 {
+  revision 2025-11-03 {
     description
       "Initial revision.";
     reference
@@ -303,12 +303,15 @@ module ietf-traffic-generator {
     description
       "Traffic generator augmentations of ietf-interfaces.";
     container traffic-generator {
+      presence "Enables the traffic generator.";
       description
         "Traffic generator configuration data.";
       choice type {
+        mandatory true;
         description
           "Choice of the type of the data model of the generator.
            Single or multi stream.";
+
         case single-stream {
           uses burst-data;
           uses modifier-data;

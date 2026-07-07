@@ -1,0 +1,31 @@
+module test-bits-iffeature {
+  yang-version 1.1;
+  namespace "urn:example:test-bits-iffeature";
+  prefix tbi;
+
+  revision 2026-07-07 {
+    description "First revision.";
+  }
+
+  feature extra-bit {
+    description "Optional bit in the bits typedef.";
+  }
+
+  typedef flags-t {
+    type bits {
+      bit always-on {
+        position 0;
+        description "Always present.";
+      }
+      bit optional-on {
+        position 1;
+        if-feature "extra-bit";
+        description "Present only when extra-bit is enabled.";
+      }
+    }
+  }
+
+  leaf flags {
+    type flags-t;
+  }
+}

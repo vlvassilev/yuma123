@@ -1486,6 +1486,12 @@ static status_t
                                       &pos, 
                                       &enu->appinfoQ);
             enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE) &&
+                   mod->langver == NCX_YANG_VERSION11) {
+            res = yang_consume_iffeature(tkc,
+                                         mod,
+                                         &enu->iffeatureQ,
+                                         &enu->appinfoQ);
         } else {
             res = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, res, expstr);

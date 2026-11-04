@@ -1,8 +1,25 @@
-yuma123 (2.15) UNRELEASED; urgency=medium
+yuma123 (2.15) stable; urgency=medium
 
-  * 
+  * yangrpc
+    - Fixed multi-session cleanup; added yangrpc_cleanup for global cleanup.
+    - Applied connection timeouts to reads and fixed blocking of yangcli.
+    - Added multi-session and timeout regression tests.
+  * ncx
+    - Added support for hex-string encoded binary data alongside base64.
+    - Added experimental IEEE 1588 and YANG date-and-time conversion APIs.
+    - Added if-feature handling for YANG bit statements.
+    - Fixed a null object dereference and handling of missing clone indexes.
+    - Fixed NETCONF hello XML declaration parsing with libxml2 2.15 while
+      retaining compatibility with earlier libxml2 versions.
+  * modules and examples
+    - Updated ietf-yang-types to RFC 9911 and network tester draft modules
+      to draft-ietf-bmwg-network-tester-cfg-17.
+    - Added basic traffic analyzer capture and traffic generator multistream
+      support; updated binary frame-data handling.
+  * tests
+    - Fixed validation test imports for current Python 3 versions.
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Tue, 20 May 2025 14:28:55 +0200
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 04 Nov 2026 15:35:47 +0100
 
 yuma123 (2.14) stable; urgency=medium
 

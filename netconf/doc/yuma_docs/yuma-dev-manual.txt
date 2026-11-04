@@ -7,13 +7,13 @@
 <center>Server Instrumentation Library Development</center>
 
 
-<center>Version yuma123-2.12</center>
+<center>Version yuma123-2.15</center>
 
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2026, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as described in the printed document:

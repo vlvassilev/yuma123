@@ -849,7 +849,7 @@ status_t
 
     res = ncxmod_load_module(
         "ietf-interfaces",
-        NULL,
+        "2014-05-08",
         &agt_profile->agt_savedevQ,
         &mod);
     assert(res == NO_ERR);

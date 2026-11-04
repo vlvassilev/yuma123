@@ -16,8 +16,8 @@ static struct option const long_options[] =
     {"interface-name", required_argument, NULL, 'i'},
     {"frame-size", required_argument, NULL, 's'},
     {"frame-data", required_argument, NULL, 'd'},
-    {"interframe-gap", required_argument, NULL, 'f'},
-    {"interburst-gap", required_argument, NULL, 'b'},
+    {"gap", required_argument, NULL, 'f'},
+    {"burst-gap", required_argument, NULL, 'b'},
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
@@ -47,14 +47,14 @@ int getopt_multistream(stream_t* streams, char* arg)
     	unsigned int frame_size;
     	ret = sscanf(arg+strlen("--frame-size"),"%u=%u",&stream_index,&frame_size);
         streams[stream_index-1].frame_size=frame_size;
-    } else if(0==memcmp(arg, "--interframe-gap", strlen("--interframe-gap"))) {
-    	unsigned int interframe_gap;
-    	ret = sscanf(arg+strlen("--interframe-gap"),"%u=%u",&stream_index,&interframe_gap);
-        streams[stream_index-1].interframe_gap=interframe_gap;
-    } else if(0==memcmp(arg, "--interstream-gap", strlen("--interstream-gap"))) {
-    	unsigned int interstream_gap;
-    	ret = sscanf(arg+strlen("--interstream-gap"),"%u=%u",&stream_index,&interstream_gap);
-        streams[stream_index-1].interstream_gap=interstream_gap;
+    } else if(0==memcmp(arg, "--gap", strlen("--gap"))) {
+    	unsigned int gap;
+    	ret = sscanf(arg+strlen("--gap"),"%u=%u",&stream_index,&gap);
+        streams[stream_index-1].gap=gap;
+    } else if(0==memcmp(arg, "--stream-gap", strlen("--stream-gap"))) {
+    	unsigned int stream_gap;
+    	ret = sscanf(arg+strlen("--stream-gap"),"%u=%u",&stream_index,&stream_gap);
+        streams[stream_index-1].stream_gap=stream_gap;
     }  else if(0==memcmp(arg, "--frame-data", strlen("--frame-data"))) {
     	uint8_t* frame_data;
     	char* frame_data_hexstr;
@@ -82,8 +82,8 @@ int main(int argc, char** argv)
     char* interface_name;
     uint32_t frame_size=64;
     char* frame_data_hexstr="000102030405060708090A0B";
-    uint32_t interframe_gap=20;
-    uint32_t interburst_gap=0;
+    uint32_t gap=20;
+    uint32_t burst_gap=0;
     uint32_t frames_per_burst=0;
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
@@ -124,10 +124,10 @@ int main(int argc, char** argv)
                 hexstr2bin(optarg,streams[0].frame_data);
                 break;
             case 'f':
-                streams[0].interframe_gap = atoi(optarg);
+                streams[0].gap = atoi(optarg);
                 break;
             case 'b':
-                streams[0].interburst_gap = atoi(optarg);
+                streams[0].burst_gap = atoi(optarg);
                 break;
             case 'n':
                 streams[0].frames_per_burst = atoi(optarg);

@@ -43,10 +43,10 @@ static status_t
     status_t res;
     val_value_t *errorval;
     const xmlChar *errorstr;
-    char* editop_str=NULL;
-    char* cbtyp_str=NULL;
-    char* newval_str=NULL;
-    char* curval_str=NULL;
+    xmlChar* editop_str=NULL;
+    xmlChar* cbtyp_str=NULL;
+    xmlChar* newval_str=NULL;
+    xmlChar* curval_str=NULL;
 
     res = NO_ERR;
     errorval = NULL;
@@ -110,7 +110,7 @@ static status_t
         val_make_serialized_string (curval, NCX_DISPLAY_MODE_XML, &curval_str);
     }
 
-    printf("<rollback-on-error><edit_cb><cbtyp>%s</cbtyp><editop>%s</editop><newval>%s</newval><curval>%s</curval></edit_cb></rollback-on-error>\n", cbtyp_str, editop_str, newval?newval_str:"NULL", curval?curval_str:"NULL");
+    printf("<rollback-on-error><edit_cb><cbtyp>%s</cbtyp><editop>%s</editop><newval>%s</newval><curval>%s</curval></edit_cb></rollback-on-error>\n", cbtyp_str, editop_str, newval?newval_str:(unsigned char*)"NULL", curval?curval_str:(unsigned char*)"NULL");
     if(newval_str!=NULL) {
         free(newval_str);
     }

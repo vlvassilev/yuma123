@@ -56,6 +56,7 @@ test-yang-1dot1-conformance \
 test-memory-leak
 
 SUBDIRS= \
+anyxml \
 multiple-edit-callbacks \
 rollback-on-error \
 ietf-routing \

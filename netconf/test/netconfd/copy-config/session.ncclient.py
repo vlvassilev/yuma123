@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from ncclient import manager
 from ncclient.xml_ import *
+
 import time
 import sys, os
 
@@ -24,7 +25,7 @@ def main():
 </get-config>
 """
 	print("get-config ...")
-	result = conn.rpc(rpc)
+	result = conn.rpc(to_ele(rpc))
 
 	names = result.xpath('//data/interfaces/interface/name')
 	print((len(names)))
@@ -51,7 +52,7 @@ def main():
 </copy-config>
 """
 	print("copy-config ...")
-	result = conn.rpc(rpc)
+	result = conn.rpc(to_ele(rpc))
 
 	rpc = """
 <commit/>
@@ -68,7 +69,7 @@ def main():
 </get-config>
 """
 	print("get-config ...")
-	result = conn.rpc(rpc)
+	result = conn.rpc(to_ele(rpc))
 
 	names = result.xpath('//data/interfaces/interface/name')
 	print((len(names)))

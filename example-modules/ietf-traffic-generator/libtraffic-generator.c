@@ -323,11 +323,11 @@ traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* real
     tg->total_frame_index = 0;
 
     for(i=0;i<tg->streams_num;i++) {
-        if(tg->streams[i].interstream_gap == 0) {
-            if(tg->streams[i].interburst_gap!=0) {
-                tg->streams[i].interstream_gap=tg->streams[i].interburst_gap;
+        if(tg->streams[i].stream_gap == 0) {
+            if(tg->streams[i].burst_gap!=0) {
+                tg->streams[i].stream_gap=tg->streams[i].burst_gap;
             } else {
-                tg->streams[i].interstream_gap=tg->streams[i].interframe_gap;
+                tg->streams[i].stream_gap=tg->streams[i].gap;
             }
         }
         if(testframe_type!=NULL) {
@@ -415,13 +415,13 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     /* update time and indexes for next transmission */
     if((tg->frame_index+1) < tg->streams[tg->stream_index].frames_per_burst) {
         tg->frame_index++;
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interframe_gap);
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].gap);
     } else if((tg->burst_index+1) < tg->streams[tg->stream_index].bursts_per_stream) {
         tg->frame_index=0;
         tg->burst_index++;
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interburst_gap);
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].burst_gap);
     } else {
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interstream_gap);
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].stream_gap);
         tg->frame_index=0;
         tg->burst_index=0;
         tg->stream_index=(tg->stream_index+1)%tg->streams_num;

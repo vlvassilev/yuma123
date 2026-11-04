@@ -4,7 +4,7 @@ import sys, os
 import lxml
 import argparse
 sys.path.append("../../litenc")
-import litenc
+from litenc import litenc
 import litenc_lxml
 
 def main():

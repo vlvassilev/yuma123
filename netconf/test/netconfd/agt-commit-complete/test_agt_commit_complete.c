@@ -72,10 +72,10 @@ void my_transaction_handler(unsigned int transaction_id, val_value_t* prev_root_
     res = xpath_find_val_target(root_val, ietf_system_mod/*mod*/,"/sys:system/sys:location", &location_after_val);
     res = xpath_find_val_target(root_val, ietf_system_mod/*mod*/,"/sys:system/sys:hostname", &hostname_after_val);
     printf("\n#%u: location=%s -> location=%s, hostname=%s -> hostname=%s\n", transaction_id,
-        (location_before_val)?VAL_STRING(location_before_val):"None",
-        (location_after_val)?VAL_STRING(location_after_val):"None",
-        (hostname_before_val)?VAL_STRING(hostname_before_val):"None",
-        (hostname_after_val)?VAL_STRING(hostname_after_val):"None");
+        (location_before_val)?VAL_STRING(location_before_val):(ncx_str_t)"None",
+        (location_after_val)?VAL_STRING(location_after_val):(ncx_str_t)"None",
+        (hostname_before_val)?VAL_STRING(hostname_before_val):(ncx_str_t)"None",
+        (hostname_after_val)?VAL_STRING(hostname_after_val):(ncx_str_t)"None");
 }
 
 static val_value_t* prev_root_config_val=NULL;

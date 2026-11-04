@@ -2,8 +2,8 @@
 
 import time
 import sys, os
-sys.path.append("../../litenc")
-import litenc
+#sys.path.append("../../litenc")
+from litenc import litenc
 import litenc_lxml
 import lxml
 import argparse

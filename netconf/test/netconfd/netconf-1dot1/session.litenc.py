@@ -5,7 +5,7 @@ import sys, os
 sys.path.append("../../litenc")
 import socket
 import paramiko
-import litenc
+from litenc import litenc
 import litenc_lxml
 import lxml
 import argparse

@@ -14,7 +14,9 @@ def yangcli_ok_script(conn, yangcli_script):
 		if not line:
 			continue
 		print("Executing: "+line)
-		ok = yangcli(conn, line).xpath('./ok')
+		reply = yangcli(conn, line)
+		print(lxml.etree.tostring(reply))
+		ok=reply.xpath('./ok')
 		assert(len(ok)==1)
 
 def main():
@@ -76,7 +78,7 @@ commit
 
 	yangcli_script='''
 create /interfaces/interface -- name=veth1 type=ethernetCsmacd description="Generator interface in a link."
-create /interfaces/interface[name='veth1']/traffic-generator -- frame-size=64 interframe-gap=20 total-frames=10000 frame-data="6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112"
+create /interfaces/interface[name='veth1']/traffic-generator -- frame-size=64 gap=20 total-frames=10000 frame-data="6c:a9:6f:00:00:02:6c:a9:6f:00:00:01:08:00:45:00:00:2e:d4:a5:00:00:0a:11:58:16:c0:00:02:01:c0:00:02:02:c0:20:00:07:00:1a:00:00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12"
 commit
 '''
 
@@ -89,7 +91,7 @@ commit
 	result = yangcli(conn, "xget /interfaces/interface[name='veth2']/traffic-analyzer" )
 	print(lxml.etree.tostring(result))
 
-	testframe_pkts = result.xpath("//rpc-reply/data/interfaces/interface[name='veth2']/traffic-analyzer/state/testframe-stats/pkts")
+	testframe_pkts = result.xpath("//rpc-reply/data/interfaces/interface[name='veth2']/traffic-analyzer/state/testframe-statistics/pkts")
 	print(testframe_pkts)
 	assert((len(testframe_pkts)==1))
 	assert(testframe_pkts[0].text == "10000")

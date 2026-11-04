@@ -48,8 +48,8 @@ static status_t
     {"interface-name", required_argument, NULL, 'i'},
     {"frame-size", required_argument, NULL, 's'},
     {"frame-data", required_argument, NULL, 'd'},
-    {"interframe-gap", required_argument, NULL, 'f'},
-    {"interburst-gap", required_argument, NULL, 'b'},
+    {"gap", required_argument, NULL, 'f'},
+    {"burst-gap", required_argument, NULL, 'b'},
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
@@ -83,12 +83,12 @@ static void serialize_params_stream(val_value_t* parent /*either traffic-generat
 #endif
     }
 
-    val = val_find_child(parent,"ietf-traffic-generator","interframe-gap");
-    sprintf(cli_args_str+strlen(cli_args_str)," --interframe-gap%s=%u",id,VAL_UINT32(val));
+    val = val_find_child(parent,"ietf-traffic-generator","gap");
+    sprintf(cli_args_str+strlen(cli_args_str)," --gap%s=%u",id,VAL_UINT32(val));
 
-    val = val_find_child(parent,"ietf-traffic-generator","interburst-gap");
+    val = val_find_child(parent,"ietf-traffic-generator","burst-gap");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --interburst-gap%s=%u",id,VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --burst-gap%s=%u",id,VAL_UINT32(val));
     }
 
     val = val_find_child(parent,"ietf-traffic-generator","frames-per-burst");
@@ -100,9 +100,9 @@ static void serialize_params_stream(val_value_t* parent /*either traffic-generat
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --bursts-per-stream%s=%u",id,VAL_UINT32(val));
     }
-    val = val_find_child(parent,"ietf-traffic-generator","interstream-gap");
+    val = val_find_child(parent,"ietf-traffic-generator","stream-gap");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --interstream-gap%s=%u",id,VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --stream-gap%s=%u",id,VAL_UINT32(val));
     }
 }
 

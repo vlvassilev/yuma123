@@ -110,8 +110,10 @@ static void serialize_params(val_value_t* traffic_analyzer_val, char* cli_args_s
     val = val_find_child(traffic_analyzer_val->parent,"ietf-interfaces","name");
     sprintf(cli_args_str,"--interface-name=%s",VAL_STRING(val));
 
-    //val = val_find_child(traffic_analyzer_val,"ietf-traffic-analyzer","frame-size");
-    //sprintf(cli_args_str+strlen(cli_args_str)," --frame-size=%u",VAL_UINT32(val));
+    val = val_find_child(traffic_analyzer_val, TA_MOD, "capture");
+    if(val!=NULL) {
+        strcat(cli_args_str, " --capture");
+    }
 
 }
 

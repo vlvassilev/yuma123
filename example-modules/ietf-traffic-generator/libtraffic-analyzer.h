@@ -28,6 +28,7 @@ typedef struct traffic_analyzer_t_ {
     } testframe;
 
     /* capture */
+    int capture_enabled;
     struct timespec capture_timestamp[MAX_CAPTURE_FRAMES];
     uint64_t capture_frame_size[MAX_CAPTURE_FRAMES];
     uint8_t capture_frame_data[MAX_CAPTURE_FRAMES][MAX_CAPTURE_FRAME_LEN];

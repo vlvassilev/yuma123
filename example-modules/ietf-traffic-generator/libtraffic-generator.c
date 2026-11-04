@@ -415,20 +415,21 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     /* update time and indexes for next transmission */
     if((tg->frame_index+1) < tg->streams[tg->stream_index].frames_per_burst) {
         tg->frame_index++;
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].gap);
+        delta_time_octets=tg->streams[tg->stream_index].gap;
     } else if((tg->burst_index+1) < tg->streams[tg->stream_index].bursts_per_stream) {
         tg->frame_index=0;
         tg->burst_index++;
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].burst_gap);
+        delta_time_octets=tg->streams[tg->stream_index].burst_gap;
     } else {
-        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].stream_gap);
+        delta_time_octets=tg->streams[tg->stream_index].stream_gap;
         tg->frame_index=0;
         tg->burst_index=0;
         tg->stream_index=(tg->stream_index+1)%tg->streams_num;
     }
 
     delta.tv_sec=(delta_time_octets/tg->octets_per_sec);
-    delta_nsec = (delta_time_octets-delta.tv_sec*tg->octets_per_sec)*(double)tg->nsec_per_octet + tg->nsec_fraction;
+    /* Split the gap before adding the frame to avoid uint64 overflow. */
+    delta_nsec = ((delta_time_octets % tg->octets_per_sec) + (double)*frame_size)*tg->nsec_per_octet + tg->nsec_fraction;
     delta.tv_sec += (long)delta_nsec/1000000000;
     delta.tv_nsec=(long)delta_nsec%1000000000;
     tg->nsec_fraction = delta_nsec - (long)delta_nsec;

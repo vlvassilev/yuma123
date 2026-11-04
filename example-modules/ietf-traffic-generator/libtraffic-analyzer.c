@@ -48,10 +48,14 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
     seq_num_ptr = frame_data+(frame_len - 18);
 
     /* capture */
-    ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_sec = rx_sec;
-    ta->capture_timestamp[ta->totalframes%MAX_CAPTURE_FRAMES].tv_nsec = rx_nsec;
-    ta->capture_frame_size[ta->totalframes%MAX_CAPTURE_FRAMES] = frame_len;
-    memcpy(ta->capture_frame_data[ta->totalframes%MAX_CAPTURE_FRAMES], frame_data, frame_len);
+    if(ta->capture_enabled) {
+        unsigned int slot = ta->totalframes % MAX_CAPTURE_FRAMES;
+        uint32_t capture_len = frame_len < MAX_CAPTURE_FRAME_LEN ? frame_len : MAX_CAPTURE_FRAME_LEN;
+        ta->capture_timestamp[slot].tv_sec = rx_sec;
+        ta->capture_timestamp[slot].tv_nsec = rx_nsec;
+        ta->capture_frame_size[slot] = frame_len;
+        memcpy(ta->capture_frame_data[slot], frame_data, capture_len);
+    }
 
     ta->totalframes++;
     ta->totaloctets+=frame_len;

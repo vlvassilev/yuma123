@@ -1,4 +1,10 @@
-=Conformance test suite for RFC6020 "YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)"=
+=CESNET conformance suite=
+
+Use [CESNET/libyang](https://github.com/CESNET/libyang), branch `libyang1`.
+The legacy suite is in `tests/conformance`; current `master` lacks it.
+From the `yuma123` root, clone it alongside `yuma123`:
+
+The `LIB_YANG_PATH` is used to resolve the path.
 
 ==FILES==
 testspec.txt  - specification of the expected results 1-FAIL, 0-PASS

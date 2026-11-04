@@ -6,12 +6,12 @@ typedef struct burst_t_ {
 typedef struct stream_t_ {
     uint32_t frame_size;
     uint8_t* frame_data;
-    uint32_t gap;
+    uint64_t gap;
     uint32_t frames_per_burst;
     uint32_t burst_gap;
     unsigned int bursts_per_stream;
     unsigned int burst_index;
-    uint32_t stream_gap;
+    uint64_t stream_gap;
     int testframe_type;
     int testframe_type_dynamic;
 } stream_t;

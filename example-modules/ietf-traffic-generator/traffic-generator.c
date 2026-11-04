@@ -48,13 +48,15 @@ int getopt_multistream(stream_t* streams, char* arg)
     	ret = sscanf(arg+strlen("--frame-size"),"%u=%u",&stream_index,&frame_size);
         streams[stream_index-1].frame_size=frame_size;
     } else if(0==memcmp(arg, "--gap", strlen("--gap"))) {
-    	unsigned int gap;
-    	ret = sscanf(arg+strlen("--gap"),"%u=%u",&stream_index,&gap);
-        streams[stream_index-1].gap=gap;
+        unsigned long long gap;
+        ret = sscanf(arg+strlen("--gap"),"%u=%llu",&stream_index,&gap);
+        if(ret!=2 || stream_index<1 || stream_index>MAX_STREAMS) return -1;
+        streams[stream_index-1].gap=(uint64_t)gap;
     } else if(0==memcmp(arg, "--stream-gap", strlen("--stream-gap"))) {
-    	unsigned int stream_gap;
-    	ret = sscanf(arg+strlen("--stream-gap"),"%u=%u",&stream_index,&stream_gap);
-        streams[stream_index-1].stream_gap=stream_gap;
+        unsigned long long stream_gap;
+        ret = sscanf(arg+strlen("--stream-gap"),"%u=%llu",&stream_index,&stream_gap);
+        if(ret!=2 || stream_index<1 || stream_index>MAX_STREAMS) return -1;
+        streams[stream_index-1].stream_gap=(uint64_t)stream_gap;
     }  else if(0==memcmp(arg, "--frame-data", strlen("--frame-data"))) {
     	uint8_t* frame_data;
     	char* frame_data_hexstr;
@@ -82,7 +84,7 @@ int main(int argc, char** argv)
     char* interface_name;
     uint32_t frame_size=64;
     char* frame_data_hexstr="000102030405060708090A0B";
-    uint32_t gap=20;
+    uint64_t gap=20;
     uint32_t burst_gap=0;
     uint32_t frames_per_burst=0;
     uint32_t bursts_per_stream=0;
@@ -124,7 +126,7 @@ int main(int argc, char** argv)
                 hexstr2bin(optarg,streams[0].frame_data);
                 break;
             case 'f':
-                streams[0].gap = atoi(optarg);
+                streams[0].gap = strtoull(optarg, NULL, 10);
                 break;
             case 'b':
                 streams[0].burst_gap = atoi(optarg);

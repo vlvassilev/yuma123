@@ -84,7 +84,7 @@ static void serialize_params_stream(val_value_t* parent /*either traffic-generat
     }
 
     val = val_find_child(parent,"ietf-traffic-generator","gap");
-    sprintf(cli_args_str+strlen(cli_args_str)," --gap%s=%u",id,VAL_UINT32(val));
+    sprintf(cli_args_str+strlen(cli_args_str)," --gap%s=%llu",id,(unsigned long long)VAL_UINT64(val));
 
     val = val_find_child(parent,"ietf-traffic-generator","burst-gap");
     if(val!=NULL) {
@@ -102,7 +102,7 @@ static void serialize_params_stream(val_value_t* parent /*either traffic-generat
     }
     val = val_find_child(parent,"ietf-traffic-generator","stream-gap");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --stream-gap%s=%u",id,VAL_UINT32(val));
+        sprintf(cli_args_str+strlen(cli_args_str)," --stream-gap%s=%llu",id,(unsigned long long)VAL_UINT64(val));
     }
 }
 
